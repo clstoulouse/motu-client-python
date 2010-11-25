@@ -1,0 +1,50 @@
+<assembly
+	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+	<id>delivery</id>
+	<formats>
+		<format>tar.gz</format>
+		<format>zip</format>
+	</formats>
+	<!--
+		all assemblies have the same directory, thus allowing to deploy
+		easily. Version is not considered here.
+	-->
+	<baseDirectory>motu-client-python</baseDirectory>
+	<fileSets>
+		<fileSet>
+			<directory>src/python</directory>
+			<outputDirectory>/</outputDirectory>
+			<!--
+				filtering allows to inject project properties (like version) as python
+				constants in the code.
+			-->
+			<filtered>true</filtered>
+			<!-- rwx rwx r-x -->
+			<fileMode>0775</fileMode>
+			<directoryMode>0775</directoryMode>
+		</fileSet>
+		<fileSet>
+			<directory>src/doc</directory>
+			<outputDirectory>/doc</outputDirectory>
+			<!-- rwx rwx r-x -->
+			<fileMode>0664</fileMode>
+			<directoryMode>0775</directoryMode>
+		</fileSet>
+	</fileSets>
+	<files>
+		<file>
+			<source>notice.txt</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0664</fileMode>
+			<filtered>true</filtered>
+		</file>
+		<file>
+			<source>license.txt</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0664</fileMode>
+			<filtered>false</filtered>
+		</file>
+	</files>
+</assembly>

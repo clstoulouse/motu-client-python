@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+	    <artifactId>motu-parent</artifactId>
+	    <groupId>cls.atoll.motu</groupId>
+	    <version>2.1.7</version>	   
+		<relativePath>../../motu-parent/pom.xml</relativePath>
+	</parent>
+
+	<groupId>cls.atoll.motu.client</groupId>
+	<artifactId>motu-client-python</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	
+    <name>Motu Client Python</name>
+    <description>This package holds the python scripts used to address Motu servers for ordering, extracting and downloading oceanographic data.</description>
+
+	<dependencies>		
+	</dependencies>
+	<scm>
+		<connection>scm:svn:https://cls-motu.svn.sourceforge.net/svnroot/cls-motu/trunk/motu/motu-client/motu-client-python</connection>
+		<url>https://cls-motu.svn.sourceforge.net/svnroot/cls-motu/trunk/motu/motu-client/motu-client-python</url>
+	</scm>
+
+	<build>
+		<scriptSourceDirectory>${basedir}/src</scriptSourceDirectory>
+		<testSourceDirectory>${basedir}/bin</testSourceDirectory>
+		<outputDirectory>${basedir}/bin</outputDirectory>
+		<testOutputDirectory>${basedir}/bin</testOutputDirectory>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ftp</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
+		</extensions>
+		<plugins>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2-beta-5</version>
+				<configuration>
+					<descriptors>
+						<descriptor>${basedir}/assembly/package-delivery.xml</descriptor>
+						<descriptor>${basedir}/assembly/package-sources.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.0</version>
+				<configuration>
+					<goals>deploy</goals>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.3.1</version>
+				<configuration>
+					<createChecksum>true</createChecksum>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>1.1</version>
+				<configuration>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+    
+</project>
