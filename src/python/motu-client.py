@@ -520,7 +520,7 @@ def get_ticket(url, main_url, usr, pwd):
     """
     url = urllib.unquote(url)
 
-    m = re.search('(https://.+/cas)', url)
+    m = re.search('(http://.+/cas|https://.+/cas)', url)
     if m is None:
         raise Exception(getExternalMessages()['motu-client.exception.authentication.unfound-url'] % url)
     url_cas = m.group(1) + '/v1/tickets'
