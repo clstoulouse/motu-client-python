@@ -28,6 +28,10 @@
 		<fileSet>
 			<directory>src/doc</directory>
 			<outputDirectory>/doc</outputDirectory>
+			<excludes>
+				<!-- exclude the source of the doc (included only in the source assembly) -->
+				<exclude>*.t2t</exclude>
+			</excludes>	
 			<!-- rwx rwx r-x -->
 			<fileMode>0664</fileMode>
 			<directoryMode>0775</directoryMode>
