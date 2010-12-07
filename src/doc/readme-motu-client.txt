@@ -6,7 +6,7 @@ NAME
 
   ./motu-client.py 
 
- The motu python client.
+ The motu python client. You must use python version 2.5 or later.
 
 
 SYNOPSIS
@@ -45,8 +45,7 @@ CONFIGURATION FILE
   		proxy_server=proxy.domain.net:8080
   		proxy_user=john
   		proxy_pwd=secret
-  		motu=http://web-qt.cls.fr/mis-gateway-servlet/Motu?
-  		service_id=http//purl.org/myocean/ontology/service/database#CLS-TOULOUSE-FR-MERCATOR-MOTU-REST
+  		motu=http://web-qt.cls.fr/mis-gateway-servlet/Motu?service_id=http//purl.org/myocean/ontology/service/database#CLS-TOULOUSE-FR-MERCATOR-MOTU-REST
   		product_id=dataset-psy2v3-pgs-med-myocean-bestestimate
   		date_min=2010-11-08
   		date_max=2010-11-10
@@ -78,53 +77,59 @@ USAGE
 
   	Usage: motu-client.py [options]
   
-  	Options:
-  	  --version             show program's version number and exit
-  	  -h, --help            show this help message and exit
-  	  -q, --quiet           prevent any output in stdout
-  	  --verbose             print information in stdout
-  	  --noisy               print more information (traces) in stdout
-  	  -u USER, --user=USER  the user name (string)
-  	  -p PWD, --pwd=PWD     the user password (string)
-  	  --proxy-server=PROXY_SERVER
-  							the proxy server (url)
-  	  --proxy-user=PROXY_USER
-  							the proxy user (string)
-  	  --proxy-pwd=PROXY_PWD
-  							the proxy password (string)
-  	  -m MOTU, --motu=MOTU  the motu server to use (url)
-  	  -s SERVICE_ID, --service-id=SERVICE_ID
-  							The service identifier (string)
-  	  -d PRODUCT_ID, --product-id=PRODUCT_ID
-  							The product (data set) to download (string)
-  	  -t DATE_MIN, --date-min=DATE_MIN
-  							The min date (string following format YYYY-MM-DD)
-  	  -T DATE_MAX, --date-max=DATE_MAX
-  							The max date (string following format YYYY-MM-DD)
-  	  -y LATITUDE_MIN, --latitude-min=LATITUDE_MIN
-  							The min latitude (float in the interval [-90 ; 90])
-  	  -Y LATITUDE_MAX, --latitude-max=LATITUDE_MAX
-  							The max latitude (float in the interval [-90 ; 90])
-  	  -x LONGITUDE_MIN, --longitude-min=LONGITUDE_MIN
-  							The min longitude (float in the interval [-180 ; 180])
-  	  -X LONGITUDE_MAX, --longitude-max=LONGITUDE_MAX
-  							The max longitude (float in the interval [-180 ; 180])
-  	  -z DEPTH_MIN, --depth-min=DEPTH_MIN
-  							The min depth (float in the interval [0 ; 2e31])
-  	  -Z DEPTH_MAX, --depth-max=DEPTH_MAX
-  							The max depth (float in the interval [0 ; 2e31])
-  	  -v VARIABLE, --variable=VARIABLE
-  							The variable (list of strings)
-  	  -o OUT_DIR, --out-dir=OUT_DIR
-  							The output dir (string)
-  	  -f OUT_NAME, --out-name=OUT_NAME
-  							The output file name (string)
-  	  --block-size=BLOCK_SIZE
-  							The block used to download file (integer expressing
-  							bytes)
-  	  --socket-timeout=SOCKET_TIMEOUT
-  							Set a timeout on blocking socket operations (float
-  							expressing seconds)
+    	Options:
+    	  --version             show program's version number and exit
+    	  -h, --help            show this help message and exit
+    	  -q, --quiet           prevent any output in stdout
+    	  --verbose             print information in stdout
+    	  --noisy               print more information (traces) in stdout
+    	  -u USER, --user=USER  the user name (string), mandatory
+  							No user name ? You must register to MyOcean
+    	  -p PWD, --pwd=PWD     the user password (string), mandatory
+    	  --proxy-server=PROXY_SERVER
+    							the proxy server (url)
+    	  --proxy-user=PROXY_USER
+    							the proxy user (string)
+    	  --proxy-pwd=PROXY_PWD
+    							the proxy password (string)
+    	  -m MOTU, --motu=MOTU  the motu server to use (url), mandatory
+  							Should be something like http://atoll.cls.fr/mfcglo-armor-gateway-servlet/Motu?
+    	  -s SERVICE_ID, --service-id=SERVICE_ID
+    							The service identifier (string), mandatory
+  							Should be something like "http://purl.org/myocean/ontology/service/database#GLOBAL_REANALYSIS_PHYS_001_003_b-TDS"
+    	  -d PRODUCT_ID, --product-id=PRODUCT_ID
+    							The product (dataset) to download (string), mandatory
+  							Should be something like "http://purl.org/myocean/ontology/product/database#dataset-armor-3d-ran-v1-myocean"
+    	  -t DATE_MIN, --date-min=DATE_MIN
+    							The min date (string following format YYYY-MM-DD)
+    	  -T DATE_MAX, --date-max=DATE_MAX
+    							The max date (string following format YYYY-MM-DD)
+    	  -y LATITUDE_MIN, --latitude-min=LATITUDE_MIN
+    							The min latitude (float in the interval [-90 ; 90])
+    	  -Y LATITUDE_MAX, --latitude-max=LATITUDE_MAX
+    							The max latitude (float in the interval [-90 ; 90])
+    	  -x LONGITUDE_MIN, --longitude-min=LONGITUDE_MIN
+    							The min longitude (float in the interval [-180 ; 180])
+    	  -X LONGITUDE_MAX, --longitude-max=LONGITUDE_MAX
+    							The max longitude (float in the interval [-180 ; 180])
+    	  -z DEPTH_MIN, --depth-min=DEPTH_MIN
+    							The min depth (float in the interval [0 ; 2e31])
+    	  -Z DEPTH_MAX, --depth-max=DEPTH_MAX
+    							The max depth (float in the interval [0 ; 2e31])
+    	  -v VARIABLE, --variable=VARIABLE
+    							The variable (list of strings), you can use netCDF variable name or standard_name attribute
+  							Generic standard name table is available here, http://cf-pcmdi.llnl.gov/documents/cf-standard-names/standard-name-table/16/cf-standard-name-table.html
+    	  -o OUT_DIR, --out-dir=OUT_DIR
+    							The output dir (string), mandatory
+    	  -f OUT_NAME, --out-name=OUT_NAME
+    							The output file name (string), mandatory
+  							Can be a netCDF file or a zip file containing netCDF files, depending on the server configuration
+    	  --block-size=BLOCK_SIZE
+    							The block used to download file (integer expressing
+    							bytes)
+    	  --socket-timeout=SOCKET_TIMEOUT
+    							Set a timeout on blocking socket operations (float
+    							expressing seconds)
 
 
 REQUIRED MODULES
@@ -152,7 +157,8 @@ LICENSE
 AUTHOR
 ======
 
-    CLS (Collecte Localisation Satellites)
+   CLS (Collecte Localisation Satellites) for MyOcean
 
-	www.cls.fr
+   www.cls.fr
 
+   operation.mis@myocean.eu.org
