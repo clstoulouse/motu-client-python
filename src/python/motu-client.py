@@ -741,6 +741,12 @@ if __name__ == '__main__':
         log.log( TRACE_LEVEL, ' . python   : %s', sys.version )
         log.log( TRACE_LEVEL, ' . client   : %s', get_client_version() )
         log.log( TRACE_LEVEL, '-'*60 )
+        fh = os.path.join(_options.out_dir,_options.out_name)
+        if (os.path.isfile(fh)):
+            os.remove(fh)
+
+        sys.exit(1)
+
     finally:
         log.debug( "Elapsed time : %s", str(datetime.datetime.now() - start_time) )
 
