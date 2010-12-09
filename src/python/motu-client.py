@@ -721,7 +721,7 @@ if __name__ == '__main__':
         if hasattr(e, 'code'):
           log.info( ' . code  %s: ', e.code )
         if hasattr(e, 'read'):
-          log.info( ' . detail:\n%s', e.read() )
+          log.log( TRACE_LEVEL, ' . detail:\n%s', e.read() )
         
         log.debug( '-'*60 )
         log.debug( "Stack trace exception is detailed herafter:" )
