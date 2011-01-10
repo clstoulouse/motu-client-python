@@ -69,6 +69,12 @@ _options = None
 
 log = None
 
+AUTHENTICATION_MODE_NONE = 'none'
+AUTHENTICATION_MODE_BASIC = 'basic'
+AUTHENTICATION_MODE_CAS = 'cas'
+
+CAS_URL_PATTERN = '(http://.+/cas|https://.+/cas)'
+
 #===============================================================================
 # Version
 #===============================================================================
@@ -143,6 +149,15 @@ def open_url(*args, **kargs):
                 proxy_auth_handler = urllib2.HTTPBasicAuthHandler()
                 proxy_auth_handler.add_password('realm', _options.proxy_user, 'username', _options.proxy_pwd)
                 handlers.append(proxy_auth_handler)
+                
+        if _options.auth_mode == AUTHENTICATION_MODE_BASIC:
+            # create the password manager
+            password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            url = args[0].partition('?')
+            password_mgr.add_password(None, url[0], _options.user, _options.pwd)
+            # add the basic authentication handler
+            handlers.append(urllib2.HTTPBasicAuthHandler(password_mgr))
+            
         _opener = urllib2.build_opener(*handlers)
         log.log( TRACE_LEVEL, 'list of handlers:' )
         for h in _opener.handlers:
@@ -233,6 +248,13 @@ def load_options():
 
     parser.add_option( '--pwd', '-p',
                        help = "the user password (string)")
+                       
+    parser.add_option( '--auth-mode',
+                       default = "none",
+                       help = "the authentication mode: '" + AUTHENTICATION_MODE_NONE  +
+                              "' (for no authentication), '"+ AUTHENTICATION_MODE_BASIC +
+                              "' (for basic authentication), or '"+AUTHENTICATION_MODE_CAS +
+                              "' (for Central Authentication Service) [default: %default]")
 
     parser.add_option( '--proxy-server',
                        help = "the proxy server (url)")
@@ -353,7 +375,7 @@ def get_service():
 #===============================================================================
 # build_url
 #===============================================================================
-def build_url():
+def build_params():
     global _GEOGRAPHIC, _VERTICAL, _TEMPORAL, _options
     temporal = ''
     geographic = ''
@@ -411,39 +433,54 @@ def build_url():
 # check_options
 #===============================================================================
 def check_options():
-    global _GEOGRAPHIC, _VERTICAL, _TEMPORAL, _PROXY, _options
+    global _GEOGRAPHIC, _VERTICAL, _TEMPORAL, _PROXY, _options, AUTHENTICATION_MODE_NONE, AUTHENTICATION_MODE_BASIC, AUTHENTICATION_MODE_CAS
     """
     Check Mandatory Options
     """        
-    if _options.user == None :
-        raise Exception(getExternalMessages()['motu-client.exception.option.mandatory'] % 'user')
+    if (_options.auth_mode != AUTHENTICATION_MODE_NONE and 
+        _options.auth_mode != AUTHENTICATION_MODE_BASIC and
+        _options.auth_mode != AUTHENTICATION_MODE_CAS):
+        raise Exception(get_external_messages()['motu-client.exception.option.invalid'] % ( _options.auth_mode, 'auth-mode', [AUTHENTICATION_MODE_NONE, AUTHENTICATION_MODE_BASIC, AUTHENTICATION_MODE_CAS]) )
+       
+    # if authentication mode is set we check both user & password presence
+    if (_options.user == None and
+        _options.auth_mode != AUTHENTICATION_MODE_NONE):
+        raise Exception(get_external_messages()['motu-client.exception.option.mandatory.user'] % ('user',_options.auth_mode))
 
-    if _options.pwd == None :
-        raise Exception(getExternalMessages()['motu-client.exception.option.mandatory'] % 'pwd')
+    # check that if a user is set, a password should be set also
+    if (_options.pwd == None and
+        _options.user != None):
+        raise Exception(get_external_messages()['motu-client.exception.option.mandatory.password'] % ( 'pwd', _options.user ) )    
     
+    #check that if a user is set, an authentication mode should also be set
+    if (_options.user != None and
+        _options.auth_mode == AUTHENTICATION_MODE_NONE):
+        raise Exception(get_external_messages()['motu-client.exception.option.mandatory.mode'] % ( AUTHENTICATION_MODE_NONE, 'auth-mode', _options.user ) )
+    
+    # those following parameters are required
     if _options.motu == None :
-        raise Exception(getExternalMessages()['motu-client.exception.option.mandatory'] % 'motu')
+        raise Exception(get_external_messages()['motu-client.exception.option.mandatory'] % 'motu')
     
     if _options.service_id == None :
-        raise Exception(getExternalMessages()['motu-client.exception.option.mandatory'] % 'service-id')
+        raise Exception(get_external_messages()['motu-client.exception.option.mandatory'] % 'service-id')
     
     if _options.product_id == None :
-        raise Exception(getExternalMessages()['motu-client.exception.option.mandatory'] % 'product-id')
+        raise Exception(get_external_messages()['motu-client.exception.option.mandatory'] % 'product-id')
     
     if _options.out_dir == None :
-        raise Exception(getExternalMessages()['motu-client.exception.option.mandatory'] % 'out-dir')
+        raise Exception(get_external_messages()['motu-client.exception.option.mandatory'] % 'out-dir')
     
     out_dir = _options.out_dir
     
-    # check directory existance
+    # check directory existence
     if not os.path.exists(out_dir):
-        raise Exception(getExternalMessages()['motu-client.exception.option.outdir-notexist'] % out_dir)
+        raise Exception(get_external_messages()['motu-client.exception.option.outdir-notexist'] % out_dir)
     # check whether directory is writable or not
     if not os.access(out_dir, os.W_OK):
-        raise Exception(getExternalMessages()['motu-client.exception.option.outdir-notwritable'] % out_dir)
+        raise Exception(get_external_messages()['motu-client.exception.option.outdir-notwritable'] % out_dir)
     
     if _options.out_name == None :
-        raise Exception(getExternalMessages()['motu-client.exception.option.mandatory'] % 'out-name')
+        raise Exception(get_external_messages()['motu-client.exception.option.mandatory'] % 'out-name')
 
     """
     Check PROXY Options
@@ -455,10 +492,10 @@ def check_options():
         p = re.compile('^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?')
         m = p.match(url)
         if not m :
-            raise Exception( getExternalMessages()['motu-client.exception.not-url'] % ( 'proxy-server', url ) )
+            raise Exception( get_external_messages()['motu-client.exception.not-url'] % ( 'proxy-server', url ) )
         # check that if proxy-user is defined then proxy-pwd shall be also, and reciprocally.
         if (_options.proxy_user != None) != ( _options.proxy_pwd != None ) :
-            raise Exception( getExternalMessages()['motu-client.exception.option.linked'] % ('proxy-user', 'proxy-name') )
+            raise Exception( get_external_messages()['motu-client.exception.option.linked'] % ('proxy-user', 'proxy-name') )
     
         
     """
@@ -468,10 +505,10 @@ def check_options():
         _VERTICAL = True
         tempvalue = float(_options.depth_min)
         if tempvalue < 0 :
-            raise Exception( getExternalMessages()['motu-client.exception.option.out-of-range'] % ( 'depth_min', str(tempvalue)) ) 
+            raise Exception( get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'depth_min', str(tempvalue)) ) 
         tempvalue = float(_options.depth_max)
         if tempvalue < 0 :
-            raise Exception( getExternalMessages()['motu-client.exception.option.out-of-range'] % ( 'depth_max', str(tempvalue)) ) 
+            raise Exception( get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'depth_max', str(tempvalue)) ) 
         
     
     """
@@ -487,93 +524,62 @@ def check_options():
     if _options.latitude_min != None or _options.latitude_max != None or _options.longitude_min != None or _options.longitude_max != None :
         _GEOGRAPHIC = True
         if( _options.latitude_min == None ):
-            raise Exception(getExternalMessages()['motu-client.exception.option.geographic-box'] % 'latitude_min' )
+            raise Exception(get_external_messages()['motu-client.exception.option.geographic-box'] % 'latitude_min' )
 
         if( _options.latitude_max == None ):
-            raise Exception(getExternalMessages()['motu-client.exception.option.geographic-box'] % 'latitude_max' )            
+            raise Exception(get_external_messages()['motu-client.exception.option.geographic-box'] % 'latitude_max' )            
         
         if( _options.longitude_min == None ):
-            raise Exception(getExternalMessages()['motu-client.exception.option.geographic-box'] % 'longitude_min' )
+            raise Exception(get_external_messages()['motu-client.exception.option.geographic-box'] % 'longitude_min' )
         
         if( _options.longitude_max == None ):
-            raise Exception(getExternalMessages()['motu-client.exception.option.geographic-box'] % 'longitude_max' )
+            raise Exception(get_external_messages()['motu-client.exception.option.geographic-box'] % 'longitude_max' )
         
         tempvalue = float(_options.latitude_min)
         if tempvalue < -90 or tempvalue > 90 :
-            raise Exception( getExternalMessages()['motu-client.exception.option.out-of-range'] % ( 'latitude_min', str(tempvalue)) )
+            raise Exception( get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'latitude_min', str(tempvalue)) )
         tempvalue = float(_options.latitude_max)
         if tempvalue < -90 or tempvalue > 90 :
-            raise Exception(getExternalMessages()['motu-client.exception.option.out-of-range'] % ( 'latitude_max', str(tempvalue)))
+            raise Exception(get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'latitude_max', str(tempvalue)))
         tempvalue = float(_options.longitude_min)
         if tempvalue < -180 or tempvalue > 180 :
-            raise Exception(getExternalMessages()['motu-client.exception.option.out-of-range'] % ( 'logitude_min', str(tempvalue)))
+            raise Exception(get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'logitude_min', str(tempvalue)))
         tempvalue = float(_options.longitude_max)
         if tempvalue < -180 or tempvalue > 180 :
-            raise Exception(getExternalMessages()['motu-client.exception.option.out-of-range'] % ( 'longitude_max', str(tempvalue)))                    
+            raise Exception(get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'longitude_max', str(tempvalue)))                    
     
-#===============================================================================
-# get_ticket
-#===============================================================================
-def get_ticket(url, main_url, usr, pwd):
-    """
-    Return the ticket for the download
-    """
-    url = urllib.unquote(url)
-
-    m = re.search('(http://.+/cas|https://.+/cas)', url)
-    if m is None:
-        raise Exception(getExternalMessages()['motu-client.exception.authentication.unfound-url'] % url)
-    url_cas = m.group(1) + '/v1/tickets'
-
-    log.debug( "url cas:\t%s" %  url_cas )
-
-    opts = encode(username = usr,
-                  password = pwd)
-    connexion = open_url(url_cas, opts)
-
-    fp = FounderParser()
-    for line in connexion:
-        fp.feed(line)
-
-    url_ticket = fp.action_
-    if url_ticket is None:
-        raise Exception(getExternalMessages()['motu-client.exception.authentication.tgt'])
-
-    print_url( "url ticket:\t",url_ticket)
-    print_url( "url service\t", url)
-    print_url( "main url:\t", main_url)
-
-    opts = encode(service = main_url)
-    return open_url(url_ticket, opts).readline()
-
-
 #===============================================================================
 # dl_2_file
 #===============================================================================
-def dl_2_file(url, ticket, fh):
+def dl_2_file(dl_url, fh):
     """
-    Download the file with the main url (of Motu), the ticket and the destination
+    Download the file with the main url (of Motu)
     file.
     Motu can return an error message in the response stream without setting an
     appropriate http error code. So, in that case, the content-type response is
     checked, and if it is text/plain, we consider this as an error.    
     """
     
-    log.info( "Requesting file to download..." )
-    
-    dl_url = url + '&ticket=' + ticket
-    
+    log.info( "Requesting file to download..." )    
     
     temp = open(fh, 'w+b')             
     try:
       m = open_url(dl_url)
       try:
+        # check the real url (after potential redirection) is not a CAS Url scheme
+        match = re.search(CAS_URL_PATTERN, m.url)
+    
+        if match is not None:
+            service, _, _ = dl_url.partition('?')
+            redirection, _, _ = m.url.partition('?')
+            raise Exception(get_external_messages()['motu-client.exception.authentication.redirected'] % (service, redirection) )
+      
         # check that content type is not text/plain
         headers = m.info()
         if "Content-Type" in headers:
           if len(headers['Content-Type']) > 0:
             if   headers['Content-Type'].startswith('text') or headers['Content-Type'].find('html') != -1:
-               raise Exception( getExternalMessages()['motu-client.exception.motu.error'] % m.read() )
+               raise Exception( get_external_messages()['motu-client.exception.motu.error'] % m.read() )
           
           log.info( 'File type: %s' % headers['Content-Type'] )
         
@@ -606,7 +612,7 @@ def dl_2_file(url, ticket, fh):
 
     # raise exception if actual size does not match content-length header
     if size >= 0 and read < size:
-        raise ContentTooShortError( getExternalMessages()['motu-client.exception.download.too-short'] % (read, size), result)
+        raise ContentTooShortError( get_external_messages()['motu-client.exception.download.too-short'] % (read, size), result)
 
 #===============================================================================
 # main
@@ -646,36 +652,92 @@ def main():
 
     log.log( TRACE_LEVEL, '-'*60 )
     
+    # start of url to invoke
+    url_service = _options.motu
+    # parameters of the invoked service
+    url_params  = build_params()
     
-    # we build the url
-    main_cas_url = _options.motu + urllib.quote_plus(build_url())
-
-    main_url = _options.motu + build_url()
-           
-    # now we connect
-    # if a problem append, an exception is thrown
-    log.info("Contacting server")
-
+    url = url_service+url_params
+    
     # set-up the socket timeout if any
     if _options.socket_timeout != None:
+        log.debug("Setting timeout %s" % _options.socket_timeout)
         socket.setdefaulttimeout(_options.socket_timeout)
+            
+    if _options.auth_mode == AUTHENTICATION_MODE_CAS:
+        # perform authentication before acceding service
+        download_url = authenticate_CAS_for_URL(url,
+                                                _options.user,
+                                                _options.pwd)
+    else:
+        # if none, we do nothing more, in basic, we let the url requester doing the job
+        download_url = url
     
-    connexion = open_url(main_url)
-
-    log.info( 'Authenticating user %s' % _options.user )
-    ticket = get_ticket(connexion.url,
-                        main_cas_url,
-                        _options.user,
-                        _options.pwd)
-    log.debug( 'ticket: %s' % ticket )
-    
+    # create a file for storing downloaded stream
     fh = os.path.join(_options.out_dir,_options.out_name)
-    dl_2_file(main_url, ticket, fh)
+    
+    dl_2_file(download_url, fh)
 
+#===============================================================================
+# CAS authentication
+# return the url with the ticket given after authenticating
+#===============================================================================
+def authenticate_CAS_for_URL(url, user, pwd):
+    server, sep, options = url.partition( '?' )
+    
+    log.info( 'Authenticating user %s for service %s' % (user,server) )      
+    
+    connexion = open_url(url)
+
+    # connexion response code must be a redirection, else, there's an error (user can't be already connected since no cookie or ticket was sent)
+    if connexion.url == url:
+        raise Exception(get_external_messages()['motu-client.exception.authentication.not-redirected'] % server )
+    
+    # find the cas url from the redirected url
+    redirected_url = connexion.url
+    
+    m = re.search(CAS_URL_PATTERN, redirected_url)
+    
+    if m is None:
+        raise Exception(get_external_messages()['motu-client.exception.authentication.unfound-url'] % redirected_url)
+    
+    url_cas = m.group(1) + '/v1/tickets'
+
+    opts = encode(username = user,
+                  password = pwd)
+
+    print_url( "login user into CAS:\t", url_cas+'?'+opts )
+    connexion = open_url(url_cas, opts)
+
+    fp = FounderParser()
+    for line in connexion:
+        fp.feed(line)
+
+    url_ticket = fp.action_
+    if url_ticket is None:
+        raise Exception(get_external_messages()['motu-client.exception.authentication.tgt'])
+    
+    print_url( "found url ticket:\t",url_ticket)
+
+    opts = encode(service = urllib.quote_plus(url))
+    
+    print_url( 'Granting user for service\t', url_ticket +'?'+opts )    
+    ticket = open_url(url_ticket, opts).readline() 
+    
+    print_url( "found service ticket:\t", ticket)
+    
+    # we append the download url with the ticket and return the result
+    service_url = url + '&ticket=' + ticket
+    
+    print_url( "service url is:\t",service_url)
+
+    return service_url
+
+    
 #===============================================================================
 # external messages
 #===============================================================================
-def getExternalMessages():
+def get_external_messages():
     global _messages
     if _messages is None:
         propFile= file( os.path.join(os.path.dirname(__file__),MESSAGES_FILE), "rU" )
