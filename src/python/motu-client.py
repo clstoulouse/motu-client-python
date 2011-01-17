@@ -250,7 +250,7 @@ def load_options():
                        help = "the user password (string)")
                        
     parser.add_option( '--auth-mode',
-                       default = "none",
+                       default = "cas",
                        help = "the authentication mode: '" + AUTHENTICATION_MODE_NONE  +
                               "' (for no authentication), '"+ AUTHENTICATION_MODE_BASIC +
                               "' (for basic authentication), or '"+AUTHENTICATION_MODE_CAS +
