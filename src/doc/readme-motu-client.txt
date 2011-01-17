@@ -23,19 +23,6 @@ SYNOPSIS
 This program can be integrated into a processing chain in order to automate the downloading of products via the Motu.
 
 
-ALGORITHM
-=========
-
-The communication algorithm with the MIS-Gateway is the following:
-
-  1. The program builds a URL based on parameters provided by the user to download the requested product.
-  2. The program sends the URL built to the Motu.
-  3. The Motu sends a new URL to perform the authentication server via a "Central Authentication Service" (CAS).
-  4. The program posts a new URL to get a "Ticket Granting Ticket" (TGT) to download the requested product.
-  5. The CAS server sends the ticket.
-  6. The program sends the first joined with ticket obtained above and download the requested product.
-
-
 CONFIGURATION FILE
 ==================
 
@@ -94,6 +81,11 @@ Usage: ./motu-client.py -h
           -u USER, --user=USER  the user name (string), mandatory
                                 No user name ? You must register to MyOcean
           -p PWD, --pwd=PWD     the user password (string), mandatory
+          --auth-mode=AUTH_MODE
+                                the authentication mode: 'none' (for no
+                                authentication), 'basic' (for basic authentication),
+                                or 'cas' (for Central Authentication Service)
+                                [default: cas]        
           --proxy-server=PROXY_SERVER
                                 the proxy server (url)
           --proxy-user=PROXY_USER

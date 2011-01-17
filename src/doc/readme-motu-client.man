@@ -16,26 +16,6 @@ The motu python client. You must use python version 2.5 or later.
 .P
 This program can be integrated into a processing chain in order to automate the downloading of products via the Motu.
 
-.SS ALGORITHM
-
-.P
-The communication algorithm with the MIS\-Gateway is the following:
-
-.RS
-.IP 1. 3
-The program builds a URL based on parameters provided by the user to download the requested product.
-.IP 2. 3
-The program sends the URL built to the Motu.
-.IP 3. 3
-The Motu sends a new URL to perform the authentication server via a "Central Authentication Service" (CAS).
-.IP 4. 3
-The program posts a new URL to get a "Ticket Granting Ticket" (TGT) to download the requested product.
-.IP 5. 3
-The CAS server sends the ticket.
-.IP 6. 3
-The program sends the first joined with ticket obtained above and download the requested product.
-.RE
-
 .SS CONFIGURATION FILE
 
 .P
@@ -102,6 +82,11 @@ Usage: \&./motu\-client.py \-h
         -u USER, --user=USER  the user name (string), mandatory
                               No user name ? You must register to MyOcean
         -p PWD, --pwd=PWD     the user password (string), mandatory
+        --auth-mode=AUTH_MODE
+                              the authentication mode: 'none' (for no
+                              authentication), 'basic' (for basic authentication),
+                              or 'cas' (for Central Authentication Service)
+                              [default: cas]        
         --proxy-server=PROXY_SERVER
                               the proxy server (url)
         --proxy-user=PROXY_USER

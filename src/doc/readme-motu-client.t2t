@@ -9,17 +9,6 @@ The motu python client. You must use python version 2.5 or later.
 ==SYNOPSIS==
 This program can be integrated into a processing chain in order to automate the downloading of products via the Motu.
 
- 
-==ALGORITHM==
-The communication algorithm with the MIS-Gateway is the following:
-
-  + The program builds a URL based on parameters provided by the user to download the requested product.
-  + The program sends the URL built to the Motu.
-  + The Motu sends a new URL to perform the authentication server via a "Central Authentication Service" (CAS).
-  + The program posts a new URL to get a "Ticket Granting Ticket" (TGT) to download the requested product.
-  + The CAS server sends the ticket.
-  + The program sends the first joined with ticket obtained above and download the requested product.
-
   
 ==CONFIGURATION FILE==
 The program parameters are contained in an ini file. This file is located in the following directory:
@@ -76,6 +65,11 @@ Usage: ``./motu-client.py -h``
         -u USER, --user=USER  the user name (string), mandatory
                               No user name ? You must register to MyOcean
         -p PWD, --pwd=PWD     the user password (string), mandatory
+        --auth-mode=AUTH_MODE
+                              the authentication mode: 'none' (for no
+                              authentication), 'basic' (for basic authentication),
+                              or 'cas' (for Central Authentication Service)
+                              [default: cas]        
         --proxy-server=PROXY_SERVER
                               the proxy server (url)
         --proxy-user=PROXY_USER
@@ -120,7 +114,6 @@ Usage: ``./motu-client.py -h``
         --socket-timeout=SOCKET_TIMEOUT
                               Set a timeout on blocking socket operations (float expressing seconds)
 ```
-
 
 ==REQUIRED MODULES==
 No module required.
