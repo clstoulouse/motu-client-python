@@ -49,6 +49,9 @@ import socket
 # The necessary required version of Python interpreter
 REQUIRED_VERSION = (2,5)
 
+# error code to use when exiting after exception catch
+ERROR_CODE_EXIT=1
+
 # the config file to load from 
 CFG_FILE = '~/motu-client/motu-client-python.ini'
 MESSAGES_FILE = './etc/messages.properties'
@@ -56,39 +59,57 @@ LOG_CFG_FILE = './etc/log.ini'
 
 SECTION = 'Main'
 
+# trace level
 TRACE_LEVEL = 1
 
+# options category
 _GEOGRAPHIC = False
 _VERTICAL   = False
 _TEMPORAL   = False
 _PROXY      = False
 
+# shared variables
 _opener = None
 _messages = None
 _options = None
 
+# shared logger
 log = None
 
+# constant for authentication modes
 AUTHENTICATION_MODE_NONE = 'none'
 AUTHENTICATION_MODE_BASIC = 'basic'
 AUTHENTICATION_MODE_CAS = 'cas'
 
+# pattern used to search for a CAS url within a response
 CAS_URL_PATTERN = '(http://.+/cas|https://.+/cas)'
 
-#===============================================================================
-# Version
-#===============================================================================
-
 def get_client_version():
+    """Return the version (as a string) of this client.
+    
+    The value is automatically set by the maven processing build, so don't 
+    touch it unless you know what you are doing."""
     return '${project.version}'
 
+    
 def get_client_artefact():
+    """Return the artifact identifier (as a string) of this client.
+    
+    The value is automatically set by the maven processing build, so don't 
+    touch it unless you know what you are doing."""
     return '${project.artifactId}'    
     
-#===============================================================================
-# print_url
-#===============================================================================
+        
 def print_url(message, url, level = logging.DEBUG ):
+    """Nicely logs the given url.
+    
+    Print out the url with the first part (protocol, host, port, authority,
+    user info, path, ref) and in sequence all the query parameters.
+    
+    message: a message to print before the url
+    url: the url to log
+    level: (optional) the log level to use"""
+    
     urls = url.split('?')
     log.log( level, message + urllib2.unquote(urls[0]) )
     if len(urls) > 1:
@@ -98,6 +119,7 @@ def print_url(message, url, level = logging.DEBUG ):
               param.append('')
             log.log( level, ' . %s = %s', urllib2.unquote(param[0]), urllib2.unquote(param[1]) )
 
+            
 class HTTPDebugProcessor(urllib2.BaseHandler):
     """ Track HTTP requests and responses with this custom handler.
     """
@@ -126,9 +148,6 @@ class HTTPDebugProcessor(urllib2.BaseHandler):
         return response
 
 
-#===============================================================================
-# open_url
-#===============================================================================
 def open_url(*args, **kargs):
     global _opener, _PROXY, _options
     if _opener is None:    
@@ -145,7 +164,7 @@ def open_url(*args, **kargs):
             # extract protocol
             url = _options.proxy_server.partition(':')
             handlers.append( urllib2.ProxyHandler({url[0]:url[2]}) )
-            if (_options.proxy_user != None):
+            if _options.proxy_user != None:
                 proxy_auth_handler = urllib2.HTTPBasicAuthHandler()
                 proxy_auth_handler.add_password('realm', _options.proxy_user, 'username', _options.proxy_pwd)
                 handlers.append(proxy_auth_handler)
@@ -163,16 +182,20 @@ def open_url(*args, **kargs):
         for h in _opener.handlers:
             log.log( TRACE_LEVEL, ' . %s',str(h))
 
-    kargs['headers'] = {"Accept": "text/plain", "X-Client-Id" : "motu-client-python", "X-Client-Version" : "1.0.0"}
+    kargs['headers'] = {"Accept": "text/plain", 
+                        "X-Client-Id": get_client_artefact(),
+                        "X-Client-Version" : get_client_version()
+                       }
 
+    if _options.user_agent != None:
+        # add the specific user-agent
+        kargs['headers']["User-Agent"] = _options.user_agent
+                       
     r = urllib2.Request(*args, **kargs)
   
     # open the url, but let the exception propagates to the caller  
     return _opener.open(r)
 
-#===============================================================================
-# encode
-#===============================================================================
 def encode(**kargs):
     opts = []
     for k, v in kargs.iteritems():
@@ -181,9 +204,7 @@ def encode(**kargs):
 
 
 
-#===============================================================================
-# HTTPErrorProcessor
-#===============================================================================
+
 class HTTPErrorProcessor(urllib2.HTTPErrorProcessor):
     def https_response(self, request, response):
         # Consider error codes that are not 2xx (201 is an acceptable response)
@@ -192,9 +213,7 @@ class HTTPErrorProcessor(urllib2.HTTPErrorProcessor):
             response = self.parent.error('http', request, response, code, msg, hdrs)
         return response
 
-#===============================================================================
-# FounderParser
-#===============================================================================
+
 class FounderParser(HTMLParser.HTMLParser):
     """
     Parser witch found the form/action section an return it
@@ -208,13 +227,9 @@ class FounderParser(HTMLParser.HTMLParser):
         if tag == 'form' and 'action' in d:
             self.action_ = d['action']
            
-#===============================================================================
-# load_options
-#===============================================================================
+
 def load_options():
-    '''
-    load options to handle
-    '''
+    """load options to handle"""
     global _options, TRACE_LEVEL
     
     # create option parser
@@ -325,6 +340,8 @@ def load_options():
     parser.add_option( '--socket-timeout',
                        type = 'float',
                        help = "Set a timeout on blocking socket operations (float expressing seconds)")                                          
+    parser.add_option( '--user-agent',
+                       help = "Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)")                       
                   
     # set default values by picking from the configuration file
     default_values = {}
@@ -336,9 +353,7 @@ def load_options():
                       
     (_options, args) = parser.parse_args()
 
-#===============================================================================
-# format_date
-#===============================================================================
+
 def format_date(date):
     """
     Format JulianDay date in unix time
@@ -346,12 +361,9 @@ def format_date(date):
     return date.isoformat()
 
 
-#===============================================================================
-# get_product
-#===============================================================================
 def get_product():
     """
-    Return the product string
+    Return the product identifier as a string, correctly encoded
     """
     global _options
     
@@ -359,12 +371,9 @@ def get_product():
     return _options.product_id.replace('#', '%23' )
     
     
-#===============================================================================
-# get_product
-#===============================================================================
 def get_service():
     """
-    Return the service string
+    Return the service identifier as a string, correctly encoded
     """
     global _options
     
@@ -372,10 +381,8 @@ def get_service():
     return _options.service_id.replace('#', '%23' )
 
 
-#===============================================================================
-# build_url
-#===============================================================================
 def build_params():
+    """Function that builds the query string for Motu according to the given options"""
     global _GEOGRAPHIC, _VERTICAL, _TEMPORAL, _options
     temporal = ''
     geographic = ''
@@ -429,14 +436,12 @@ def build_params():
     
     return opts + temporal + geographic + vertical + other_opt
 
-#===============================================================================
-# check_options
-#===============================================================================
+
 def check_options():
+    """function that checks the given options for coherency."""
     global _GEOGRAPHIC, _VERTICAL, _TEMPORAL, _PROXY, _options, AUTHENTICATION_MODE_NONE, AUTHENTICATION_MODE_BASIC, AUTHENTICATION_MODE_CAS
-    """
-    Check Mandatory Options
-    """        
+    
+    # Check Mandatory Options
     if (_options.auth_mode != AUTHENTICATION_MODE_NONE and 
         _options.auth_mode != AUTHENTICATION_MODE_BASIC and
         _options.auth_mode != AUTHENTICATION_MODE_CAS):
@@ -482,9 +487,7 @@ def check_options():
     if _options.out_name == None :
         raise Exception(get_external_messages()['motu-client.exception.option.mandatory'] % 'out-name')
 
-    """
-    Check PROXY Options
-    """
+    # Check PROXY Options
     if _options.proxy_server != None:
         _PROXY = True
         # check that proxy server is a valid url
@@ -498,9 +501,7 @@ def check_options():
             raise Exception( get_external_messages()['motu-client.exception.option.linked'] % ('proxy-user', 'proxy-name') )
     
         
-    """
-    Check VERTICAL Options
-    """
+    # Check VERTICAL Options
     if _options.depth_min != None and _options.depth_max != None :
         _VERTICAL = True
         tempvalue = float(_options.depth_min)
@@ -510,17 +511,12 @@ def check_options():
         if tempvalue < 0 :
             raise Exception( get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'depth_max', str(tempvalue)) ) 
         
-    
-    """
-    Check TEMPORAL  Options
-    """
+    # Check TEMPORAL  Options
     if _options.date_min != None and _options.date_max != None :
         _TEMPORAL = True
     
     
-    """
-    Check GEOGRAPHIC Options
-    """
+    # Check GEOGRAPHIC Options
     if _options.latitude_min != None or _options.latitude_max != None or _options.longitude_min != None or _options.longitude_max != None :
         _GEOGRAPHIC = True
         if( _options.latitude_min == None ):
@@ -548,19 +544,19 @@ def check_options():
         if tempvalue < -180 or tempvalue > 180 :
             raise Exception(get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'longitude_max', str(tempvalue)))                    
     
-#===============================================================================
-# dl_2_file
-#===============================================================================
+
 def dl_2_file(dl_url, fh):
-    """
-    Download the file with the main url (of Motu)
-    file.
+    """ Download the file with the main url (of Motu) file.
+     
     Motu can return an error message in the response stream without setting an
     appropriate http error code. So, in that case, the content-type response is
-    checked, and if it is text/plain, we consider this as an error.    
-    """
+    checked, and if it is text/plain, we consider this as an error.
     
-    log.info( "Requesting file to download..." )    
+    dl_url: the complete download url of Motu
+    fh: file handler to use to write the downstream"""
+    
+    start_time = datetime.datetime.now()    
+    log.info( "Requesting file to download (this can take a while)..." )    
     
     temp = open(fh, 'w+b')             
     try:
@@ -603,7 +599,7 @@ def dl_2_file(dl_url, fh):
            if True:
                percent = read*100./size
                log.info( "%s/%i (%.1f%%)", str(read ).rjust(padding), size, percent )
-           
+        log.info( "Download rate: %.0f bytes/s", read / (datetime.datetime.now() - start_time).total_seconds() )
       finally:
         m.close()
     finally:
@@ -678,11 +674,23 @@ def main():
     
     dl_2_file(download_url, fh)
 
-#===============================================================================
-# CAS authentication
-# return the url with the ticket given after authenticating
-#===============================================================================
+    
 def authenticate_CAS_for_URL(url, user, pwd):
+    """Performs a CAS authentication for the given URL service and returns
+    the service url with the obtained credential.
+    
+    The following algorithm is done:
+    1) A connection is opened on the given URL
+    2) We check that the response is an HTTP redirection
+    3) Redirected URL contains the CAS address
+    4) We ask for a ticket for the given user and password
+    5) We ask for a service ticket for the given service
+    6) Then we return a new url with the ticket attached
+    
+    url: the url of the service to invoke
+    user: the username
+    pwd: the password"""
+    
     server, sep, options = url.partition( '?' )
     
     log.info( 'Authenticating user %s for service %s' % (user,server) )      
@@ -734,10 +742,10 @@ def authenticate_CAS_for_URL(url, user, pwd):
     return service_url
 
     
-#===============================================================================
-# external messages
-#===============================================================================
 def get_external_messages():
+    """Return a table of externalized messages.
+        
+    The table is lazzy instancied (loaded once when called the first time)."""
     global _messages
     if _messages is None:
         propFile= file( os.path.join(os.path.dirname(__file__),MESSAGES_FILE), "rU" )
@@ -759,6 +767,9 @@ def get_external_messages():
 
     
 def check_version():
+    """Utilitary function that checks the required version of the python interpreter
+    is available. Raise an exception if not."""
+    
     global REQUIRED_VERSION
     cur_version = sys.version_info
     if (cur_version[0] > REQUIRED_VERSION[0] or
@@ -776,6 +787,7 @@ if __name__ == '__main__':
     start_time = datetime.datetime.now()
     try:                
         main()
+        log.info( "Done" )
     except Exception, e:
         log.error( "Execution failed: %s", e )
         if hasattr(e, 'reason'):
@@ -807,7 +819,7 @@ if __name__ == '__main__':
         if (os.path.isfile(fh)):
             os.remove(fh)
 
-        sys.exit(1)
+        sys.exit(ERROR_CODE_EXIT)
 
     finally:
         log.debug( "Elapsed time : %s", str(datetime.datetime.now() - start_time) )
