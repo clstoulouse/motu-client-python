@@ -84,6 +84,9 @@ AUTHENTICATION_MODE_CAS = 'cas'
 # pattern used to search for a CAS url within a response
 CAS_URL_PATTERN = '(http://.+/cas|https://.+/cas)'
 
+# SI unit prefixes
+SI_K, SI_M, SI_G, SI_T = 10 ** 3, 10 ** 6, 10 ** 9, 10 ** 12
+
 def get_client_version():
     """Return the version (as a string) of this client.
     
@@ -118,6 +121,24 @@ def print_url(message, url, level = logging.DEBUG ):
             if( len(param) < 2 ):
               param.append('')
             log.log( level, ' . %s = %s', urllib2.unquote(param[0]), urllib2.unquote(param[1]) )
+
+            
+def convert_bytes(n):
+    """Converts the given bytes into a string with the most appropriate
+    unit power.
+    
+    Note that prefixes like M, G, T are power of 10 (ISO/IEC 80000-13:2008) and
+    not power of 2."""        
+    if   n >= SI_T:
+        return '%.1f TB' % (float(n) / SI_T)
+    elif n >= SI_G:
+        return '%.1f GB' % (float(n) / SI_G)
+    elif n >= SI_M:
+        return '%.1f MB' % (float(n) / SI_M)
+    elif n >= SI_K:
+        return '%.1f kB' % (float(n) / SI_K)
+    else:
+        return '%d B' % n
 
             
 class HTTPDebugProcessor(urllib2.BaseHandler):
@@ -578,17 +599,22 @@ def dl_2_file(dl_url, fh):
                raise Exception( get_external_messages()['motu-client.exception.motu.error'] % m.read() )
           
           log.info( 'File type: %s' % headers['Content-Type'] )
-        
-        if "Content-Length" in headers:
-          log.info( 'File size: %s bytes' % headers['Content-Length'] )
-          size = int(headers["Content-Length"])     
+                
+        # check if a content length (size of the file) has been send
+        if "Content-Length" in headers:        
+            try:
+                # it should be an integer
+                size = int(headers["Content-Length"]) 
+                log.info( 'File size: %s (%i B)' % ( convert_bytes(size), size )  )    
+            except Exception, e:
+                size = -1
+                log.warn( 'File size is not an integer: %s' % headers["Content-Length"] )                      
         else:
           size = -1
           log.warn( 'File size: %s' % 'unknown' )
         
-        log.info( 'Downloading file %s:' % os.path.abspath(fh) )
+        log.info( 'Downloading file %s' % os.path.abspath(fh) )
 
-        padding = len(str(size)) 
         read = 0        
         while 1:
            block = m.read(_options.block_size)
@@ -598,8 +624,8 @@ def dl_2_file(dl_url, fh):
            temp.write(block)
            if True:
                percent = read*100./size
-               log.info( "%s/%i (%.1f%%)", str(read ).rjust(padding), size, percent )
-        log.info( "Download rate: %.0f bytes/s", read / (datetime.datetime.now() - start_time).total_seconds() )
+               log.info( "- %s (%.1f%%)", convert_bytes(read ).rjust(8), percent )
+        log.info( "Download rate: %s/s", convert_bytes(read / (datetime.datetime.now() - start_time).total_seconds()) )
       finally:
         m.close()
     finally:
