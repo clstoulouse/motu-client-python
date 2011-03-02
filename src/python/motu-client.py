@@ -82,7 +82,8 @@ AUTHENTICATION_MODE_BASIC = 'basic'
 AUTHENTICATION_MODE_CAS = 'cas'
 
 # pattern used to search for a CAS url within a response
-CAS_URL_PATTERN = '(http://.+/cas|https://.+/cas)'
+#CAS_URL_PATTERN = '(http://.+/cas|https://.+/cas)'
+CAS_URL_PATTERN = '(.*)/login.*'
 
 # SI unit prefixes
 SI_K, SI_M, SI_G, SI_T = 10 ** 3, 10 ** 6, 10 ** 9, 10 ** 12
@@ -565,7 +566,9 @@ def check_options():
         if tempvalue < -180 or tempvalue > 180 :
             raise Exception(get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'longitude_max', str(tempvalue)))                    
     
-
+def total_seconds(td):
+    return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6 
+    
 def dl_2_file(dl_url, fh):
     """ Download the file with the main url (of Motu) file.
      
@@ -585,7 +588,6 @@ def dl_2_file(dl_url, fh):
       try:
         # check the real url (after potential redirection) is not a CAS Url scheme
         match = re.search(CAS_URL_PATTERN, m.url)
-    
         if match is not None:
             service, _, _ = dl_url.partition('?')
             redirection, _, _ = m.url.partition('?')
@@ -625,7 +627,7 @@ def dl_2_file(dl_url, fh):
            if True:
                percent = read*100./size
                log.info( "- %s (%.1f%%)", convert_bytes(read ).rjust(8), percent )
-        log.info( "Download rate: %s/s", convert_bytes(read / (datetime.datetime.now() - start_time).total_seconds()) )
+        log.info( "Download rate: %s/s", convert_bytes(read / total_seconds(datetime.datetime.now() - start_time)) )
       finally:
         m.close()
     finally:
@@ -679,7 +681,12 @@ def main():
     # parameters of the invoked service
     url_params  = build_params()
     
-    url = url_service+url_params
+    # check if question mark is in the url
+    questionMark = '?'
+    if url_service.endswith(questionMark) :
+        questionMark = ''
+             
+    url = url_service+questionMark+url_params
     
     # set-up the socket timeout if any
     if _options.socket_timeout != None:
