@@ -57,10 +57,10 @@ CFG_FILE = '~/motu-client/motu-client-python.ini'
 MESSAGES_FILE = './etc/messages.properties'
 LOG_CFG_FILE = './etc/log.ini'
 
-SECTION = 'Main'
+# project libraries path
+LIBRARIES_PATH = './lib'
 
-# trace level
-TRACE_LEVEL = 1
+SECTION = 'Main'
 
 # options category
 _GEOGRAPHIC = False
@@ -85,8 +85,16 @@ AUTHENTICATION_MODE_CAS = 'cas'
 #CAS_URL_PATTERN = '(http://.+/cas|https://.+/cas)'
 CAS_URL_PATTERN = '(.*)/login.*'
 
-# SI unit prefixes
-SI_K, SI_M, SI_G, SI_T = 10 ** 3, 10 ** 6, 10 ** 9, 10 ** 12
+# Manage imports of project libraries
+if not os.path.exists(LIBRARIES_PATH):
+    sys.stderr.write('\nERROR: can not find project libraries path: %s\n\n' % os.path.abspath(LIBRARIES_PATH))
+    sys.exit(1) 
+sys.path.append(LIBRARIES_PATH)  
+
+# Import project libraries
+import utils_log;
+import utils_unit;
+import utils_stream;
 
 def get_client_version():
     """Return the version (as a string) of this client.
@@ -102,73 +110,7 @@ def get_client_artefact():
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
     return '${project.artifactId}'    
-    
-        
-def print_url(message, url, level = logging.DEBUG ):
-    """Nicely logs the given url.
-    
-    Print out the url with the first part (protocol, host, port, authority,
-    user info, path, ref) and in sequence all the query parameters.
-    
-    message: a message to print before the url
-    url: the url to log
-    level: (optional) the log level to use"""
-    
-    urls = url.split('?')
-    log.log( level, message + urllib2.unquote(urls[0]) )
-    if len(urls) > 1:
-        for a in sorted(urls[1].split('&')):
-            param = a.split('=')
-            if( len(param) < 2 ):
-              param.append('')
-            log.log( level, ' . %s = %s', urllib2.unquote(param[0]), urllib2.unquote(param[1]) )
-
-            
-def convert_bytes(n):
-    """Converts the given bytes into a string with the most appropriate
-    unit power.
-    
-    Note that prefixes like M, G, T are power of 10 (ISO/IEC 80000-13:2008) and
-    not power of 2."""        
-    if   n >= SI_T:
-        return '%.1f TB' % (float(n) / SI_T)
-    elif n >= SI_G:
-        return '%.1f GB' % (float(n) / SI_G)
-    elif n >= SI_M:
-        return '%.1f MB' % (float(n) / SI_M)
-    elif n >= SI_K:
-        return '%.1f kB' % (float(n) / SI_K)
-    else:
-        return '%d B' % n
-
-            
-class HTTPDebugProcessor(urllib2.BaseHandler):
-    """ Track HTTP requests and responses with this custom handler.
-    """
-    def __init__(self, log_level=TRACE_LEVEL):
-        self.log_level = log_level
-
-    def http_request(self, request):
-        host, full_url = request.get_host(), request.get_full_url()
-        url_path = full_url[full_url.find(host) + len(host):]
-        print_url ( "Requesting: ", request.get_full_url(), TRACE_LEVEL )
-        log.log(self.log_level, "%s %s" % (request.get_method(), url_path))
-
-        for header in request.header_items():
-            log.log(self.log_level, " . %s: %s" % header[:])
-
-        return request
-
-    def http_response(self, request, response):
-        code, msg, hdrs = response.code, response.msg, response.headers
-        log.log(self.log_level, "Response:")
-        log.log(self.log_level," HTTP/1.x %s %s" % (code, msg))
-        
-        for headers in hdrs.headers:
-            log.log(self.log_level, " . %s%s %s" % headers.rstrip().partition(':'))
-
-        return response
-
+                          
 
 def open_url(*args, **kargs):
     global _opener, _PROXY, _options
@@ -178,7 +120,7 @@ def open_url(*args, **kargs):
                     urllib2.HTTPHandler(),
                     urllib2.HTTPSHandler(),
                     HTTPErrorProcessor(),
-                    HTTPDebugProcessor()
+                    utils_log.HTTPDebugProcessor(log)
                    ]
 
         # add handlers for managing proxy credentials if necessary        
@@ -200,9 +142,9 @@ def open_url(*args, **kargs):
             handlers.append(urllib2.HTTPBasicAuthHandler(password_mgr))
             
         _opener = urllib2.build_opener(*handlers)
-        log.log( TRACE_LEVEL, 'list of handlers:' )
+        log.log( utils_log.TRACE_LEVEL, 'list of handlers:' )
         for h in _opener.handlers:
-            log.log( TRACE_LEVEL, ' . %s',str(h))
+            log.log( utils_log.TRACE_LEVEL, ' . %s',str(h))
 
     kargs['headers'] = {"Accept": "text/plain", 
                         "X-Client-Id": get_client_artefact(),
@@ -252,7 +194,7 @@ class FounderParser(HTMLParser.HTMLParser):
 
 def load_options():
     """load options to handle"""
-    global _options, TRACE_LEVEL
+    global _options
     
     # create option parser
     parser = optparse.OptionParser(version=get_client_artefact() + ' v' + get_client_version())
@@ -277,7 +219,7 @@ def load_options():
     parser.add_option( '--noisy',
                        help = "print more information (traces) in stdout",
                        action='store_const',
-                       const = TRACE_LEVEL,
+                       const = utils_log.TRACE_LEVEL,
                        dest='log_level')
                        
     parser.add_option( '--user', '-u',
@@ -517,7 +459,7 @@ def check_options():
         p = re.compile('^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?')
         m = p.match(url)
         if not m :
-            raise Exception( get_external_messages()['motu-client.exception.not-url'] % ( 'proxy-server', url ) )
+            raise Exception( get_external_messages()['motu-client.exception.option.not-url'] % ( 'proxy-server', url ) )
         # check that if proxy-user is defined then proxy-pwd shall be also, and reciprocally.
         if (_options.proxy_user != None) != ( _options.proxy_pwd != None ) :
             raise Exception( get_external_messages()['motu-client.exception.option.linked'] % ('proxy-user', 'proxy-name') )
@@ -579,7 +521,7 @@ def dl_2_file(dl_url, fh):
     dl_url: the complete download url of Motu
     fh: file handler to use to write the downstream"""
     
-    start_time = datetime.datetime.now()    
+    start_time = datetime.datetime.now()
     log.info( "Requesting file to download (this can take a while)..." )    
     
     temp = open(fh, 'w+b')             
@@ -607,7 +549,7 @@ def dl_2_file(dl_url, fh):
             try:
                 # it should be an integer
                 size = int(headers["Content-Length"]) 
-                log.info( 'File size: %s (%i B)' % ( convert_bytes(size), size )  )    
+                log.info( 'File size: %s (%i B)' % ( utils_unit.convert_bytes(size), size )  )    
             except Exception, e:
                 size = -1
                 log.warn( 'File size is not an integer: %s' % headers["Content-Length"] )                      
@@ -615,19 +557,30 @@ def dl_2_file(dl_url, fh):
           size = -1
           log.warn( 'File size: %s' % 'unknown' )
         
-        log.info( 'Downloading file %s' % os.path.abspath(fh) )
+        # performs the download           
+        processing_time = datetime.datetime.now();
 
-        read = 0        
-        while 1:
-           block = m.read(_options.block_size)
-           if block == "":
-               break;
-           read += len(block)
-           temp.write(block)
-           if True:
-               percent = read*100./size
-               log.info( "- %s (%.1f%%)", convert_bytes(read ).rjust(8), percent )
-        log.info( "Download rate: %s/s", convert_bytes(read / total_seconds(datetime.datetime.now() - start_time)) )
+        log.info( 'Downloading file %s' % os.path.abspath(fh) )
+        
+        download_profile = open('downloadProfile.csv', 'w+b')     
+        
+        def progress_function(sizeRead):
+           percent = sizeRead*100./size
+           log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
+           td = datetime.datetime.now()- start_time;           
+           download_profile.write( str((td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6)) )
+           download_profile.write( ',' )
+           download_profile.write( str(percent) )
+           download_profile.write( '\n' )
+        
+        read = utils_stream.copy(m,temp,progress_function if size != -1 else None, _options.block_size )
+
+        download_profile.close()
+        
+        end_time = datetime.datetime.now()
+        log.info( "Processing  time : %s", str(processing_time - start_time) )
+        log.info( "Downloading time : %s", str(end_time - processing_time) )
+        log.info( "Download rate    : %s/s", utils_unit.convert_bytes(read / total_seconds(end_time - start_time)) )        
       finally:
         m.close()
     finally:
@@ -649,7 +602,7 @@ def main():
     global loaded, log, _options
        
     # first initialize the logger
-    logging.addLevelName(TRACE_LEVEL, 'TRACE')
+    logging.addLevelName(utils_log.TRACE_LEVEL, 'TRACE')
     logging.config.fileConfig(  os.path.join(os.path.dirname(__file__),LOG_CFG_FILE) )
     log = logging.getLogger("motu-client-python")
 
@@ -667,14 +620,14 @@ def main():
     check_options()
 
     # print some trace info about the options set
-    log.log( TRACE_LEVEL, '-'*60 )
-    log.log( TRACE_LEVEL, '[%s]' % SECTION )
+    log.log( utils_log.TRACE_LEVEL, '-'*60 )
+    log.log( utils_log.TRACE_LEVEL, '[%s]' % SECTION )
     
     for option in dir(_options):
         if not option.startswith('_'):
-            log.log(TRACE_LEVEL, "%s=%s" % (option, getattr( _options, option ) ) )
+            log.log(utils_log.TRACE_LEVEL, "%s=%s" % (option, getattr( _options, option ) ) )
 
-    log.log( TRACE_LEVEL, '-'*60 )
+    log.log( utils_log.TRACE_LEVEL, '-'*60 )
     
     # start of url to invoke
     url_service = _options.motu
@@ -747,7 +700,7 @@ def authenticate_CAS_for_URL(url, user, pwd):
     opts = encode(username = user,
                   password = pwd)
 
-    print_url( "login user into CAS:\t", url_cas+'?'+opts )
+    utils_log.log_url( log, "login user into CAS:\t", url_cas+'?'+opts )
     connexion = open_url(url_cas, opts)
 
     fp = FounderParser()
@@ -758,19 +711,19 @@ def authenticate_CAS_for_URL(url, user, pwd):
     if url_ticket is None:
         raise Exception(get_external_messages()['motu-client.exception.authentication.tgt'])
     
-    print_url( "found url ticket:\t",url_ticket)
+    utils_log.log_url( log, "found url ticket:\t",url_ticket)
 
     opts = encode(service = urllib.quote_plus(url))
     
-    print_url( 'Granting user for service\t', url_ticket +'?'+opts )    
+    utils_log.log_url( log, 'Granting user for service\t', url_ticket +'?'+opts )    
     ticket = open_url(url_ticket, opts).readline() 
     
-    print_url( "found service ticket:\t", ticket)
+    utils_log.log_url( log, "found service ticket:\t", ticket)
     
     # we append the download url with the ticket and return the result
     service_url = url + '&ticket=' + ticket
     
-    print_url( "service url is:\t",service_url)
+    utils_log.log_url( log, "service url is:\t",service_url)
 
     return service_url
 
@@ -828,7 +781,7 @@ if __name__ == '__main__':
         if hasattr(e, 'code'):
           log.info( ' . code  %s: ', e.code )
         if hasattr(e, 'read'):
-          log.log( TRACE_LEVEL, ' . detail:\n%s', e.read() )
+          log.log( utils_log.TRACE_LEVEL, ' . detail:\n%s', e.read() )
         
         log.debug( '-'*60 )
         log.debug( "Stack trace exception is detailed herafter:" )
@@ -837,17 +790,17 @@ if __name__ == '__main__':
         for stack in x:
             log.debug( ' . %s', stack.replace('\n', '') )
         log.debug( '-'*60 )
-        log.log( TRACE_LEVEL, 'System info is provided hereafter:' )
+        log.log( utils_log.TRACE_LEVEL, 'System info is provided hereafter:' )
         system, node, release, version, machine, processor = platform.uname()
-        log.log( TRACE_LEVEL, ' . system   : %s', system )
-        log.log( TRACE_LEVEL, ' . node     : %s', node )
-        log.log( TRACE_LEVEL, ' . release  : %s', release )
-        log.log( TRACE_LEVEL, ' . version  : %s', version ) 
-        log.log( TRACE_LEVEL, ' . machine  : %s', machine )
-        log.log( TRACE_LEVEL, ' . processor: %s', processor )
-        log.log( TRACE_LEVEL, ' . python   : %s', sys.version )
-        log.log( TRACE_LEVEL, ' . client   : %s', get_client_version() )
-        log.log( TRACE_LEVEL, '-'*60 )
+        log.log( utils_log.TRACE_LEVEL, ' . system   : %s', system )
+        log.log( utils_log.TRACE_LEVEL, ' . node     : %s', node )
+        log.log( utils_log.TRACE_LEVEL, ' . release  : %s', release )
+        log.log( utils_log.TRACE_LEVEL, ' . version  : %s', version ) 
+        log.log( utils_log.TRACE_LEVEL, ' . machine  : %s', machine )
+        log.log( utils_log.TRACE_LEVEL, ' . processor: %s', processor )
+        log.log( utils_log.TRACE_LEVEL, ' . python   : %s', sys.version )
+        log.log( utils_log.TRACE_LEVEL, ' . client   : %s', get_client_version() )
+        log.log( utils_log.TRACE_LEVEL, '-'*60 )
         fh = os.path.join(_options.out_dir,_options.out_name)
         if (os.path.isfile(fh)):
             os.remove(fh)
