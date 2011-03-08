@@ -1,0 +1,422 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Python motu client v.${project.version} 
+#
+# Motu, a high efficient, robust and Standard compliant Web Server for Geographic
+#  Data Dissemination.
+# 
+#  http://cls-motu.sourceforge.net/
+# 
+#  (C) Copyright 2009-2010, by CLS (Collecte Localisation Satellites) -
+#  http://www.cls.fr - and Contributors
+# 
+# 
+#  This library is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+# 
+#  This library is distributed in the hope that it will be useful, but
+#  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+#  License for more details.
+# 
+#  You should have received a copy of the GNU Lesser General Public License
+#  along with this library; if not, write to the Free Software Foundation,
+#  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+
+import urllib
+import urllib2
+import traceback
+import platform
+import sys
+import httplib
+import os
+import re
+import tempfile
+import datetime
+import shutil
+import zipfile
+import logging
+import logging.config
+import ConfigParser
+import optparse
+import socket
+
+# Import project libraries
+import utils_log
+import utils_unit
+import utils_stream
+import utils_http
+import utils_messages
+import utils_cas
+import utils_collection
+
+# constant for authentication modes
+AUTHENTICATION_MODE_NONE  = 'none'
+AUTHENTICATION_MODE_BASIC = 'basic'
+AUTHENTICATION_MODE_CAS   = 'cas'
+
+# shared logger
+log = None
+
+def get_client_version():
+    """Return the version (as a string) of this client.
+    
+    The value is automatically set by the maven processing build, so don't 
+    touch it unless you know what you are doing."""
+    return '${project.version}'
+
+def get_client_artefact():
+    """Return the artifact identifier (as a string) of this client.
+    
+    The value is automatically set by the maven processing build, so don't 
+    touch it unless you know what you are doing."""
+    return '${project.artifactId}'
+
+def format_date(date):
+    """
+    Format JulianDay date in unix time
+    """
+    return date.isoformat()
+    
+def build_params(_options):
+    """Function that builds the query string for Motu according to the given options"""
+    temporal = ''
+    geographic = ''
+    vertical = ''
+    other_opt = ''
+    
+
+    """
+    Build the main url to connect to
+    """
+    query_options = utils_collection.ListMultimap()
+    
+    query_options.insert( action  = 'productdownload',
+                          mode    = 'console',
+                          service = _options.service_id,
+                          product = _options.product_id 
+                        )   
+
+    if _options.extraction_geographic:
+        query_options.insert( x_lo = _options.longitude_min,
+                              x_hi = _options.longitude_max,
+                              y_lo = _options.latitude_min,
+                              y_hi = _options.latitude_max
+                            )
+    
+    if _options.extraction_vertical:
+        query_options.insert( z_lo = _options.depth_min,
+                              z_hi = _options.depth_max
+                            )
+    
+    if _options.extraction_temporal:
+        # we change date types
+        date_max = _options.date_max
+        if isinstance(date_max, basestring):
+            date_max = datetime.date(*(int(x) for x in date_max.split('-')))
+        
+        date_min = _options.date_min
+        if date_min is None or date_min == None:
+            date_min = date_max - datetime.timedelta(20)
+        elif isinstance(date_min, basestring):
+            date_min = datetime.date(*(int(x) for x in date_min.split('-')))
+        
+        query_options.insert( t_lo = format_date(date_min),
+                              t_hi = format_date(date_max)
+                            )
+
+    variable = _options.variable
+    if variable is not None:
+        for i, opt in enumerate(variable):
+            query_options.insert( variable = opt )
+    
+    return utils_http.encode(query_options)
+
+def check_options(_options):    
+    """function that checks the given options for coherency."""    
+    
+    # Check Mandatory Options
+    if (_options.auth_mode != AUTHENTICATION_MODE_NONE and 
+        _options.auth_mode != AUTHENTICATION_MODE_BASIC and
+        _options.auth_mode != AUTHENTICATION_MODE_CAS):
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.invalid'] % ( _options.auth_mode, 'auth-mode', [AUTHENTICATION_MODE_NONE, AUTHENTICATION_MODE_BASIC, AUTHENTICATION_MODE_CAS]) )
+       
+    # if authentication mode is set we check both user & password presence
+    if (_options.user == None and
+        _options.auth_mode != AUTHENTICATION_MODE_NONE):
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory.user'] % ('user',_options.auth_mode))
+
+    # check that if a user is set, a password should be set also
+    if (_options.pwd == None and
+        _options.user != None):
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory.password'] % ( 'pwd', _options.user ) )    
+    
+    #check that if a user is set, an authentication mode should also be set
+    if (_options.user != None and
+        _options.auth_mode == AUTHENTICATION_MODE_NONE):
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory.mode'] % ( AUTHENTICATION_MODE_NONE, 'auth-mode', _options.user ) )
+    
+    # those following parameters are required
+    if _options.motu == None :
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory'] % 'motu')
+    
+    if _options.service_id == None :
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory'] % 'service-id')
+    
+    if _options.product_id == None :
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory'] % 'product-id')
+    
+    if _options.out_dir == None :
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory'] % 'out-dir')
+    
+    out_dir = _options.out_dir
+    
+    # check directory existence
+    if not os.path.exists(out_dir):
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.outdir-notexist'] % out_dir)
+    # check whether directory is writable or not
+    if not os.access(out_dir, os.W_OK):
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.outdir-notwritable'] % out_dir)
+    
+    if _options.out_name == None :
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory'] % 'out-name')
+
+    # Check PROXY Options
+    _options.proxy = False
+    if _options.proxy_server != None:
+        _options.proxy = True
+        # check that proxy server is a valid url
+        url = _options.proxy_server
+        p = re.compile('^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?')
+        m = p.match(url)
+        
+        if not m :
+            raise Exception( utils_messages.get_external_messages()['motu-client.exception.option.not-url'] % ( 'proxy-server', url ) )
+        # check that if proxy-user is defined then proxy-pwd shall be also, and reciprocally.
+        if (_options.proxy_user != None) != ( _options.proxy_pwd != None ) :
+            raise Exception( utils_messages.get_external_messages()['motu-client.exception.option.linked'] % ('proxy-user', 'proxy-name') )
+    
+        
+    # Check VERTICAL Options
+    _options.extraction_vertical = False
+    if _options.depth_min != None and _options.depth_max != None :
+        _options.extraction_vertical = True
+        tempvalue = float(_options.depth_min)
+        if tempvalue < 0 :
+            raise Exception( utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'depth_min', str(tempvalue)) ) 
+        tempvalue = float(_options.depth_max)
+        if tempvalue < 0 :
+            raise Exception( utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'depth_max', str(tempvalue)) ) 
+        
+    # Check TEMPORAL  Options
+    _options.extraction_temporal = False
+    if _options.date_min != None and _options.date_max != None :
+         _options.extraction_temporal = True
+    
+    
+    # Check GEOGRAPHIC Options
+    _options.extraction_geographic = False
+    if _options.latitude_min != None or _options.latitude_max != None or _options.longitude_min != None or _options.longitude_max != None :
+        _options.extraction_geographic = True
+        if( _options.latitude_min == None ):
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.geographic-box'] % 'latitude_min' )
+
+        if( _options.latitude_max == None ):
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.geographic-box'] % 'latitude_max' )            
+        
+        if( _options.longitude_min == None ):
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.geographic-box'] % 'longitude_min' )
+        
+        if( _options.longitude_max == None ):
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.geographic-box'] % 'longitude_max' )
+        
+        tempvalue = float(_options.latitude_min)
+        if tempvalue < -90 or tempvalue > 90 :
+            raise Exception( utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'latitude_min', str(tempvalue)) )
+        tempvalue = float(_options.latitude_max)
+        if tempvalue < -90 or tempvalue > 90 :
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'latitude_max', str(tempvalue)))
+        tempvalue = float(_options.longitude_min)
+        if tempvalue < -180 or tempvalue > 180 :
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'logitude_min', str(tempvalue)))
+        tempvalue = float(_options.longitude_max)
+        if tempvalue < -180 or tempvalue > 180 :
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'longitude_max', str(tempvalue)))           
+            
+def total_seconds(td):
+    return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6 
+        
+def get_url_config(_options, data = None):
+    # prepare arguments    
+    kargs = {}
+    # proxy
+    if _options.proxy:
+        proxyUrl = _options.proxy_server.partition(':')
+        kargs['proxy'] = { "url": proxyUrl[0],
+                           "port": proxyUrl[2] }
+        if _options.proxy_user != None:
+            kargs['proxy']['user']     = _options.proxy_user
+            kargs['proxy']['password'] = _options.proxy_pwd
+    # authentication
+    if _options.auth_mode == AUTHENTICATION_MODE_BASIC:
+        kargs['authentication'] = { 'mode'    : 'basic',
+                                    'user'    : _options.user,
+                                    'password': _options.pwd }
+    # headers
+    kargs['headers'] = {"X-Client-Id"     : get_client_artefact(),
+                        "X-Client-Version": get_client_version()}            
+    # data
+    if data != None:
+        kargs['data'] = data
+    
+    return kargs
+        
+def dl_2_file(dl_url, fh, block_size = 65535, **options):
+    """ Download the file with the main url (of Motu) file.
+     
+    Motu can return an error message in the response stream without setting an
+    appropriate http error code. So, in that case, the content-type response is
+    checked, and if it is text/plain, we consider this as an error.
+    
+    dl_url: the complete download url of Motu
+    fh: file handler to use to write the downstream"""    
+    
+    start_time = datetime.datetime.now()
+    log.info( "Requesting file to download (this can take a while)..." )    
+    
+    temp = open(fh, 'w+b')             
+    try:
+      
+      m = utils_http.open_url(dl_url, **options)
+      try:
+        # check the real url (after potential redirection) is not a CAS Url scheme
+        match = re.search(utils_cas.CAS_URL_PATTERN, m.url)
+        if match is not None:
+            service, _, _ = dl_url.partition('?')
+            redirection, _, _ = m.url.partition('?')
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.authentication.redirected'] % (service, redirection) )
+      
+        # check that content type is not text/plain
+        headers = m.info()
+        if "Content-Type" in headers:
+          if len(headers['Content-Type']) > 0:
+            if   headers['Content-Type'].startswith('text') or headers['Content-Type'].find('html') != -1:
+               raise Exception( utils_messages.get_external_messages()['motu-client.exception.motu.error'] % m.read() )
+          
+          log.info( 'File type: %s' % headers['Content-Type'] )
+                
+        # check if a content length (size of the file) has been send
+        if "Content-Length" in headers:        
+            try:
+                # it should be an integer
+                size = int(headers["Content-Length"]) 
+                log.info( 'File size: %s (%i B)' % ( utils_unit.convert_bytes(size), size )  )    
+            except Exception, e:
+                size = -1
+                log.warn( 'File size is not an integer: %s' % headers["Content-Length"] )                      
+        else:
+          size = -1
+          log.warn( 'File size: %s' % 'unknown' )
+        
+        # performs the download           
+        processing_time = datetime.datetime.now();
+
+        log.info( 'Downloading file %s' % os.path.abspath(fh) )
+        
+        download_profile = open('downloadProfile.csv', 'w+b')     
+        
+        def progress_function(sizeRead):
+           percent = sizeRead*100./size
+           log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
+           td = datetime.datetime.now()- start_time;           
+           download_profile.write( str((td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6)) )
+           download_profile.write( ',' )
+           download_profile.write( str(percent) )
+           download_profile.write( '\n' )
+        
+        read = utils_stream.copy(m,temp,progress_function if size != -1 else None, block_size )
+
+        download_profile.close()
+        
+        end_time = datetime.datetime.now()
+        log.info( "Processing  time : %s", str(processing_time - start_time) )
+        log.info( "Downloading time : %s", str(end_time - processing_time) )
+        log.info( "Total time       : %s", str(end_time - start_time) )
+        log.info( "Download rate    : %s/s", utils_unit.convert_bytes(read / total_seconds(end_time - start_time)) )        
+      finally:
+        m.close()
+    finally:
+      temp.flush()
+      temp.close()
+
+    # raise exception if actual size does not match content-length header
+    if size >= 0 and read < size:
+        raise ContentTooShortError( utils_messages.get_external_messages()['motu-client.exception.download.too-short'] % (read, size), result)
+
+def execute_request(_options):
+    """
+    the main function that submit a request to motu. Available options are:
+    
+    """
+    global log
+
+    log = logging.getLogger("motu_api")
+    
+    # at first, we check given options are ok
+    check_options(_options)
+    
+    # print some trace info about the options set
+    log.log( utils_log.TRACE_LEVEL, '-'*60 )
+
+    for option in dir(_options):
+        if not option.startswith('_'):
+            log.log(utils_log.TRACE_LEVEL, "%s=%s" % (option, getattr( _options, option ) ) )
+
+    log.log( utils_log.TRACE_LEVEL, '-'*60 )
+    
+    # start of url to invoke
+    url_service = _options.motu
+    
+    # parameters of the invoked service
+    url_params  = build_params(_options)
+    
+    url_config = get_url_config(_options)
+    
+    # check if question mark is in the url
+    questionMark = '?'
+    if url_service.endswith(questionMark) :
+        questionMark = ''
+             
+    url = url_service+questionMark+url_params
+    
+    # set-up the socket timeout if any
+    if _options.socket_timeout != None:
+        log.debug("Setting timeout %s" % _options.socket_timeout)
+        socket.setdefaulttimeout(_options.socket_timeout)
+            
+    if _options.auth_mode == AUTHENTICATION_MODE_CAS:
+        # perform authentication before acceding service
+        download_url = utils_cas.authenticate_CAS_for_URL(url,
+                                                         _options.user,
+                                                         _options.pwd,**url_config)
+    else:
+        # if none, we do nothing more, in basic, we let the url requester doing the job
+        download_url = url
+    
+    # create a file for storing downloaded stream
+    fh = os.path.join(_options.out_dir,_options.out_name)
+    try: 
+        dl_2_file(download_url, fh, _options.block_size, **url_config)
+        
+        log.info( "Done" )
+    except:
+        try:
+            if (os.path.isfile(fh)):
+                os.remove(fh)
+        except:
+            pass
+        raise        
+    
