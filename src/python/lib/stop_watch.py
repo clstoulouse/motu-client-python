@@ -43,6 +43,9 @@ class StopWatch(object):
     def __init__(self):
         self.timers = []
     
+    def clear(self):
+        self.timers = []
+    
     def start(self):    
         self.timers.append( { 'label': StopWatch.START,
                               'time': time.time() })
