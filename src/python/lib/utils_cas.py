@@ -85,9 +85,17 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
 
     fp = utils_html.FounderParser()
     for line in connexion:
+        log.log( utils_log.TRACE_LEVEL, 'utils_html.FounderParser() line: %s', line )
         fp.feed(line)
+        
+    tgt = fp.action_[fp.action_.rfind('/') + 1:]
+    log.log( utils_log.TRACE_LEVEL, 'TGT: %s', tgt )
 
-    url_ticket = fp.action_
+    # WARNING : don't use 'fp.action_' as url : it seems protocol is always http never https 
+    # use 'url_cas', extract TGT from 'fp.action_' , then construct url_ticket.
+    # url_ticket = fp.action_
+    url_ticket = url_cas + '/' + tgt
+
     if url_ticket is None:
         raise Exception(utils_messages.get_external_messages()['motu-client.exception.authentication.tgt'])
     
