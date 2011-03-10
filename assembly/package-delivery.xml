@@ -24,6 +24,10 @@
 			<!-- rwx rwx r-x -->
 			<fileMode>0775</fileMode>
 			<directoryMode>0775</directoryMode>
+            <excludes>
+				<!-- excludeany compiled source -->
+				<exclude>**/*.pyc</exclude>
+			</excludes>	
 		</fileSet>
 		<fileSet>
 			<directory>src/doc</directory>
