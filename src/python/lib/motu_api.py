@@ -415,63 +415,65 @@ def execute_request(_options):
 
     stopWatch = stop_watch.localThreadStopWatch()
     stopWatch.start()
-    
-    log = logging.getLogger("motu_api")
-    
-    # at first, we check given options are ok
-    check_options(_options)
-    
-    # print some trace info about the options set
-    log.log( utils_log.TRACE_LEVEL, '-'*60 )
+    try:
+        log = logging.getLogger("motu_api")
 
-    for option in dir(_options):
-        if not option.startswith('_'):
-            log.log(utils_log.TRACE_LEVEL, "%s=%s" % (option, getattr( _options, option ) ) )
+        # at first, we check given options are ok
+        check_options(_options)
 
-    log.log( utils_log.TRACE_LEVEL, '-'*60 )
-    
-    # start of url to invoke
-    url_service = _options.motu
-    
-    # parameters of the invoked service
-    url_params  = build_params(_options)
-    
-    url_config = get_url_config(_options)
-    
-    # check if question mark is in the url
-    questionMark = '?'
-    if url_service.endswith(questionMark) :
-        questionMark = ''
-             
-    url = url_service+questionMark+url_params
-    
-    # set-up the socket timeout if any
-    if _options.socket_timeout != None:
-        log.debug("Setting timeout %s" % _options.socket_timeout)
-        socket.setdefaulttimeout(_options.socket_timeout)
-            
-    if _options.auth_mode == AUTHENTICATION_MODE_CAS:
-    
-        # perform authentication before acceding service
-        download_url = utils_cas.authenticate_CAS_for_URL(url,
-                                                         _options.user,
-                                                         _options.pwd,**url_config)
-        stopWatch.check('end_authentication')
-    else:
-        # if none, we do nothing more, in basic, we let the url requester doing the job
-        download_url = url
-    
-    # create a file for storing downloaded stream
-    fh = os.path.join(_options.out_dir,_options.out_name)
-    try: 
-        dl_2_file(download_url, fh, _options.block_size, **url_config)        
-        log.info( "Done" )
-    except:
+        # print some trace info about the options set
+        log.log( utils_log.TRACE_LEVEL, '-'*60 )
+
+        for option in dir(_options):
+            if not option.startswith('_'):
+                log.log(utils_log.TRACE_LEVEL, "%s=%s" % (option, getattr( _options, option ) ) )
+
+        log.log( utils_log.TRACE_LEVEL, '-'*60 )
+
+        # start of url to invoke
+        url_service = _options.motu
+
+        # parameters of the invoked service
+        url_params  = build_params(_options)
+
+        url_config = get_url_config(_options)
+
+        # check if question mark is in the url
+        questionMark = '?'
+        if url_service.endswith(questionMark) :
+            questionMark = ''
+
+        url = url_service+questionMark+url_params
+
+        # set-up the socket timeout if any
+        if _options.socket_timeout != None:
+            log.debug("Setting timeout %s" % _options.socket_timeout)
+            socket.setdefaulttimeout(_options.socket_timeout)
+
+        if _options.auth_mode == AUTHENTICATION_MODE_CAS:
+
+            # perform authentication before acceding service
+            download_url = utils_cas.authenticate_CAS_for_URL(url,
+                                                             _options.user,
+                                                             _options.pwd,**url_config)
+            stopWatch.check('end_authentication')
+        else:
+            # if none, we do nothing more, in basic, we let the url requester doing the job
+            download_url = url
+
+        # create a file for storing downloaded stream
+        fh = os.path.join(_options.out_dir,_options.out_name)
         try:
-            if (os.path.isfile(fh)):
-                os.remove(fh)
+            dl_2_file(download_url, fh, _options.block_size, **url_config)
+            log.info( "Done" )
         except:
-            pass
-        raise        
+            try:
+                if (os.path.isfile(fh)):
+                    os.remove(fh)
+            except:
+                pass
+            raise
+    finally:
+        stopWatch.stop()
     
     
