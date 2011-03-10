@@ -360,6 +360,57 @@ def execute_request(_options):
     """
     the main function that submit a request to motu. Available options are:
     
+    * Proxy configuration (with eventually user credentials)
+      - proxy_server: 'http://my-proxy.site.com:8080'
+      - proxy_user  : 'john'
+      - proxy_pwd   :'doe'
+
+    * Autorisation mode: 'cas', 'basic', 'none'
+      - auth_mode: 'cas'
+      
+    * User credentials for authentication 'cas' or 'basic'
+      - user: 'john'
+      - pwd:  'doe'
+    
+    * Motu service URL
+      - motu: 'http://atoll-dev.cls.fr:30080/mis-gateway-servlet/Motu'
+    
+    * Dataset identifier to download
+      - product_id: 'dataset-duacs-global-nrt-madt-merged-h'
+    
+    * Service identifier to use for retrieving dataset
+      - service_id: 'http://purl.org/myocean/ontology/service/database#yourduname'
+    
+    * Geographic extraction parameters
+      - latitude_max :  10.0
+      - latitude_min : -10.0
+      - longitude_max: -0.333333333369
+      - longitude_min:  0.0
+
+    * Vertical extraction parameters
+      - depth_max: 1000
+      - depth_min: 0
+    
+    * Temporal extraction parameters
+      - date_max: '2010-04-25'
+      - date_min: '2010-04-25'
+
+    * Variable extraction
+      - variable: ['variable1','variable2']
+      
+    * The file name and the directory of the downloaded dataset
+      - out_dir : '.'
+      - out_name: 'dataset'
+      
+    * The block size used to perform download
+      - block_size: 12001
+      
+    * The socket timeout configuration
+      - socket_timeout: 515
+
+    * The user agent to use when performing http requests
+      - user_agent: 'motu-api-client' 
+
     """
     global log
 
