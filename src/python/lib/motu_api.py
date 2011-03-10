@@ -52,6 +52,7 @@ import utils_http
 import utils_messages
 import utils_cas
 import utils_collection
+import stop_watch
 
 # constant for authentication modes
 AUTHENTICATION_MODE_NONE  = 'none'
@@ -284,6 +285,8 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
     dl_url: the complete download url of Motu
     fh: file handler to use to write the downstream"""    
     
+    stopWatch = stop_watch.localThreadStopWatch()
+    
     start_time = datetime.datetime.now()
     log.info( "Requesting file to download (this can take a while)..." )    
     
@@ -298,7 +301,7 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
             service, _, _ = dl_url.partition('?')
             redirection, _, _ = m.url.partition('?')
             raise Exception(utils_messages.get_external_messages()['motu-client.exception.authentication.redirected'] % (service, redirection) )
-      
+
         # check that content type is not text/plain
         headers = m.info()
         if "Content-Type" in headers:
@@ -322,30 +325,26 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
           log.warn( 'File size: %s' % 'unknown' )
         
         # performs the download           
-        processing_time = datetime.datetime.now();
-
-        log.info( 'Downloading file %s' % os.path.abspath(fh) )
         
-        download_profile = open('downloadProfile.csv', 'w+b')     
+        processing_time = datetime.datetime.now();
+        stopWatch.check('end_processing')
+        
+        log.info( 'Downloading file %s' % os.path.abspath(fh) )
         
         def progress_function(sizeRead):
            percent = sizeRead*100./size
            log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
            td = datetime.datetime.now()- start_time;           
-           download_profile.write( str((td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6)) )
-           download_profile.write( ',' )
-           download_profile.write( str(percent) )
-           download_profile.write( '\n' )
         
         read = utils_stream.copy(m,temp,progress_function if size != -1 else None, block_size )
-
-        download_profile.close()
         
         end_time = datetime.datetime.now()
+        stopWatch.check('end_downloading')
+        
         log.info( "Processing  time : %s", str(processing_time - start_time) )
         log.info( "Downloading time : %s", str(end_time - processing_time) )
         log.info( "Total time       : %s", str(end_time - start_time) )
-        log.info( "Download rate    : %s/s", utils_unit.convert_bytes(read / total_seconds(end_time - start_time)) )        
+        log.info( "Download rate    : %s/s", utils_unit.convert_bytes(read / total_seconds(end_time - start_time)) )
       finally:
         m.close()
     finally:
@@ -414,6 +413,9 @@ def execute_request(_options):
     """
     global log
 
+    stopWatch = stop_watch.localThreadStopWatch()
+    stopWatch.start()
+    
     log = logging.getLogger("motu_api")
     
     # at first, we check given options are ok
@@ -449,10 +451,12 @@ def execute_request(_options):
         socket.setdefaulttimeout(_options.socket_timeout)
             
     if _options.auth_mode == AUTHENTICATION_MODE_CAS:
+    
         # perform authentication before acceding service
         download_url = utils_cas.authenticate_CAS_for_URL(url,
                                                          _options.user,
                                                          _options.pwd,**url_config)
+        stopWatch.check('end_authentication')
     else:
         # if none, we do nothing more, in basic, we let the url requester doing the job
         download_url = url
@@ -460,8 +464,7 @@ def execute_request(_options):
     # create a file for storing downloaded stream
     fh = os.path.join(_options.out_dir,_options.out_name)
     try: 
-        dl_2_file(download_url, fh, _options.block_size, **url_config)
-        
+        dl_2_file(download_url, fh, _options.block_size, **url_config)        
         log.info( "Done" )
     except:
         try:
@@ -470,4 +473,5 @@ def execute_request(_options):
         except:
             pass
         raise        
+    
     

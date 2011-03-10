@@ -29,6 +29,7 @@
 import logging
 import re
 import urllib
+import datetime
 
 import utils_http
 import utils_messages
@@ -113,7 +114,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     service_url = url + '&ticket=' + ticket
     
     utils_log.log_url( log, "service url is:\t",service_url)
-
+      
     return service_url
 
     
