@@ -24,6 +24,7 @@
 			<!-- rwx rwx r-x -->
 			<fileMode>0775</fileMode>
 			<directoryMode>0775</directoryMode>
+            <lineEnding>unix</lineEnding>
             <excludes>
 				<!-- excludeany compiled source -->
 				<exclude>**/*.pyc</exclude>
