@@ -347,7 +347,7 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
         log.info( "Processing  time : %s", str(processing_time - start_time) )
         log.info( "Downloading time : %s", str(end_time - processing_time) )
         log.info( "Total time       : %s", str(end_time - start_time) )
-        log.info( "Download rate    : %s/s", utils_unit.convert_bytes((read / total_milliseconds(end_time - start_time)) * 10**3) )
+        log.info( "Download rate    : %s/s", utils_unit.convert_bytes((read / total_seconds(end_time - start_time)) )
       finally:
         m.close()
     finally:
