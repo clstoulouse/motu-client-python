@@ -248,8 +248,11 @@ def check_options(_options):
             raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'longitude_max', str(tempvalue)))           
             
 def total_seconds(td):
-    return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6 
-        
+    return total_milliseconds(td) / 10**3 
+
+def total_milliseconds(td):
+    return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**3 
+    
 def get_url_config(_options, data = None):
     # prepare arguments    
     kargs = {}
@@ -344,7 +347,7 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
         log.info( "Processing  time : %s", str(processing_time - start_time) )
         log.info( "Downloading time : %s", str(end_time - processing_time) )
         log.info( "Total time       : %s", str(end_time - start_time) )
-        log.info( "Download rate    : %s/s", utils_unit.convert_bytes(read / total_seconds(end_time - start_time)) )
+        log.info( "Download rate    : %s/s", utils_unit.convert_bytes((read / total_milliseconds(end_time - start_time)) * 10**3) )
       finally:
         m.close()
     finally:
