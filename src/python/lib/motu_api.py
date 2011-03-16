@@ -479,6 +479,3 @@ def execute_request(_options):
             raise
     finally:
         stopWatch.stop()
-        print stopWatch
-    
-    
