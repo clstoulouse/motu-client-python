@@ -105,23 +105,3 @@ def localThreadStopWatch():
         finally:
             lock.release()
     return tsl.timer
-    
-if __name__ == "__main__":
-
-    w = StopWatch()
-    
-    w.start()
-    print w
-    time.sleep(1)
-    w.start('toto')
-    print w
-    time.sleep(1)
-    w.stop('toto')
-    w.stop()
-    print w
-    time.sleep(2)
-    w.start()
-    time.sleep(1)
-    w.stop()
-    
-    print w
