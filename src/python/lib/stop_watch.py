@@ -34,76 +34,53 @@ import threading
 # global stats
 tsl = local()
 
-class StopWatch(object):
-    START = "start"
-    END   = "end"
-    LABEL = "label"
+class StopWatch(object):    
     TIME = "time"
+    GLOBAL = "global"
     
     def __init__(self):
-        self.timers = []
+        # contains the computed times
+        self.times = {}
+        # contains the current timers
+        self.timers = {}        
     
     def clear(self):
-        self.timers = []
-    
-    def start(self):    
-        self.timers.append( { 'label': StopWatch.START,
-                              'time': time.time() })
-        return self.timers[0][StopWatch.TIME]
-  
-    def check(self,label ):
-        """Add a new check point for the current time.
-           Returns the time the check point has been recorded.
-        """
-        self.timers.append( { 'label': label,
-                              'time': time.time() })
-        return self.timers[-1][StopWatch.TIME]
+        self.timers = {}
+        self.times = {}
         
-    def stop(self):
-        """Stops the clock permanently for the instance of the StopWatch.
-        Returns the time at which the instance was stopped.
+    def start(self,label = GLOBAL):
+        """Starts a new counter
+           Returns the time the counter has been recorded.
         """
-        self.timers.append( { 'label': StopWatch.END,
-                              'time': time.time() })
-        return self.timers[0][StopWatch.TIME]
+        self.timers[label] = self.__time()
+        return self.timers[label]
+        
+    def stop(self,label=GLOBAL):
+        """Stops the clock for the given counter.
+        Returns the time at which the instance was stopped.
+        """        
+        self.times[label] = self.elapsed(label)
+        del self.timers[label]
+        
+        return self.times[label]
 
-    def elapsed(self):
+    def isRunning(self, label=GLOBAL):
+        return label in self.timers
+        
+    def elapsed(self,label=GLOBAL):
         """The number of seconds since the current time that the StopWatch
         object was created.  If stop() was called, it is the number
         of seconds from the instance creation until stop() was called.
         """
-        return self.__last_time() - self.__start_time()
-    
+        t0 = self.times[label] if label in self.times else 0.
+        t1 = self.timers[label] if label in self.timers else 0.
+        t2 = self.__time() if label in self.timers else 0.
+        
+        return t0 + (t2 - t1)
+        
     def getTimes(self):
-        return self.timers
-    
-    def start_time(self):
-        """The time at which the StopWatch instance was created.
-        """
-        return self.__start    
-    
-    def stop_time(self):
-        """The time at which stop() was called, or None if stop was 
-        never called.
-        """
-        return self.__stopped 
-    
-    def __last_time(self):
-        """Return the current time or the time at which stop() was call,
-        if called at all.
-        """
-        if self.timers[-1][StopWatch.LABEL] == StopWatch.END:
-            return self.timers[-1][StopWatch.TIME]
-        return self.__time()
-    
-    def __start_time(self):
-        """Return the current time or the time at which stop() was call,
-        if called at all.
-        """
-        if self.timers[0][StopWatch.LABEL] == StopWatch.END:
-            return self.timers[0][StopWatch.TIME]
-        return self.__time()
-    
+        return self.times
+          
     def __time(self):
         """Wrapper for time.time() to allow unit testing.
         """
@@ -112,7 +89,11 @@ class StopWatch(object):
     def __str__(self):
         """Nicely format the elapsed time
         """
-        return str(self.elapsed) + ' sec'
+        keys = self.times.keys() + filter( lambda x:x not in self.times.keys(), self.timers.keys() )
+        txt = ""
+        for key in keys:
+          txt = txt + key + " : " + str(self.elapsed(key)) + " s " + ("(running)" if self.isRunning(key) else "(stopped)")+"\n"
+        return txt
 
 def localThreadStopWatch():    
     if not hasattr(tsl,'timer'):
@@ -124,3 +105,23 @@ def localThreadStopWatch():
         finally:
             lock.release()
     return tsl.timer
+    
+if __name__ == "__main__":
+
+    w = StopWatch()
+    
+    w.start()
+    print w
+    time.sleep(1)
+    w.start('toto')
+    print w
+    time.sleep(1)
+    w.stop('toto')
+    w.stop()
+    print w
+    time.sleep(2)
+    w.start()
+    time.sleep(1)
+    w.stop()
+    
+    print w

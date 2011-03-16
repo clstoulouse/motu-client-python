@@ -295,7 +295,7 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
     
     temp = open(fh, 'w+b')             
     try:
-      
+      stopWatch.start('processing')
       m = utils_http.open_url(dl_url, **options)
       try:
         # check the real url (after potential redirection) is not a CAS Url scheme
@@ -326,12 +326,13 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
         else:
           size = -1
           log.warn( 'File size: %s' % 'unknown' )
+        processing_time = datetime.datetime.now();        
+        stopWatch.stop('processing')        
+        
+        
+        stopWatch.start('downloading')
         
         # performs the download           
-        
-        processing_time = datetime.datetime.now();
-        stopWatch.check('end_processing')
-        
         log.info( 'Downloading file %s' % os.path.abspath(fh) )
         
         def progress_function(sizeRead):
@@ -342,7 +343,7 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
         read = utils_stream.copy(m,temp,progress_function if size != -1 else None, block_size )
         
         end_time = datetime.datetime.now()
-        stopWatch.check('end_downloading')
+        stopWatch.stop('downloading')
         
         log.info( "Processing  time : %s", str(processing_time - start_time) )
         log.info( "Downloading time : %s", str(end_time - processing_time) )
@@ -454,12 +455,12 @@ def execute_request(_options):
             socket.setdefaulttimeout(_options.socket_timeout)
 
         if _options.auth_mode == AUTHENTICATION_MODE_CAS:
-
+            stopWatch.start('authentication')
             # perform authentication before acceding service
             download_url = utils_cas.authenticate_CAS_for_URL(url,
                                                              _options.user,
                                                              _options.pwd,**url_config)
-            stopWatch.check('end_authentication')
+            stopWatch.stop('authentication')
         else:
             # if none, we do nothing more, in basic, we let the url requester doing the job
             download_url = url
@@ -478,5 +479,6 @@ def execute_request(_options):
             raise
     finally:
         stopWatch.stop()
+        print stopWatch
     
     
