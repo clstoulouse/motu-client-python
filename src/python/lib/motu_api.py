@@ -187,7 +187,7 @@ def check_options(_options):
 
     # Check PROXY Options
     _options.proxy = False
-    if _options.proxy_server != None:
+    if (_options.proxy_server != None) and (len(_options.proxy_server) != 0):
         _options.proxy = True
         # check that proxy server is a valid url
         url = _options.proxy_server

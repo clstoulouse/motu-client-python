@@ -62,6 +62,9 @@ SECTION = 'Main'
 # shared logger
 log = None
 
+# shared variables to download
+_variables = []
+
 # Manage imports of project libraries
 if not os.path.exists(LIBRARIES_PATH):
     sys.stderr.write('\nERROR: can not find project libraries path: %s\n\n' % os.path.abspath(LIBRARIES_PATH))
@@ -182,7 +185,10 @@ def load_options():
 
     parser.add_option( '--variable', '-v',
                        help = "The variable (list of strings)",
-                       action="append")
+                       callback=option_callback_variable,
+                       dest="variable",
+                       type="string",
+                       action="callback")
                        
     parser.add_option( '--out-dir', '-o',
                        help = "The output dir (string)",
@@ -205,14 +211,24 @@ def load_options():
                   
     # set default values by picking from the configuration file
     default_values = {}
+    default_variables = []
     for option in parser.option_list:        
         if (option.dest != None) and conf_parser.has_option(SECTION, option.dest):
-            default_values[option.dest] = conf_parser.get(SECTION, option.dest)
+            if (option.dest == "variable"):
+                default_variables.append(conf_parser.get(SECTION, option.dest))
+                default_values[option.dest] = default_variables
+            else:    
+                default_values[option.dest] = conf_parser.get(SECTION, option.dest)
     
     parser.set_defaults( **default_values )
                       
     return parser.parse_args()
-
+    
+def option_callback_variable(option, opt, value, parser):
+    global _variables
+    _variables.append(value)
+    setattr(parser.values, option.dest, _variables)
+    
 def check_version():
     """Utilitary function that checks the required version of the python interpreter
     is available. Raise an exception if not."""
@@ -245,7 +261,7 @@ if __name__ == '__main__':
         (_options, args) = load_options()    
 
         if _options.log_level != None:
-            logging.getLogger().setLevel(_options.log_level)
+            logging.getLogger().setLevel(int(_options.log_level))
                    
         motu_api.execute_request(_options)       
     except Exception, e:
