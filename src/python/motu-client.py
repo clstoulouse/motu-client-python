@@ -176,12 +176,12 @@ def load_options():
                        help = "The max longitude (float in the interval [-180 ; 180])")
                
     parser.add_option( '--depth-min', '-z',
-                       type = 'float',    
-                       help = "The min depth (float in the interval [0 ; 2e31])")
+                       type = 'string',    
+                       help = "The min depth (float in the interval [0 ; 2e31] or string 'Surface')")
 
     parser.add_option( '--depth-max', '-Z',
-                       type = 'float',    
-                       help = "The max depth (float in the interval [0 ; 2e31])")
+                       type = 'string',    
+                       help = "The max depth (float in the interval [0 ; 2e31] or string 'Surface')")
 
     parser.add_option( '--variable', '-v',
                        help = "The variable (list of strings)",
