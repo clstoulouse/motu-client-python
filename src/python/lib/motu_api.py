@@ -203,18 +203,12 @@ def check_options(_options):
         
     # Check VERTICAL Options
     _options.extraction_vertical = False
-    if _options.depth_min != None and _options.depth_max != None :
+    if _options.depth_min != None or _options.depth_max != None :
         _options.extraction_vertical = True
-        tempvalue = float(_options.depth_min)
-        if tempvalue < 0 :
-            raise Exception( utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'depth_min', str(tempvalue)) ) 
-        tempvalue = float(_options.depth_max)
-        if tempvalue < 0 :
-            raise Exception( utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'depth_max', str(tempvalue)) ) 
         
     # Check TEMPORAL  Options
     _options.extraction_temporal = False
-    if _options.date_min != None and _options.date_max != None :
+    if _options.date_min != None or _options.date_max != None :
          _options.extraction_temporal = True
     
     
