@@ -113,5 +113,5 @@ def encode(options):
     opts = []
     for k, vset in options.dict().iteritems():
         for v in vset:
-           opts.append('%s=%s' % (str(k), str(v).replace('#','%23')))
+           opts.append('%s=%s' % (str(k), str(v).replace('#','%23').replace(' ','%20')))
     return '&'.join(opts)
