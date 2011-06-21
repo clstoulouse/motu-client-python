@@ -17,6 +17,12 @@ NAME
 The motu python client. You must use python version 2.5 or later.
 
 
+VERSION
+=======
+
+This documentation is intended to describe the 1.0.2 version or higher of the motu python client.
+
+
 SYNOPSIS
 ========
 
@@ -42,7 +48,7 @@ The expected structure of file is:
   		proxy_pwd=secret
   		motu=http://web-qt.cls.fr/mis-gateway-servlet/Motu?service_id=http//purl.org/myocean/ontology/service/database#CLS-TOULOUSE-FR-MERCATOR-MOTU-REST
   		product_id=dataset-psy2v3-pgs-med-myocean-bestestimate
-  		date_min=2010-11-08
+  		date_min=2010-11-08 12:00:00
   		date_max=2010-11-10
   		latitude_min=-75.0
   		latitude_max=30.0
@@ -101,9 +107,9 @@ Usage: ./motu-client.py -h
                                 The product (dataset) to download (string), mandatory
                                 Should be something like "http://purl.org/myocean/ontology/product/database#dataset-armor-3d-ran-v1-myocean"
           -t DATE_MIN, --date-min=DATE_MIN
-                                The min date (string following format YYYY-MM-DD)
+                                The min date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])
           -T DATE_MAX, --date-max=DATE_MAX
-                                The max date (string following format YYYY-MM-DD)
+                                The max date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])
           -y LATITUDE_MIN, --latitude-min=LATITUDE_MIN
                                 The min latitude (float in the interval [-90 ; 90])
           -Y LATITUDE_MAX, --latitude-max=LATITUDE_MAX

@@ -1,10 +1,14 @@
 Motu python client
 
 
-== NAME ==
+==NAME==
 ``` ./motu-client.py 
 
 The motu python client. You must use python version 2.5 or later.
+
+
+==VERSION==
+This documentation is intended to describe the @motu-client-python-version@ version or higher of the motu python client.
 
 ==SYNOPSIS==
 This program can be integrated into a processing chain in order to automate the downloading of products via the Motu.
