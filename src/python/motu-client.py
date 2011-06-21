@@ -153,10 +153,10 @@ def load_options():
                        help = "The product (data set) to download (string)")
 
     parser.add_option( '--date-min', '-t',
-                       help = "The min date (string following format YYYY-MM-DD)")
+                       help = "The min date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])")
 
     parser.add_option( '--date-max', '-T',
-                       help = "The max date (string following format YYYY-MM-DD)",
+                       help = "The max date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])",
                        default = datetime.date.today().isoformat())
                
     parser.add_option( '--latitude-min', '-y',
