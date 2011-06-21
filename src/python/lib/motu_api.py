@@ -36,6 +36,7 @@ import os
 import re
 import tempfile
 import datetime
+import time
 import shutil
 import zipfile
 import logging
@@ -59,6 +60,10 @@ AUTHENTICATION_MODE_NONE  = 'none'
 AUTHENTICATION_MODE_BASIC = 'basic'
 AUTHENTICATION_MODE_CAS   = 'cas'
 
+# constant for date time string format
+DATETIME_FORMAT = "%Y-%m-%d% %H:%M:%S"
+
+
 # shared logger
 log = None
 
@@ -75,12 +80,6 @@ def get_client_artefact():
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
     return '${project.artifactId}'
-
-def format_date(date):
-    """
-    Format JulianDay date in unix time
-    """
-    return date.isoformat()
     
 def build_params(_options):
     """Function that builds the query string for Motu according to the given options"""
@@ -114,20 +113,18 @@ def build_params(_options):
                             )
     
     if _options.extraction_temporal:
-        # we change date types
-        date_max = _options.date_max
-        if isinstance(date_max, basestring):
-            date_max = datetime.date(*(int(x) for x in date_max.split('-')))
-        
-        date_min = _options.date_min
-        if date_min is None or date_min == None:
-            date_min = date_max - datetime.timedelta(20)
-        elif isinstance(date_min, basestring):
-            date_min = datetime.date(*(int(x) for x in date_min.split('-')))
-        
-        query_options.insert( t_lo = format_date(date_min),
-                              t_hi = format_date(date_max)
-                            )
+        # date are strings, and they are send to Motu "as is". If not, we convert them into string
+        if _options.date_min is not None or _options.date_min != None:            
+            date_min = _options.date_min
+            if not isinstance(date_min, basestring):
+               date_min = date_min.strftime(DATETIME_FORMAT)
+            query_options.insert( t_lo = date_min )
+            
+        if _options.date_max is not None or _options.date_max != None:            
+            date_max = _options.date_max
+            if not isinstance(date_max, basestring):
+               date_max = date_max.strftime(DATETIME_FORMAT)
+            query_options.insert( t_hi = date_max )
 
     variable = _options.variable
     if variable is not None:
@@ -388,9 +385,9 @@ def execute_request(_options):
       - depth_max: 1000
       - depth_min: 0
     
-    * Temporal extraction parameters
-      - date_max: '2010-04-25'
-      - date_min: '2010-04-25'
+    * Temporal extraction parameters, as a datetime instance or a string (format: '%Y-%m-%d %H:%M:%S')
+      - date_max: 2010-04-25 12:05:36
+      - date_min: 2010-04-25
 
     * Variable extraction
       - variable: ['variable1','variable2']
