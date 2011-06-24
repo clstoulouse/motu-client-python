@@ -107,9 +107,9 @@ Usage: ./motu-client.py -h
                                 The product (dataset) to download (string), mandatory
                                 Should be something like "http://purl.org/myocean/ontology/product/database#dataset-armor-3d-ran-v1-myocean"
           -t DATE_MIN, --date-min=DATE_MIN
-                                The min date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])
+                                The min date with optional hour resolution (string following format "YYYY-MM-DD [HH:MM:SS]").
           -T DATE_MAX, --date-max=DATE_MAX
-                                The max date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])
+                                The max date with optional hour resolution (string following format "YYYY-MM-DD [HH:MM:SS]")
           -y LATITUDE_MIN, --latitude-min=LATITUDE_MIN
                                 The min latitude (float in the interval [-90 ; 90])
           -Y LATITUDE_MAX, --latitude-max=LATITUDE_MAX
