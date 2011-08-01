@@ -108,9 +108,10 @@ def build_params(_options):
                             )
     
     if _options.extraction_vertical:
-        query_options.insert( z_lo = _options.depth_min,
-                              z_hi = _options.depth_max
-                            )
+        if _options.depth_min is not None or _options.depth_min != None:  
+            query_options.insert( z_lo = _options.depth_min)
+        if _options.depth_max is not None or _options.depth_max != None:  
+            query_options.insert(z_hi = _options.depth_max)
     
     if _options.extraction_temporal:
         # date are strings, and they are send to Motu "as is". If not, we convert them into string
