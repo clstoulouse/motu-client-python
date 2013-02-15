@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python motu client v.${project.version} 
+# Python motu client v.1.0.2 
 #
 # Motu, a high efficient, robust and Standard compliant Web Server for Geographic
 #  Data Dissemination.
@@ -72,14 +72,14 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '${project.version}'
+    return '1.0.2'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '${project.artifactId}'
+    return 'motu-client-python'
     
 def build_params(_options):
     """Function that builds the query string for Motu according to the given options"""
@@ -108,10 +108,9 @@ def build_params(_options):
                             )
     
     if _options.extraction_vertical:
-        if _options.depth_min is not None or _options.depth_min != None:  
-            query_options.insert( z_lo = _options.depth_min)
-        if _options.depth_max is not None or _options.depth_max != None:  
-            query_options.insert(z_hi = _options.depth_max)
+        query_options.insert( z_lo = _options.depth_min,
+                              z_hi = _options.depth_max
+                            )
     
     if _options.extraction_temporal:
         # date are strings, and they are send to Motu "as is". If not, we convert them into string
@@ -270,7 +269,7 @@ def get_url_config(_options, data = None):
     
     return kargs
         
-def dl_2_file(dl_url, fh, block_size = 65535, **options):
+def dl_2_file(dl_url, fh, block_size = 65535, describe = 'None', **options):
     """ Download the file with the main url (of Motu) file.
      
     Motu can return an error message in the response stream without setting an
@@ -305,7 +304,6 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
                raise Exception( utils_messages.get_external_messages()['motu-client.exception.motu.error'] % m.read() )
           
           log.info( 'File type: %s' % headers['Content-Type'] )
-                
         # check if a content length (size of the file) has been send
         if "Content-Length" in headers:        
             try:
@@ -318,10 +316,9 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
         else:
           size = -1
           log.warn( 'File size: %s' % 'unknown' )
+
         processing_time = datetime.datetime.now();        
         stopWatch.stop('processing')        
-        
-        
         stopWatch.start('downloading')
         
         # performs the download           
@@ -332,7 +329,12 @@ def dl_2_file(dl_url, fh, block_size = 65535, **options):
            log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
            td = datetime.datetime.now()- start_time;           
         
-        read = utils_stream.copy(m,temp,progress_function if size != -1 else None, block_size )
+	def none_function(sizeRead):
+           percent = 100
+           log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
+           td = datetime.datetime.now()- start_time;           
+
+	read = utils_stream.copy(m,temp,progress_function if size != -1 else none_function, block_size )
         
         end_time = datetime.datetime.now()
         stopWatch.stop('downloading')
@@ -440,6 +442,9 @@ def execute_request(_options):
             questionMark = ''
 
         url = url_service+questionMark+url_params
+	if _options.describe == True: 
+	    url = url.replace('productdownload','describeProduct')
+	    _options.out_name = _options.out_name.replace('.nc','.xml')
 
         # set-up the socket timeout if any
         if _options.socket_timeout != None:
@@ -460,7 +465,7 @@ def execute_request(_options):
         # create a file for storing downloaded stream
         fh = os.path.join(_options.out_dir,_options.out_name)
         try:
-            dl_2_file(download_url, fh, _options.block_size, **url_config)
+            dl_2_file(download_url, fh, _options.block_size, _options.describe, **url_config)
             log.info( "Done" )
         except:
             try:
