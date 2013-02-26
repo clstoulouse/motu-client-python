@@ -75,7 +75,10 @@ def open_url(url, **kargs):
     # add handlers for managing proxy credentials if necessary        
     if kargs.has_key('proxy'):
         # extract protocol            
-        handlers.append( urllib2.ProxyHandler({kargs['proxy']['url']:kargs['proxy']['port']}) )
+        #log.log( utils_log.TRACE_LEVEL, ' PROXY. %s',kargs['proxy']['scheme'])
+        #log.log( utils_log.TRACE_LEVEL, ' PORT . %s',kargs['proxy']['netloc'])
+        #handlers.append( urllib2.ProxyHandler({kargs['proxy']['scheme']:kargs['proxy']['netloc']}) )
+        handlers.append( urllib2.ProxyHandler({'http':kargs['proxy']['netloc'], 'https':kargs['proxy']['netloc']}) )
         if kargs['proxy'].has_key('user'):
             proxy_auth_handler = urllib2.HTTPBasicAuthHandler()
             proxy_auth_handler.add_password('realm', kargs['proxy']['user'], 'username', kargs['proxy']['password'])

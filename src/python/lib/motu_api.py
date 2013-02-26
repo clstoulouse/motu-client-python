@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python motu client v.1.0.2 
+# Python motu client v.${project.version} 
 #
 # Motu, a high efficient, robust and Standard compliant Web Server for Geographic
 #  Data Dissemination.
@@ -26,6 +26,7 @@
 #  along with this library; if not, write to the Free Software Foundation,
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
+import urlparse # WARNING : The urlparse module is renamed to urllib.parse
 import urllib
 import urllib2
 import traceback
@@ -72,14 +73,14 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '1.0.2'
+    return '${project.version}'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return 'motu-client-python'
+    return '${project.artifactId}'
     
 def build_params(_options):
     """Function that builds the query string for Motu according to the given options"""
@@ -249,9 +250,10 @@ def get_url_config(_options, data = None):
     kargs = {}
     # proxy
     if _options.proxy:
-        proxyUrl = _options.proxy_server.partition(':')
-        kargs['proxy'] = { "url": proxyUrl[0],
-                           "port": proxyUrl[2] }
+        #proxyUrl = _options.proxy_server.partition(':')
+        proxyUrl = urlparse.urlparse(_options.proxy_server)
+        kargs['proxy'] = { "scheme": proxyUrl.scheme,
+                           "netloc": proxyUrl.netloc }
         if _options.proxy_user != None:
             kargs['proxy']['user']     = _options.proxy_user
             kargs['proxy']['password'] = _options.proxy_pwd
