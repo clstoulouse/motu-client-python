@@ -6,3 +6,10 @@ The project can be found at:
 ${project.url}
 
 Copyright ${project.organization.name} (${project.organization.url})
+
+Version History
+===============
+1.0.3 - Feb. 2013
+------------------
+  - Bugs fixed :
+    * Connection failed through a proxy (--proxy-server option).
