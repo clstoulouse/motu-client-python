@@ -170,5 +170,3 @@ CLS (Collecte Localisation Satellites) for MyOcean
 
 www.cls.fr
 
-operation.mis@myocean.eu.org
-
