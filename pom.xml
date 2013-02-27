@@ -272,12 +272,6 @@
                     <id>cls-to-ext-repo</id>
                     <url>http://mvnrepo-ext.cls.fr/nexus/content/repositories/cls-to-ext/</url>
                 </repository>
-                <snapshotRepository>
-                    <!-- for snapshot/nightly release, we publish in the internal nexus server -->
-                    <id>repo</id>
-                    <name>CLS Entreprise Snapshot Repository</name>
-                    <url>http://mvnrepo.cls.fr:8081/nexus/content/repositories/snapshots</url>
-                </snapshotRepository>
             </distributionManagement>
         </profile>
         <profile>
