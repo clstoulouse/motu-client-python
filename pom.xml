@@ -273,7 +273,8 @@
             <distributionManagement>
                 <repository>
                     <id>cls-to-ext-repo</id>
-                    <url>http://mvnrepo-ext.cls.fr/nexus/content/repositories/cls-to-altamira-public/</url>
+                    <!-- url>http://mvnrepo-ext.cls.fr/nexus/content/repositories/cls-to-altamira-public/</url -->>
+                    <url>http://mvnrepo-ext.cls.fr/nexus/content/repositories/altamira-to-cls-releases</url>
                 </repository>
             </distributionManagement>
         </profile>
