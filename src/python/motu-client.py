@@ -191,9 +191,9 @@ def load_options():
                        action="callback")
                        
     parser.add_option( '--describe-product', '-D',
-                       help = "Perform a describe product operation instead of download",
+                       help = "It allows to have all updated information on a dataset. Output is in XML format",
                        action='store_true',
-		       dest='describe')
+					   dest='describe')
 
     parser.add_option( '--out-dir', '-o',
                        help = "The output dir (string)",
