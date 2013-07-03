@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python motu client v.1.0.2 
+# Python motu client v.${project.version} 
 #
 # Motu, a high efficient, robust and Standard compliant Web Server for Geographic
 #  Data Dissemination.
@@ -45,7 +45,7 @@ import optparse
 import socket
 
 # The necessary required version of Python interpreter
-REQUIRED_VERSION = (2,5)
+REQUIRED_VERSION = (2,6)
 
 # error code to use when exiting after exception catch
 ERROR_CODE_EXIT=1
@@ -81,14 +81,14 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '1.0.2'
+    return '${project.version}'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return 'motu-client-python'    
+	return '${project.artifactId}'   
                                      
 def load_options():
     """load options to handle"""
@@ -245,7 +245,7 @@ def check_version():
         cur_version[1] >= REQUIRED_VERSION[1]):   
        return
     else:
-       raise Exception( "This tool uses python 2.5 or greater. You version is %s. " % str(cur_version) )
+       raise Exception( "This tool uses python 2.6 or greater. You version is %s. " % str(cur_version) )
     
 #===============================================================================
 # The Main function
