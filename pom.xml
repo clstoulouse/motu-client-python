@@ -9,11 +9,11 @@
     <description>This package holds the python scripts used to address Motu servers for ordering, extracting and
         downloading oceanographic data.
     </description>
-    <scm>
-        <connection>scm:svn:https://cls-motu.svn.sourceforge.net/svnroot/cls-motu/tags/motu-client-python-1.0.4
+   <scm>
+        <connection>scm:svn:https://svn.code.sf.net/p/cls-motu/code/trunk/motu-client/motu-client-python
         </connection>
-        <url>https://cls-motu.svn.sourceforge.net/svnroot/cls-motu/tags/motu-client-python-1.0.4</url>
-    </scm>
+        <url>https://svn.code.sf.net/p/cls-motu/code/trunk/motu-client/motu-client-python</url>
+    </scm>	
     <dependencies>
         <dependency>
             <groupId>ant-contrib</groupId>
