@@ -88,7 +88,7 @@ def get_client_artefact():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-	return '${project.artifactId}'   
+    return '${project.artifactId}'   
                                      
 def load_options():
     """load options to handle"""
