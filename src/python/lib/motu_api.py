@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python motu client v.${project.version} 
+# Python motu client v.1.0.4-SNAPSHOT 
 #
 # Motu, a high efficient, robust and Standard compliant Web Server for Geographic
 #  Data Dissemination.
@@ -45,6 +45,7 @@ import logging.config
 import ConfigParser
 import optparse
 import socket
+from xml.dom import minidom
 
 # Import project libraries
 import utils_log
@@ -73,14 +74,14 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '${project.version}'
+    return '1.0.4-SNAPSHOT'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '${project.artifactId}'
+    return 'motu-client-python'
     
 def build_params(_options):
     """Function that builds the query string for Motu according to the given options"""
@@ -96,7 +97,7 @@ def build_params(_options):
     query_options = utils_collection.ListMultimap()
     
     query_options.insert( action  = 'productdownload',
-                          mode    = 'console',
+                          mode    = 'status',
                           service = _options.service_id,
                           product = _options.product_id 
                         )   
@@ -270,7 +271,34 @@ def get_url_config(_options, data = None):
         kargs['data'] = data
     
     return kargs
-        
+
+def get_requestUrl(dl_url, server, **options):
+    """ Get the request url."""    
+    
+    stopWatch = stop_watch.localThreadStopWatch()    
+    start_time = datetime.datetime.now()
+    stopWatch.start('get_request')
+    log.info( "Requesting file to download (this can take a while)..." ) 
+	
+	# Get request id    	
+    m = utils_http.open_url(dl_url, **options)
+    dom = minidom.parseString(m.read())
+	
+    for node in dom.getElementsByTagName('statusModeResponse'):
+		requestId = node.getAttribute('requestId')
+    
+	# Get request url
+    get_req_url = server + '?action=getreqstatus&requestid=' + requestId
+    stopWatch.stop('get_request')
+	
+    return get_req_url
+	
+def wait_till_finished(reqUrlCAS, **options):	
+
+    stopWatch = stop_watch.localThreadStopWatch()    
+    start_time = datetime.datetime.now()
+
+	
 def dl_2_file(dl_url, fh, block_size = 65535, describe = 'None', **options):
     """ Download the file with the main url (of Motu) file.
      
@@ -281,11 +309,11 @@ def dl_2_file(dl_url, fh, block_size = 65535, describe = 'None', **options):
     dl_url: the complete download url of Motu
     fh: file handler to use to write the downstream"""    
     
-    stopWatch = stop_watch.localThreadStopWatch()
-    
+    stopWatch = stop_watch.localThreadStopWatch()    
     start_time = datetime.datetime.now()
-    log.info( "Requesting file to download (this can take a while)..." )    
-    
+    log.info( "Downloading file (this can take a while)..." )    
+
+	# download file
     temp = open(fh, 'w+b')             
     try:
       stopWatch.start('processing')
@@ -467,8 +495,49 @@ def execute_request(_options):
         # create a file for storing downloaded stream
         fh = os.path.join(_options.out_dir,_options.out_name)
         try:
-            dl_2_file(download_url, fh, _options.block_size, _options.describe, **url_config)
-            log.info( "Done" )
+			stopWatch.start('wait_request')
+			requestUrl = get_requestUrl(download_url, url_service, **url_config)			
+			
+			# asynchronous mode
+			status = 0
+			dwurl = ""
+			
+			while True:	
+				if _options.auth_mode == AUTHENTICATION_MODE_CAS:
+					stopWatch.start('authentication')
+					# perform authentication before acceding service
+					requestUrlCas = utils_cas.authenticate_CAS_for_URL(requestUrl,
+																	 _options.user,
+																	 _options.pwd,**url_config)
+					stopWatch.stop('authentication')
+				else:
+					# if none, we do nothing more, in basic, we let the url requester doing the job
+					requestUrlCas = requestUrl	
+				
+				m = utils_http.open_url(requestUrlCas, **url_config)				
+				dom = minidom.parseString(m.read())
+				
+				for node in dom.getElementsByTagName('statusModeResponse'):
+					status = node.getAttribute('status')	
+					dwurl = node.getAttribute('msg')
+					
+				# Check status
+				if status == "0" or status == "3": # in progress/pending
+					log.info('Product is not yet available (request in process)') 		
+					time.sleep(10)
+				else: # finished (error|success)
+					break
+				
+			stopWatch.stop('wait_request')							
+
+			if status == "2": log.error('Some sort of error ocurred with the request') 
+			if status == "1": log.info('The product is ready for download') 						
+			
+			if dwurl != "":
+				dl_2_file(dwurl, fh, _options.block_size, _options.describe, **url_config)
+				log.info( "Done" )
+			else:
+				log.error("Couldn't retrieve file")
         except:
             try:
                 if (os.path.isfile(fh)):
