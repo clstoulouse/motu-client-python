@@ -90,18 +90,37 @@ def build_params(_options):
     vertical = ''
     other_opt = ''
     
-
     """
     Build the main url to connect to
     """
     query_options = utils_collection.ListMultimap()
     
-    query_options.insert( action  = 'productdownload',
-                          mode    = 'status',
-                          service = _options.service_id,
-                          product = _options.product_id 
-                        )   
-
+	# describeProduct in XML format (sync) / productDownload (sync/async)
+    if _options.describe:
+		_options.sync = True
+		log.info('Synchronous mode set')		
+		query_options.insert( action  = 'describeProduct',				
+							  service = _options.service_id,
+							  product = _options.product_id 
+							)   
+    else:						
+		# synchronous/asynchronous mode
+		if _options.sync:
+			log.info('Synchronous mode set')
+			query_options.insert( action  = 'productdownload',	
+								  mode = 'console',
+								  service = _options.service_id,
+								  product = _options.product_id 
+								)						
+		else:
+			log.info('Asynchronous mode set')
+			query_options.insert( action  = 'productdownload',
+								  mode    = 'status',
+								  service = _options.service_id,
+								  product = _options.product_id 
+								)
+	
+	# geographical parameters
     if _options.extraction_geographic:
         query_options.insert( x_lo = _options.longitude_min,
                               x_hi = _options.longitude_max,
@@ -470,10 +489,9 @@ def execute_request(_options):
         questionMark = '?'
         if url_service.endswith(questionMark) :
             questionMark = ''
-
         url = url_service+questionMark+url_params
-	if _options.describe == True: 
-	    url = url.replace('productdownload','describeProduct')
+
+        if _options.describe == True: 
 	    _options.out_name = _options.out_name.replace('.nc','.xml')
 
         # set-up the socket timeout if any
@@ -494,50 +512,57 @@ def execute_request(_options):
 
         # create a file for storing downloaded stream
         fh = os.path.join(_options.out_dir,_options.out_name)
+		
         try:
-			stopWatch.start('wait_request')
-			requestUrl = get_requestUrl(download_url, url_service, **url_config)			
-			
-			# asynchronous mode
-			status = 0
-			dwurl = ""
-			
-			while True:	
-				if _options.auth_mode == AUTHENTICATION_MODE_CAS:
-					stopWatch.start('authentication')
-					# perform authentication before acceding service
-					requestUrlCas = utils_cas.authenticate_CAS_for_URL(requestUrl,
-																	 _options.user,
-																	 _options.pwd,**url_config)
-					stopWatch.stop('authentication')
-				else:
-					# if none, we do nothing more, in basic, we let the url requester doing the job
-					requestUrlCas = requestUrl	
-				
-				m = utils_http.open_url(requestUrlCas, **url_config)				
-				dom = minidom.parseString(m.read())
-				
-				for node in dom.getElementsByTagName('statusModeResponse'):
-					status = node.getAttribute('status')	
-					dwurl = node.getAttribute('msg')
-					
-				# Check status
-				if status == "0" or status == "3": # in progress/pending
-					log.info('Product is not yet available (request in process)') 		
-					time.sleep(10)
-				else: # finished (error|success)
-					break
-				
-			stopWatch.stop('wait_request')							
-
-			if status == "2": log.error('Some sort of error ocurred with the request') 
-			if status == "1": log.info('The product is ready for download') 						
-			
-			if dwurl != "":
-				dl_2_file(dwurl, fh, _options.block_size, _options.describe, **url_config)
-				log.info( "Done" )
+			# Synchronous mode
+			if _options.sync == True:
+				dl_2_file(download_url, fh, _options.block_size, **url_config)
+				log.info( "Done" )			
+			# Asynchronous mode
 			else:
-				log.error("Couldn't retrieve file")
+				stopWatch.start('wait_request')
+				requestUrl = get_requestUrl(download_url, url_service, **url_config)			
+				
+				# asynchronous mode
+				status = 0
+				dwurl = ""
+				
+				while True:	
+					if _options.auth_mode == AUTHENTICATION_MODE_CAS:
+						stopWatch.start('authentication')
+						# perform authentication before acceding service
+						requestUrlCas = utils_cas.authenticate_CAS_for_URL(requestUrl,
+																		 _options.user,
+																		 _options.pwd,**url_config)
+						stopWatch.stop('authentication')
+					else:
+						# if none, we do nothing more, in basic, we let the url requester doing the job
+						requestUrlCas = requestUrl	
+					
+					m = utils_http.open_url(requestUrlCas, **url_config)				
+					dom = minidom.parseString(m.read())
+					
+					for node in dom.getElementsByTagName('statusModeResponse'):
+						status = node.getAttribute('status')	
+						dwurl = node.getAttribute('msg')
+						
+					# Check status
+					if status == "0" or status == "3": # in progress/pending
+						log.info('Product is not yet available (request in process)') 		
+						time.sleep(10)
+					else: # finished (error|success)
+						break
+					
+				stopWatch.stop('wait_request')							
+
+				if status == "2": log.error('Some sort of error ocurred with the request') 
+				if status == "1": log.info('The product is ready for download') 						
+				
+				if dwurl != "":
+					dl_2_file(dwurl, fh, _options.block_size, _options.describe, **url_config)
+					log.info( "Done" )
+				else:
+					log.error("Couldn't retrieve file")
         except:
             try:
                 if (os.path.isfile(fh)):

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python motu client v.${project.version} 
+# Python motu client v.1.0.4-SNAPSHOT 
 #
 # Motu, a high efficient, robust and Standard compliant Web Server for Geographic
 #  Data Dissemination.
@@ -81,14 +81,14 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '${project.version}'
+    return '1.0.4-SNAPSHOT'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '${project.artifactId}'   
+    return 'motu-client-python'   
                                      
 def load_options():
     """load options to handle"""
@@ -190,10 +190,15 @@ def load_options():
                        type="string",
                        action="callback")
                        
+    parser.add_option( '--sync-mode', '-S',
+                       help = "Sets the download mode to synchronous (not recommended)",
+                       action='store_true',
+					   dest='sync')
+					   
     parser.add_option( '--describe-product', '-D',
                        help = "It allows to have all updated information on a dataset. Output is in XML format",
                        action='store_true',
-					   dest='describe')
+					   dest='describe')					   
 
     parser.add_option( '--out-dir', '-o',
                        help = "The output dir (string)",
