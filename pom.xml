@@ -10,9 +10,9 @@
         downloading oceanographic data.
     </description>
    <scm>
-        <connection>scm:svn:https://svn.code.sf.net/p/cls-motu/code/trunk/motu-client-python
+        <connection>scm:svn:https://svn.code.sf.net/p/cls-motu/code/trunk/motu-client/motu-client-python
         </connection>
-        <url>https://svn.code.sf.net/p/cls-motu/code/trunk/motu-client-python</url>
+        <url>https://svn.code.sf.net/p/cls-motu/code/trunk/motu-client/motu-client-python</url>
     </scm>	
     <dependencies>
         <dependency>
