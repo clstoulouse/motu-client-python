@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cls.atoll.motu.client</groupId>
     <artifactId>motu-client-python</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Motu Client Python</name>
@@ -11,9 +11,9 @@
     </description>
 	
    <scm>
-        <connection>scm:svn:https://svn.code.sf.net/p/cls-motu/code/tags/motu-client-python-1.0.4
+        <connection>scm:svn:https://svn.code.sf.net/p/cls-motu/code/trunk/motu-client/motu-client-python
         </connection>
-        <url>https://svn.code.sf.net/p/cls-motu/code/tags/motu-client-python-1.0.4</url>
+        <url>https://svn.code.sf.net/p/cls-motu/code/trunk/motu-client/motu-client-python</url>
     </scm>	
 	
     <dependencies>
