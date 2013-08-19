@@ -42,7 +42,7 @@ class HTTPErrorProcessor(urllib2.HTTPErrorProcessor):
         return response
 
 
-def open_url(url, **kargs):
+def open_url(url, **kargsParam):
     """open an url and return an handler on it.
        arguments can be :
          headers : http headers to send
@@ -71,6 +71,16 @@ def open_url(url, **kargs):
                 utils_log.HTTPDebugProcessor(log),
                 HTTPErrorProcessor()                    
                ]
+
+    # print "AAAAAAAAAAAA kargsParam"               
+    # for key, value in kargsParam.items():
+        # print key, value                
+               
+    kargs = kargsParam.copy();
+    
+    # print "BBBBBBBBBBB kargs"               
+    # for key, value in kargs.items():
+        # print key, value                
 
     # add handlers for managing proxy credentials if necessary        
     if kargs.has_key('proxy'):
@@ -109,6 +119,10 @@ def open_url(url, **kargs):
     else:
         r = urllib2.Request(url, **kargs)
   
+    # print "CCCCCCC kargs"               
+    # for key, value in kargs.items():
+        # print key, value                
+
     # open the url, but let the exception propagates to the caller  
     return _opener.open(r)
 
