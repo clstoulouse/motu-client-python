@@ -45,7 +45,7 @@ import optparse
 import socket
 
 # The necessary required version of Python interpreter
-REQUIRED_VERSION = (2,6)
+REQUIRED_VERSION = (2,7)
 
 # error code to use when exiting after exception catch
 ERROR_CODE_EXIT=1
@@ -250,7 +250,7 @@ def check_version():
         cur_version[1] >= REQUIRED_VERSION[1]):   
        return
     else:
-       raise Exception( "This tool uses python 2.6 or greater. You version is %s. " % str(cur_version) )
+       raise Exception( "This tool uses python 2.7 or greater. You version is %s. " % str(cur_version) )
     
 #===============================================================================
 # The Main function

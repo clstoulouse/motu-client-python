@@ -4,7 +4,7 @@ Motu python client
 ==NAME==
 ``` ./motu-client.py 
 
-The motu python client. You must use python version 2.5 or later.
+The motu python client. You must use python version 2.7 or later.
 
 
 ==VERSION==

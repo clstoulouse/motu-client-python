@@ -14,13 +14,13 @@ NAME
 
   ./motu-client.py 
 
-The motu python client. You must use python version 2.5 or later.
+The motu python client. You must use python version 2.7 or later.
 
 
 VERSION
 =======
 
-This documentation is intended to describe the 1.0.3 version or higher of the motu python client.
+This documentation is intended to describe the 1.0.5 version or higher of the motu python client.
 
 
 SYNOPSIS
