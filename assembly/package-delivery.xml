@@ -28,6 +28,7 @@
             <excludes>
 				<!-- excludeany compiled source -->
 				<exclude>**/*.pyc</exclude>
+                                <exclude>**/*.formatted</exclude>
 			</excludes>	
 		</fileSet>
 		<fileSet>
