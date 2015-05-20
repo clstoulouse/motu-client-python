@@ -1,11 +1,12 @@
-${project.name} - v. ${project.version}
+Motu Client Python - v. 1.0.6
 
-${project.description}
+This package holds the python scripts used to address Motu servers for ordering, extracting and
+        downloading oceanographic data.
 
 The project can be found at:
 ${project.url}
 
-Copyright ${project.organization.name} (${project.organization.url})
+Copyright CLS (Collecte Localisation Satelite) (http://www.cls.fr)
 
 Version History
 ===============
@@ -13,3 +14,12 @@ Version History
 ------------------
   - Bugs fixed :
     * Connection failed through a proxy (--proxy-server option).
+
+===============
+1.0.6 - May. 2015
+------------------
+  - Bugs fixed :
+    * Connection problem with double-proxy configuration.
+	
+  - New feature :
+    * Asynchronous download mode that waits until the files are processed on motu side.
