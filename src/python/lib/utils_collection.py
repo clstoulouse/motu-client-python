@@ -9,7 +9,7 @@ notation, e.g. m["a"] = 1, m["a"] = 2 creates a container for key "a"
 containing 1 and 2. An item within a container can be removed using the 
 "remove"  method.
 
-Requires Python 2.5.  
+Requires Python 2.7.  
 """
 
 import collections

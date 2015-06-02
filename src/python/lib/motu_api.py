@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python motu client v.${project.version} 
+# Python motu client v.1.0.7 
 #
 # Motu, a high efficient, robust and Standard compliant Web Server for Geographic
 #  Data Dissemination.
@@ -74,7 +74,7 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '${project.version}'
+    return '1.0.6'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
@@ -540,8 +540,9 @@ def execute_request(_options):
 						requestUrlCas = requestUrl	
 					
 					m = utils_http.open_url(requestUrlCas, **url_config)				
-					dom = minidom.parseString(m.read())
-					
+					motu_reply=m.read()
+					dom = minidom.parseString(motu_reply)
+
 					for node in dom.getElementsByTagName('statusModeResponse'):
 						status = node.getAttribute('status')	
 						dwurl = node.getAttribute('msg')
@@ -555,14 +556,14 @@ def execute_request(_options):
 					
 				stopWatch.stop('wait_request')							
 
-				if status == "2": log.error('Some sort of error ocurred with the request') 
-				if status == "1": log.info('The product is ready for download') 						
-				
-				if dwurl != "":
-					dl_2_file(dwurl, fh, _options.block_size, _options.describe, **url_config)
-					log.info( "Done" )
-				else:
-					log.error("Couldn't retrieve file")
+				if status == "2": log.error(dwurl) 
+				if status == "1": 
+					log.info('The product is ready for download')
+					if dwurl != "":
+						dl_2_file(dwurl, fh, _options.block_size, _options.describe, **url_config)
+						log.info( "Done" )
+					else:
+						log.error("Couldn't retrieve file")
         except:
             try:
                 if (os.path.isfile(fh)):
