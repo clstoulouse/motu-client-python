@@ -1,4 +1,4 @@
-Motu Client Python - v. 1.0.7
+Motu Client Python - v. 1.0.8
 
 This package holds the python scripts used to address Motu servers for ordering, extracting and
         downloading oceanographic data.
