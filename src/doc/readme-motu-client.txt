@@ -20,7 +20,7 @@ This program is not compatible with Python 3.X versions.
 VERSION
 =======
 
-This documentation is intended to describe the 1.0.6 version or higher of the motu python client.
+This documentation is intended to describe the 1.0.8 version or higher of the motu python client.
 
 
 SYNOPSIS
