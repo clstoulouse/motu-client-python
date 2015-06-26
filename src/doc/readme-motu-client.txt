@@ -169,7 +169,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 AUTHOR
 ======
 
-CLS (Collecte Localisation Satellites) for MyOcean
+CLS (Collecte Localisation Satellites)
 
 www.cls.fr
 

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python motu client v.1.0.7
+# Python motu client v.1.0.8
 #
 # Motu, a high efficient, robust and Standard compliant Web Server for Geographic
 #  Data Dissemination.
@@ -81,7 +81,7 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '1.0.7'
+    return '1.0.8'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.

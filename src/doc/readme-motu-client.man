@@ -171,7 +171,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 .SS AUTHOR
 
 .P
-CLS (Collecte Localisation Satellites) for MyOcean
+CLS (Collecte Localisation Satellites)
 
 .P
 www.cls.fr
