@@ -29,3 +29,10 @@ Version History
 ------------------
   - New feature :
     * Improvement of verbosity/error control with the asynchronous mode.
+	
+===============
+1.0.8 - June. 2015
+------------------
+  - Bug correction :
+    * Avoid SSL negotiation (TLSv1 fixed as default).
+	* Bug affected latest Ubuntu 12.04 and higher.
