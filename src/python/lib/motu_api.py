@@ -253,11 +253,22 @@ def check_options(_options):
         if tempvalue < -90 or tempvalue > 90 :
             raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'latitude_max', str(tempvalue)))
         tempvalue = float(_options.longitude_min)
+        tempvalue = normalize_longitude(tempvalue)
         if tempvalue < -180 or tempvalue > 180 :
             raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'logitude_min', str(tempvalue)))
         tempvalue = float(_options.longitude_max)
+        tempvalue = normalize_longitude(tempvalue)
         if tempvalue < -180 or tempvalue > 180 :
             raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'longitude_max', str(tempvalue)))           
+
+def normalize_longitude(lon):
+    if lon > 180:
+        while lon > 180:
+            lon -= 360
+    elif lon < -180:
+        while lon < -180:
+            lon += 360
+    return lon
             
 def total_seconds(td):
     return total_milliseconds(td) / 10**3 
@@ -318,7 +329,7 @@ def wait_till_finished(reqUrlCAS, **options):
     start_time = datetime.datetime.now()
 
 	
-def dl_2_file(dl_url, fh, block_size = 65535, describe = 'None', **options):
+def dl_2_file(dl_url, fh, block_size = 65535, describe = None, **options):
     """ Download the file with the main url (of Motu) file.
      
     Motu can return an error message in the response stream without setting an
@@ -349,8 +360,9 @@ def dl_2_file(dl_url, fh, block_size = 65535, describe = 'None', **options):
         headers = m.info()
         if "Content-Type" in headers:
           if len(headers['Content-Type']) > 0:
-            if   headers['Content-Type'].startswith('text') or headers['Content-Type'].find('html') != -1:
-               raise Exception( utils_messages.get_external_messages()['motu-client.exception.motu.error'] % m.read() )
+            if not describe:
+              if   headers['Content-Type'].startswith('text') or headers['Content-Type'].find('html') != -1:
+                raise Exception( utils_messages.get_external_messages()['motu-client.exception.motu.error'] % m.read() )
           
           log.info( 'File type: %s' % headers['Content-Type'] )
         # check if a content length (size of the file) has been send
@@ -516,7 +528,7 @@ def execute_request(_options):
         try:
 			# Synchronous mode
 			if _options.sync == True:
-				dl_2_file(download_url, fh, _options.block_size, **url_config)
+				dl_2_file(download_url, fh, _options.block_size, _options.describe, **url_config)
 				log.info( "Done" )			
 			# Asynchronous mode
 			else:
