@@ -36,3 +36,13 @@ Version History
   - Bug correction :
     * Avoid SSL negotiation (TLSv1 fixed as default).
 	* Bug affected latest Ubuntu 12.04 and higher.
+
+===============
+1.1.0 - June. 2016
+------------------
+  - MOTU-39: [CIS] Motu-Client python script error with the -D option (describe product)
+  	* The provided patch has been applied.
+  - MOTU-58: Script Python: Describe product longitude outside [0-360] are causing errors
+  	* Method normalize_longitude added in order to adapt the longitude values to the correct interval [-180,180].
+  - MOTU-62: motu-client script : Processing time displayed not pertinent
+  	* The start time for process duration is now starting from the beginning of the request
