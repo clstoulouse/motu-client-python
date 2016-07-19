@@ -27,23 +27,10 @@
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 import urlparse # WARNING : The urlparse module is renamed to urllib.parse
-import urllib
-import urllib2
-import traceback
-import platform
-import sys
-import httplib
 import os
 import re
-import tempfile
 import datetime
 import time
-import shutil
-import zipfile
-import logging
-import logging.config
-import ConfigParser
-import optparse
 import socket
 from xml.dom import minidom
 
@@ -56,6 +43,7 @@ import utils_messages
 import utils_cas
 import utils_collection
 import stop_watch
+import logging
 
 # constant for authentication modes
 AUTHENTICATION_MODE_NONE  = 'none'
@@ -253,11 +241,22 @@ def check_options(_options):
         if tempvalue < -90 or tempvalue > 90 :
             raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'latitude_max', str(tempvalue)))
         tempvalue = float(_options.longitude_min)
+        tempvalue = normalize_longitude(tempvalue)
         if tempvalue < -180 or tempvalue > 180 :
             raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'logitude_min', str(tempvalue)))
         tempvalue = float(_options.longitude_max)
+        tempvalue = normalize_longitude(tempvalue)
         if tempvalue < -180 or tempvalue > 180 :
             raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.out-of-range'] % ( 'longitude_max', str(tempvalue)))           
+
+def normalize_longitude(lon):
+    if lon > 180:
+        while lon > 180:
+            lon -= 360
+    elif lon < -180:
+        while lon < -180:
+            lon += 360
+    return lon
             
 def total_seconds(td):
     return total_milliseconds(td) / 10**3 
@@ -318,7 +317,7 @@ def wait_till_finished(reqUrlCAS, **options):
     start_time = datetime.datetime.now()
 
 	
-def dl_2_file(dl_url, fh, block_size = 65535, describe = 'None', **options):
+def dl_2_file(dl_url, fh, block_size = 65535, describe = None, **options):
     """ Download the file with the main url (of Motu) file.
      
     Motu can return an error message in the response stream without setting an
@@ -349,8 +348,9 @@ def dl_2_file(dl_url, fh, block_size = 65535, describe = 'None', **options):
         headers = m.info()
         if "Content-Type" in headers:
           if len(headers['Content-Type']) > 0:
-            if   headers['Content-Type'].startswith('text') or headers['Content-Type'].find('html') != -1:
-               raise Exception( utils_messages.get_external_messages()['motu-client.exception.motu.error'] % m.read() )
+            if not describe:
+              if   headers['Content-Type'].startswith('text') or headers['Content-Type'].find('html') != -1:
+                raise Exception( utils_messages.get_external_messages()['motu-client.exception.motu.error'] % m.read() )
           
           log.info( 'File type: %s' % headers['Content-Type'] )
         # check if a content length (size of the file) has been send
@@ -388,9 +388,9 @@ def dl_2_file(dl_url, fh, block_size = 65535, describe = 'None', **options):
         end_time = datetime.datetime.now()
         stopWatch.stop('downloading')
         
-        log.info( "Processing  time : %s", str(processing_time - start_time) )
+        log.info( "Processing  time : %s", str(processing_time - init_time) )
         log.info( "Downloading time : %s", str(end_time - processing_time) )
-        log.info( "Total time       : %s", str(end_time - start_time) )
+        log.info( "Total time       : %s", str(end_time - init_time) )
         log.info( "Download rate    : %s/s", utils_unit.convert_bytes((read / total_milliseconds(end_time - start_time)) * 10**3) )
       finally:
         m.close()
@@ -400,7 +400,7 @@ def dl_2_file(dl_url, fh, block_size = 65535, describe = 'None', **options):
 
     # raise exception if actual size does not match content-length header
     if size >= 0 and read < size:
-        raise ContentTooShortError( utils_messages.get_external_messages()['motu-client.exception.download.too-short'] % (read, size), result)
+        raise Exception(utils_messages.get_external_messages()['motu-client.exception.download.too-short'] % (read, size) )
 
 def execute_request(_options):
     """
@@ -459,7 +459,9 @@ def execute_request(_options):
 
     """
     global log
+    global init_time
 
+    init_time = datetime.datetime.now()
     stopWatch = stop_watch.localThreadStopWatch()
     stopWatch.start()
     try:
@@ -516,7 +518,7 @@ def execute_request(_options):
         try:
 			# Synchronous mode
 			if _options.sync == True:
-				dl_2_file(download_url, fh, _options.block_size, **url_config)
+				dl_2_file(download_url, fh, _options.block_size, _options.describe, **url_config)
 				log.info( "Done" )			
 			# Asynchronous mode
 			else:
