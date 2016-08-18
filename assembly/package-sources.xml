@@ -4,7 +4,7 @@
     <id>sources</id>
     <formats>
         <format>tar.gz</format>
-		<format>zip</format>
+		<!-- <format>zip</format>   -->
     </formats>
     <fileSets>
         <fileSet>
@@ -13,6 +13,7 @@
             <excludes>
                <exclude>.settings/**</exclude>
                <exclude>.svn</exclude>
+               <exclude>.git</exclude>
                <exclude>.project</exclude>
                <exclude>.includepath</exclude>
                <exclude>${project.build.directory}/**</exclude>

@@ -5,7 +5,7 @@
 	<id>delivery</id>
 	<formats>
 		<format>tar.gz</format>
-		<format>zip</format>
+		<!-- <format>zip</format>   -->
 	</formats>
 	<!--
 		all assemblies have the same directory, thus allowing to deploy

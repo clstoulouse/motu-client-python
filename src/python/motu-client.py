@@ -81,7 +81,7 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '1.0.8'
+    return '${project.version}-${build-timestamp}'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
