@@ -48,11 +48,12 @@
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2-beta-5</version>
-                <configuration>
+                <version>2.4</version>
+    			<configuration>
+					<finalName>${project.artifactId}-${project.version}-${build-timestamp}</finalName>
                     <descriptors>
-                        <descriptor>${basedir}/assembly/package-delivery.xml</descriptor>
-                        <descriptor>${basedir}/assembly/package-sources.xml</descriptor>
+                        <descriptor>${basedir}/assembly/bin.xml</descriptor>
+                        <descriptor>${basedir}/assembly/src.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>
