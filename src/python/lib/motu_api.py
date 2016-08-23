@@ -62,7 +62,7 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '1.0.8'
+    return '1.0.9'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
@@ -95,7 +95,8 @@ def build_params(_options):
 		# synchronous/asynchronous mode
 		if _options.sync:
 			log.info('Synchronous mode set')
-			query_options.insert( action  = 'productdownload',	
+			query_options.insert( action  = 'productdownload',
+								  scriptVersion = get_client_version(),
 								  mode = 'console',
 								  service = _options.service_id,
 								  product = _options.product_id 
@@ -103,6 +104,7 @@ def build_params(_options):
 		else:
 			log.info('Asynchronous mode set')
 			query_options.insert( action  = 'productdownload',
+								  scriptVersion = get_client_version(),
 								  mode    = 'status',
 								  service = _options.service_id,
 								  product = _options.product_id 
