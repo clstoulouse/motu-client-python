@@ -549,7 +549,7 @@ def execute_request(_options):
 
 					for node in dom.getElementsByTagName('statusModeResponse'):
 						status = node.getAttribute('status')	
-						dwurl = node.getAttribute('msg')
+						dwurl = node.getAttribute('remoteUri')
 						
 					# Check status
 					if status == "0" or status == "3": # in progress/pending
