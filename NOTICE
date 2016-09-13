@@ -1,10 +1,7 @@
-Motu Client Python - v. 1.0.8
+Motu Client Python
 
 This package holds the python scripts used to address Motu servers for ordering, extracting and
         downloading oceanographic data.
-
-The project can be found at:
-${project.url}
 
 Copyright CLS (Collecte Localisation Satelite) (http://www.cls.fr)
 
@@ -46,3 +43,9 @@ Version History
   	* Method normalize_longitude added in order to adapt the longitude values to the correct interval [-180,180].
   - MOTU-62: motu-client script : Processing time displayed not pertinent
   	* The start time for process duration is now starting from the beginning of the request
+  	
+===============
+1.2.0 - Sept. 2016
+------------------
+  - Add script version as an HTTP parameter while requesting Motu server
+  - Validate the client to be compatible with Motu server version 3.x
