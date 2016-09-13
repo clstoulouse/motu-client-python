@@ -15,7 +15,11 @@
         downloading oceanographic data.
     </description>
 	
-     <dependencies>
+	<properties>
+    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  	</properties>
+    
+    <dependencies>
         <dependency>
             <groupId>ant-contrib</groupId>
             <artifactId>ant-contrib</artifactId>
@@ -48,11 +52,12 @@
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2-beta-5</version>
-                <configuration>
+                <version>2.4</version>
+    			<configuration>
+					<finalName>${project.artifactId}-${project.version}-${build-timestamp}</finalName>
                     <descriptors>
-                        <descriptor>${basedir}/assembly/package-delivery.xml</descriptor>
-                        <descriptor>${basedir}/assembly/package-sources.xml</descriptor>
+                        <descriptor>${basedir}/assembly/bin.xml</descriptor>
+                        <descriptor>${basedir}/assembly/src.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>
@@ -80,13 +85,33 @@
                     <createChecksum>true</createChecksum>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>1.1</version>
-                <configuration>
-                </configuration>
-            </plugin>
+			
+			<!-- Used to build a "build-timestamp" property, this property could be overridden by ANT calls from /motu-distribution/build.xml -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.4</version>
+				<configuration>
+					<revisionOnScmFailure>no.scm.config.in.pom</revisionOnScmFailure>
+				</configuration>
+				<executions>
+					<execution>
+						<id>create-timestamp-id</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>create-timestamp</goal>
+						</goals>
+						<configuration>
+							<timestampFormat>yyyyMMddHHmmssSSS</timestampFormat>
+							<timestampPropertyName>build-timestamp</timestampPropertyName>
+							<!-- formats the timestamp all together like 2016-04-04 14:17:05.123 
+								and puts it in the ${myBuildNumberVariable} buildProperty -->
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.4</version>
@@ -168,37 +193,6 @@
               </plugin>
         </plugins>
     </build>
-    <repositories>
-        <repository>
-            <id>sfnet-motu-repo</id>
-            <name>SourceForge Project Repository</name>
-            <url>http://cls-motu.sourceforge.net/m2repo</url>
-        </repository>
-        <repository>
-            <id>cls-to-ext-repo</id>
-            <name>CLS External Repository</name>
-            <!-- url>http://mvnrepo-ext.cls.fr/nexus/content/repositories/cls-to-ext/</url -->
-            <url>http://mvnrepo-ext.cls.fr/nexus/content/repositories/cls-to-altamira-public/</url>            
-        </repository>
-        <repository>
-            <id>central</id>
-            <name>Maven Central Repository</name>
-            <url>http://repo2.maven.org/maven2</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>Codehaus repository</id>
-            <url>https://nexus.codehaus.org/content/repositories/releases</url>
-            <!-- <url>http://repository.codehaus.org/</url>-->
-        </pluginRepository>
-    </pluginRepositories>
-
-    <issueManagement>
-        <system>Sourceforge</system>
-        <url>https://sourceforge.net/tracker/?group_id=322177</url>
-    </issueManagement>
 
     <organization>
         <name>CLS (Collecte Localisation Satelite)</name>
@@ -254,40 +248,5 @@
             <properties />
         </contributor>
     </contributors>
-
-    <profiles>
-        <profile>
-            <id>release-sfnet</id>
-            <distributionManagement>
-                <site>
-                    <id>sfnet-motu-repo</id>
-                    <url>scp://shell.sourceforge.net//home/groups/c/cl/cls-motu/htdocs</url>
-                </site>
-                <repository>
-                    <id>sfnet-motu-repo</id>
-                    <url>scp://shell.sourceforge.net//home/groups/c/cl/cls-motu/htdocs/m2repo</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-        <profile>
-            <id>release-cls-nexus</id>
-            <distributionManagement>
-                <repository>
-					<id>altamira-to-cls-releases</id>
-                    <url>http://mvnrepo-ext.cls.fr/nexus/content/repositories/altamira-to-cls-releases</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-        <profile>
-            <id>release-cls-ftpsedr</id>
-            <distributionManagement>
-                <repository>
-                    <id>cls-ftpsedr-repo</id>
-                    <url>ftp://majsedr.cls.fr/donnees/ftpsedr/ftpanonymous/pub/myocean/</url>
-                </repository>
-            </distributionManagement>
-        </profile>
-    </profiles>
-
 
 </project>

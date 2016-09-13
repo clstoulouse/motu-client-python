@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Python motu client v.1.0.8 
+# Python motu client
 #
 # Motu, a high efficient, robust and Standard compliant Web Server for Geographic
 #  Data Dissemination.
@@ -62,7 +62,7 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '1.0.8'
+    return '${project.version}-${build-timestamp}'
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
@@ -95,7 +95,8 @@ def build_params(_options):
 		# synchronous/asynchronous mode
 		if _options.sync:
 			log.info('Synchronous mode set')
-			query_options.insert( action  = 'productdownload',	
+			query_options.insert( action  = 'productdownload',
+								  scriptVersion = get_client_version(),
 								  mode = 'console',
 								  service = _options.service_id,
 								  product = _options.product_id 
@@ -103,6 +104,7 @@ def build_params(_options):
 		else:
 			log.info('Asynchronous mode set')
 			query_options.insert( action  = 'productdownload',
+								  scriptVersion = get_client_version(),
 								  mode    = 'status',
 								  service = _options.service_id,
 								  product = _options.product_id 
@@ -547,7 +549,7 @@ def execute_request(_options):
 
 					for node in dom.getElementsByTagName('statusModeResponse'):
 						status = node.getAttribute('status')	
-						dwurl = node.getAttribute('msg')
+						dwurl = node.getAttribute('remoteUri')
 						
 					# Check status
 					if status == "0" or status == "3": # in progress/pending
