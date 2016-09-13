@@ -15,6 +15,7 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
 
 #Summary
 * [Overview](#Overview)
+* [Build](#Build)
 * [Installation](#Installation)
 * [Configuration](#Configuration)
 * [Usage and options](#Usage)
