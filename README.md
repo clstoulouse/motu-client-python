@@ -24,6 +24,22 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
 #<a name="Overview">Overview</a>
 Motu client "motu-client-python" is a python script used to connect to Motu HTTP server.  
 This program can be integrated into a processing chain in order to automate the downloading of products via the Motu.
+  
+  
+#<a name="Build">Build</a>  
+From the root folder runs the Maven command:
+```
+mvn clean install -Dmaven.test.skip=true
+[...]
+[INFO] BUILD SUCCESS
+[...]
+```  
+
+This creates two archives in the target folder:
+
+* motu-client-python-$version-$buildTimestamp-src.tar.gz: Archive containing all the source code
+* motu-client-python-$version-$buildTimestamp-bin.tar.gz: Archive ready to be installed
+
 
 
 #<a name="Installation">Installation</a> 
@@ -31,6 +47,9 @@ You must use python version 2.7.X or later.
 This program is not compatible with Python 3.X versions.  
   
 Deploy the archive in the directory of your choice.  
+```  
+tar xvzf motu-client-python-$version-$buildTimestamp-bin.tar.gz
+```  
 Create a [configuration file](#Configuration) to inform the user and password to use to connect to the CAS server.   
 
 
