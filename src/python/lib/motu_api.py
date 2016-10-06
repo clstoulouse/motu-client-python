@@ -302,15 +302,21 @@ def get_requestUrl(dl_url, server, **options):
 	
 	# Get request id    	
     m = utils_http.open_url(dl_url, **options)
-    dom = minidom.parseString(m.read())
-	
-    for node in dom.getElementsByTagName('statusModeResponse'):
-		requestId = node.getAttribute('requestId')
-    
-	# Get request url
-    get_req_url = server + '?action=getreqstatus&requestid=' + requestId
+    responseStr = m.read()
+    dom = minidom.parseString(responseStr)
+    node = dom.getElementsByTagName('statusModeResponse')[0]
+    status = node.getAttribute('status')
+    if status == "2":
+        msg = node.getAttribute('msg')
+        log.error(msg)
+        get_req_url = None
+    else:
+        requestId = node.getAttribute('requestId')
+        # Get request url
+        get_req_url = server + '?action=getreqstatus&requestid=' + requestId
+        
     stopWatch.stop('get_request')
-	
+    
     return get_req_url
 	
 def wait_till_finished(reqUrlCAS, **options):	
@@ -527,47 +533,54 @@ def execute_request(_options):
 				stopWatch.start('wait_request')
 				requestUrl = get_requestUrl(download_url, url_service, **url_config)			
 				
-				# asynchronous mode
-				status = 0
-				dwurl = ""
+				if requestUrl != None:
+					# asynchronous mode
+					status = 0
+					dwurl = ""
+					msg = ""
 				
-				while True:	
-					if _options.auth_mode == AUTHENTICATION_MODE_CAS:
-						stopWatch.start('authentication')
-						# perform authentication before acceding service
-						requestUrlCas = utils_cas.authenticate_CAS_for_URL(requestUrl,
-																		 _options.user,
-																		 _options.pwd,**url_config)
-						stopWatch.stop('authentication')
-					else:
-						# if none, we do nothing more, in basic, we let the url requester doing the job
-						requestUrlCas = requestUrl	
-					
-					m = utils_http.open_url(requestUrlCas, **url_config)				
-					motu_reply=m.read()
-					dom = minidom.parseString(motu_reply)
-
-					for node in dom.getElementsByTagName('statusModeResponse'):
-						status = node.getAttribute('status')	
-						dwurl = node.getAttribute('remoteUri')
+					while True:	
+						if _options.auth_mode == AUTHENTICATION_MODE_CAS:
+							stopWatch.start('authentication')
+							# perform authentication before acceding service
+							requestUrlCas = utils_cas.authenticate_CAS_for_URL(requestUrl,
+																			 _options.user,
+																			 _options.pwd,**url_config)
+							stopWatch.stop('authentication')
+						else:
+							# if none, we do nothing more, in basic, we let the url requester doing the job
+							requestUrlCas = requestUrl	
 						
-					# Check status
-					if status == "0" or status == "3": # in progress/pending
-						log.info('Product is not yet available (request in process)') 		
-						time.sleep(10)
-					else: # finished (error|success)
-						break
+						m = utils_http.open_url(requestUrlCas, **url_config)				
+						motu_reply=m.read()
+						dom = minidom.parseString(motu_reply)
+	
+						for node in dom.getElementsByTagName('statusModeResponse'):
+							status = node.getAttribute('status')	
+							dwurl = node.getAttribute('remoteUri')
+							msg = node.getAttribute('msg')
+							
+						# Check status
+						if status == "0" or status == "3": # in progress/pending
+							log.info('Product is not yet available (request in process)') 		
+							time.sleep(10)
+						else: # finished (error|success)
+							break
 					
-				stopWatch.stop('wait_request')							
-
-				if status == "2": log.error(dwurl) 
-				if status == "1": 
-					log.info('The product is ready for download')
-					if dwurl != "":
-						dl_2_file(dwurl, fh, _options.block_size, _options.describe, **url_config)
-						log.info( "Done" )
-					else:
-						log.error("Couldn't retrieve file")
+					
+	
+					if status == "2": 
+					    log.error(msg) 
+					if status == "1": 
+						log.info('The product is ready for download')
+						if dwurl != "":
+							dl_2_file(dwurl, fh, _options.block_size, _options.describe, **url_config)
+							log.info( "Done" )
+						else:
+							log.error("Couldn't retrieve file")
+					
+				stopWatch.stop('wait_request')		
+							
         except:
             try:
                 if (os.path.isfile(fh)):
