@@ -1,1 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/python/lib/motu_api.py=utf-8
+encoding//src/python/lib/stop_watch.py=utf-8
+encoding//src/python/lib/utils_cas.py=utf-8
+encoding//src/python/motu-client.py=utf-8

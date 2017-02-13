@@ -515,6 +515,7 @@ def execute_request(_options):
             download_url = utils_cas.authenticate_CAS_for_URL(url,
                                                              _options.user,
                                                              _options.pwd,**url_config)
+            url_service =  download_url.split("?")[0]
             stopWatch.stop('authentication')
         else:
             # if none, we do nothing more, in basic, we let the url requester doing the job
