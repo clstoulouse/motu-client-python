@@ -27,6 +27,7 @@
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 import urlparse # WARNING : The urlparse module is renamed to urllib.parse
+import urllib
 import os
 import re
 import datetime
@@ -96,7 +97,7 @@ def build_params(_options):
 		if _options.sync:
 			log.info('Synchronous mode set')
 			query_options.insert( action  = 'productdownload',
-								  scriptVersion = get_client_version(),
+								  scriptVersion = urllib.quote_plus(get_client_version()),
 								  mode = 'console',
 								  service = _options.service_id,
 								  product = _options.product_id 
@@ -104,7 +105,7 @@ def build_params(_options):
 		else:
 			log.info('Asynchronous mode set')
 			query_options.insert( action  = 'productdownload',
-								  scriptVersion = get_client_version(),
+								  scriptVersion = urllib.quote_plus(get_client_version()),
 								  mode    = 'status',
 								  service = _options.service_id,
 								  product = _options.product_id 
@@ -285,7 +286,7 @@ def get_url_config(_options, data = None):
                                     'password': _options.pwd }
     # headers
     kargs['headers'] = {"X-Client-Id"     : get_client_artefact(),
-                        "X-Client-Version": get_client_version()}            
+                        "X-Client-Version": urllib.quote_plus(get_client_version())}            
     # data
     if data != None:
         kargs['data'] = data
@@ -515,6 +516,7 @@ def execute_request(_options):
             download_url = utils_cas.authenticate_CAS_for_URL(url,
                                                              _options.user,
                                                              _options.pwd,**url_config)
+            url_service =  download_url.split("?")[0]
             stopWatch.stop('authentication')
         else:
             # if none, we do nothing more, in basic, we let the url requester doing the job

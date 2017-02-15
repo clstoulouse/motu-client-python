@@ -37,6 +37,8 @@ import utils_html
 import utils_log
 import utils_collection
 
+from urlparse import parse_qs, urlparse
+    
 # pattern used to search for a CAS url within a response
 CAS_URL_PATTERN = '(.*)/login.*'
 
@@ -70,6 +72,9 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     
     # find the cas url from the redirected url
     redirected_url = connexion.url
+    p = parse_qs(urlparse(connexion.url).query, keep_blank_values=False)
+    redirectServiceUrl = p['service'][0]
+    
     
     m = re.search(CAS_URL_PATTERN, redirected_url)
     
@@ -102,7 +107,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     
     utils_log.log_url( log, "found url ticket:\t",url_ticket)
 
-    opts = utils_http.encode(utils_collection.ListMultimap(service = urllib.quote_plus(url)))
+    opts = utils_http.encode(utils_collection.ListMultimap(service = urllib.quote_plus(redirectServiceUrl)))
     
     utils_log.log_url( log, 'Granting user for service\t', url_ticket +'?'+opts )    
     url_config['data']=opts
@@ -110,8 +115,8 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     
     utils_log.log_url( log, "found service ticket:\t", ticket)
     
-    # we append the download url with the ticket and return the result
-    service_url = url + '&ticket=' + ticket
+    # we append the download url with the ticket and return the result  
+    service_url = redirectServiceUrl + '&ticket=' + ticket
     
     utils_log.log_url( log, "service url is:\t",service_url)
       
