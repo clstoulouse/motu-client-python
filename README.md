@@ -103,7 +103,10 @@ __Options:__
 * __--verbose__             print information in stdout  
 * __--noisy__               print more information (traces) in stdout  
 * __-u USER, --user=USER__  the user name (string)  
-* __-p PWD, --pwd=PWD__     the user password (string)  
+* __-p PWD, --pwd=PWD__     the user password (string). Special characters can be used.  
+  * __Example 1__ From a Windows batch, if your password contains a percent character, double the percent character: If password is CMS2017@%! then enter -u username-p CMS2017@%%! 
+  * __Example 2__ From a Windows batch, if your password contains a space character, set password between double quotes: If password is CMS2017 @%! then enter -u username-p "CMS2017 @%%!"
+  * __Example 3__ From a Linux shell, if your password contains a space character, set password between simple quotes: If password is CMS2017 @%! then enter -u username-p 'CMS2017 @%!'
 * __--auth-mode=AUTH_MODE__  the authentication mode: [default: cas]  
   * __none__ for no authentication
   * __basic__ for basic authentication
