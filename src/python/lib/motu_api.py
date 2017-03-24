@@ -123,6 +123,11 @@ def build_params(_options):
         query_options.insert( z_lo = _options.depth_min,
                               z_hi = _options.depth_max
                             )
+        
+    if _options.extraction_output:
+        query_options.insert(output=_options.outputWritten)
+    else:
+        query_options.insert(output="netcdf")
     
     if _options.extraction_temporal:
         # date are strings, and they are send to Motu "as is". If not, we convert them into string
@@ -220,6 +225,10 @@ def check_options(_options):
     if _options.date_min != None or _options.date_max != None :
          _options.extraction_temporal = True
     
+    #Check OUTPUT Options
+    _options.extraction_output = False
+    if _options.outputWritten != None :
+        _options.extraction_output = True
     
     # Check GEOGRAPHIC Options
     _options.extraction_geographic = False
@@ -529,13 +538,13 @@ def execute_request(_options):
 			# Synchronous mode
 			if _options.sync == True:
 				dl_2_file(download_url, fh, _options.block_size, _options.describe, **url_config)
-				log.info( "Done" )			
+				log.info( "Done" )
 			# Asynchronous mode
 			else:
 				stopWatch.start('wait_request')
-				requestUrl = get_requestUrl(download_url, url_service, **url_config)			
+				requestUrl = get_requestUrl(download_url, url_service, **url_config)	
 				
-				if requestUrl != None:
+				if requestUrl != None:    
 					# asynchronous mode
 					status = 0
 					dwurl = ""

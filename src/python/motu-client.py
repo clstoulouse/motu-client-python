@@ -217,7 +217,10 @@ def load_options():
                        type = 'float',
                        help = "Set a timeout on blocking socket operations (float expressing seconds)")                                          
     parser.add_option( '--user-agent',
-                       help = "Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)")                       
+                       help = "Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)")
+                                              
+    parser.add_option( '--outputWritten',
+                       help = "Set the format type returned by the requst. The possible values are netcdf or netcdf4 By default, it's set to netcdf.")                      
                   
     # set default values by picking from the configuration file
     default_values = {}
