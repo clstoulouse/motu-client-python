@@ -196,12 +196,17 @@ def load_options():
 					   dest='sync')
 					   
     parser.add_option( '--describe-product', '-D',
-                       help = "It allows to have all updated information on a dataset. Output is in XML format",
+                       help = "Get all updated information on a dataset. Output is in XML format",
                        action='store_true',
-					   dest='describe')					   
-
+					   dest='describe')		
+    			   
+    parser.add_option( '--size', 
+                       help = "Get the size of an extraction. Output is in XML format",
+                       action='store_true',
+                       dest='size')        
+    
     parser.add_option( '--out-dir', '-o',
-                       help = "The output dir (string)",
+                       help = "The output dir where result (download file) is written (string). If it starts with 'console', behaviour is the same as with --console-mode. ",
                        default=".")
                
     parser.add_option( '--out-name', '-f',
@@ -220,14 +225,18 @@ def load_options():
                        help = "Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)")
                                               
     parser.add_option( '--outputWritten',
-                       help = "Set the format type returned by the requst. The possible values are netcdf or netcdf4 By default, it's set to netcdf.")                      
-                  
+                       help = "Optional parameter used to set the format of the file returned by the download request: netcdf or netcdf4. If not set, netcdf is used.")                      
+    
+    parser.add_option( '--console-mode',
+                       help = "Optional parameter used to display result on stdout, either URL path to download extraction file, or the XML content of getSize or describeProduct requests.")                      
+    
+    
     # set default values by picking from the configuration file
     default_values = {}
     default_variables = []
     for option in parser.option_list:        
         if (option.dest != None) and conf_parser.has_option(SECTION, option.dest):
-            if (option.dest == "variable"):
+            if option.dest == "variable":
                 default_variables.append(conf_parser.get(SECTION, option.dest))
                 default_values[option.dest] = default_variables
             else:    

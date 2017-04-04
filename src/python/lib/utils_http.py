@@ -73,7 +73,27 @@ class HTTPErrorProcessor(urllib2.HTTPErrorProcessor):
             response = self.parent.error('http', request, response, code, msg, hdrs)
         return response
 
+class NoRedirection(urllib2.HTTPErrorProcessor):
 
+    # deg __init__(self, )
+    def http_response(self, request, response):
+        if response.code == 302: 
+            return response
+        
+        return response
+
+    https_response = http_response
+    
+
+class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
+
+    def http_error_302(self, req, fp, code, msg, headers):
+        result = urllib2.HTTPRedirectHandler.http_error_302(
+            self, req, fp, code, msg, headers)              
+        result.status = code                                
+        return result
+    
+    
 def open_url(url, **kargsParam):
     """open an url and return an handler on it.
        arguments can be :
@@ -96,23 +116,15 @@ def open_url(url, **kargsParam):
     """   
     data = None
     log = logging.getLogger("utils_http:open_url")
+    kargs = kargsParam.copy();
     # common handlers
-    handlers = [urllib2.HTTPCookieProcessor(cookielib.CookieJar()),
+    handlers = [SmartRedirectHandler(),
+                urllib2.HTTPCookieProcessor(cookielib.CookieJar()),
                 urllib2.HTTPHandler(),
                 TLS1Handler(),
                 utils_log.HTTPDebugProcessor(log),
                 HTTPErrorProcessor()                    
                ]
-
-    # print "AAAAAAAAAAAA kargsParam"               
-    # for key, value in kargsParam.items():
-        # print key, value                
-               
-    kargs = kargsParam.copy();
-    
-    # print "BBBBBBBBBBB kargs"               
-    # for key, value in kargs.items():
-        # print key, value                
 
     # add handlers for managing proxy credentials if necessary        
     if kargs.has_key('proxy'):
@@ -150,10 +162,6 @@ def open_url(url, **kargsParam):
         r = urllib2.Request(url, data, **kargs)
     else:
         r = urllib2.Request(url, **kargs)
-  
-    # print "CCCCCCC kargs"               
-    # for key, value in kargs.items():
-        # print key, value                
 
     # open the url, but let the exception propagates to the caller  
     return _opener.open(r)

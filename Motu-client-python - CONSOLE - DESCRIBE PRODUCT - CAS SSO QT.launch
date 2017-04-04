@@ -8,7 +8,7 @@
 </listAttribute>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${workspace_loc:motu-client-python/src/python/motu-client.py}"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_OTHER_WORKING_DIRECTORY" value=""/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-S -D -u ${MOTU_USER} -p ${MOTU_PASSWORD} -m https://motu-archive-datastore.cls.fr/motu-web/Motu -s Mercator_Ocean_Model_Global-TDS -d dataset-mercator-psy4v3-gl12-bestestimate-uv --verbose"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-S -D -u ${MOTU_USER} -p ${MOTU_PASSWORD} -m https://motu-archive-datastore.cls.fr/motu-web/Motu -s Mercator_Ocean_Model_Global-TDS -d dataset-mercator-psy4v3-gl12-bestestimate-uv --quiet -o console"/>
 <stringAttribute key="org.python.pydev.debug.ATTR_INTERPRETER" value="__default"/>
 <stringAttribute key="org.python.pydev.debug.ATTR_PROJECT" value="motu-client-python"/>
 <stringAttribute key="process_factory_id" value="org.python.pydev.debug.processfactory.PyProcessFactory"/>
