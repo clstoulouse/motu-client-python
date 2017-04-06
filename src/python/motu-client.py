@@ -228,7 +228,9 @@ def load_options():
                        help = "Optional parameter used to set the format of the file returned by the download request: netcdf or netcdf4. If not set, netcdf is used.")                      
     
     parser.add_option( '--console-mode',
-                       help = "Optional parameter used to display result on stdout, either URL path to download extraction file, or the XML content of getSize or describeProduct requests.")                      
+                       help = "Optional parameter used to display result on stdout, either URL path to download extraction file, or the XML content of getSize or describeProduct requests.",
+                       action='store_true',
+                       dest='console_mode')                      
     
     
     # set default values by picking from the configuration file
