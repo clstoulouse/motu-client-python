@@ -27,15 +27,18 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
 
 
 #<a name="Overview">Overview</a>
-Motu client "motu-client-python" is a python script used to connect to Motu HTTP server in order to:
-* to extract the data of a dataset, with geospatial, temporal and variable criterias (default option)   
-* get the size of an extraction with geospatial, temporal and variable criterias  
-* get information about a dataset  
+Motu client "motu-client-python" is a python script used to connect to Motu HTTP server in order to:  
+
+* __extract__ the data of a dataset, with geospatial, temporal and variable criterias (default option)   
+* __get the size__ of an extraction with geospatial, temporal and variable criterias  
+* __get information__ about a dataset  
+
 This program can be integrated into a processing chain in order to automate the downloading of products via the Motu.  
   
   
 #<a name="Build">Build</a>  
-From the root folder runs the Maven command:
+From the root folder runs the Maven command:  
+  
 ```
 mvn clean install -Dmaven.test.skip=true
 [...]
@@ -58,14 +61,16 @@ Deploy the archive in the directory of your choice.
 ```  
 tar xvzf motu-client-python-$version-$buildTimestamp-bin.tar.gz
 ```  
+
 Create a [configuration file](#Configuration) and set the user and password to use to connect to the CAS server.   
 
 
 #<a name="Configuration">Configuration</a>  
-The program parameters are contained in an ini file. This file is located in the following directory:  
+All parameters can be defined as command line options or can be written in a configuration file.
+The configuration file is a .ini file. This file is located in the following directory:  
 
 * on __Unix__ platforms: $HOME/motu-client/motu-client-python.ini
-* on __Windows__ platforms: %USERPROFILE%\motu-client/motu-client-python.ini
+* on __Windows__ platforms: %USERPROFILE%\motu-client\motu-client-python.ini
   
 The expected structure of file is:  
 ``` 
@@ -153,21 +158,27 @@ __Options:__
 * __--user-agent=USER_AGENT__ Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)  
   
 #<a name="UsageExamples">Usage examples</a>   
-In the following examples, variable ${MOTU_USER} and ${MOTU_PASSWORD} are user name and user password used to connect to the CAS server for single sign on.  
-${MOTU_SERVER_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.
+In the following examples, variable ${MOTU\_USER} and ${MOTU\_PASSWORD} are user name and user password used to connect to the CAS server for single sign on.  
+${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.
 
 ##<a name="UsageExamplesDownload">Download</a>  
 ### Download and save extracted file on the local machine
+This command writes the extraction result data in file: /data/test.nc  
+
 ```  
 ./motu-client.py --verbose --auth-mode=none -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f test.nc
 ``` 
 
-### Display on stdout the URL of the NC file available on the Motu server
+### Display on stdout the HTTP(s) URL of the NC file available on the Motu server
+The HTTP(s) URL is displayed on stdout. This URL is a direct link to the file which is available to be downloaded.  
+
 ```  
 ./motu-client.py --quiet --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o console
 ``` 
 
 ##<a name="UsageExamplesGetSize">GetSize</a>  
+See [https://github.com/clstoulouse/motu#ClientAPI_GetSize](https://github.com/clstoulouse/motu#ClientAPI_GetSize) for more details about XML result.  
+
 ### Download and save the XML file which contains the size on the local machine
 ```  
 ./motu-client.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f size.xml
@@ -180,6 +191,8 @@ ${MOTU_SERVER_URL} is the URL on the MOTU HTTP(s) server. For example http://loc
 
 
 ##<a name="UsageExamplesDescribeProduct">DescribeProduct</a>  
+See [https://github.com/clstoulouse/motu#describe-product](https://github.com/clstoulouse/motu#describe-product) for more details about XML result.  
+
 ### Download and save the XML file which contains the size on the local machine
 ```  
 ./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f size.xml
