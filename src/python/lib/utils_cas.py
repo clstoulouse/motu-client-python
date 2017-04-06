@@ -83,7 +83,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     
     url_cas = m.group(1) + '/v1/tickets'
 
-    opts = utils_http.encode(utils_collection.ListMultimap(username = user, password = pwd))
+    opts = utils_http.encode(utils_collection.ListMultimap(username = urllib.quote(user), password = urllib.quote(pwd))) 
 
     utils_log.log_url( log, "login user into CAS:\t", url_cas+'?'+opts )
     url_config['data']=opts

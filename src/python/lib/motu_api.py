@@ -84,34 +84,37 @@ def build_params(_options):
     """
     query_options = utils_collection.ListMultimap()
     
-	# describeProduct in XML format (sync) / productDownload (sync/async)
+    # describeProduct in XML format (sync) / productDownload (sync/async)
     if _options.describe:
-		_options.sync = True
-		log.info('Synchronous mode set')		
-		query_options.insert( action  = 'describeProduct',				
-							  service = _options.service_id,
-							  product = _options.product_id 
-							)   
-    else:						
-		# synchronous/asynchronous mode
-		if _options.sync:
-			log.info('Synchronous mode set')
-			query_options.insert( action  = 'productdownload',
-								  scriptVersion = urllib.quote_plus(get_client_version()),
-								  mode = 'console',
-								  service = _options.service_id,
-								  product = _options.product_id 
-								)						
-		else:
-			log.info('Asynchronous mode set')
-			query_options.insert( action  = 'productdownload',
-								  scriptVersion = urllib.quote_plus(get_client_version()),
-								  mode    = 'status',
-								  service = _options.service_id,
-								  product = _options.product_id 
-								)
-	
-	# geographical parameters
+        query_options.insert( action  = 'describeProduct',                
+                              service = _options.service_id,
+                              product = _options.product_id 
+                            )   
+    elif _options.size:   
+        query_options.insert( action  = 'getSize',                
+                              service = _options.service_id,
+                              product = _options.product_id 
+                            )        
+    else:                        
+        # synchronous/asynchronous mode
+        if _options.sync:
+            log.info('Synchronous mode set')
+            query_options.insert( action  = 'productdownload',
+                                  scriptVersion = urllib.quote_plus(get_client_version()),
+                                  mode = 'console',
+                                  service = _options.service_id,
+                                  product = _options.product_id 
+                                )                        
+        else:
+            log.info('Asynchronous mode set')
+            query_options.insert( action  = 'productdownload',
+                                  scriptVersion = urllib.quote_plus(get_client_version()),
+                                  mode    = 'status',
+                                  service = _options.service_id,
+                                  product = _options.product_id 
+                                )
+    
+    # geographical parameters
     if _options.extraction_geographic:
         query_options.insert( x_lo = _options.longitude_min,
                               x_hi = _options.longitude_max,
@@ -123,6 +126,11 @@ def build_params(_options):
         query_options.insert( z_lo = _options.depth_min,
                               z_hi = _options.depth_max
                             )
+        
+    if _options.extraction_output:
+        query_options.insert(output=_options.outputWritten)
+    else:
+        query_options.insert(output="netcdf")
     
     if _options.extraction_temporal:
         # date are strings, and they are send to Motu "as is". If not, we convert them into string
@@ -143,6 +151,10 @@ def build_params(_options):
         for i, opt in enumerate(variable):
             query_options.insert( variable = opt )
     
+    
+    if _options.console_mode or _options.out_dir.startswith("console") :
+        query_options.insert(mode="console")
+        
     return utils_http.encode(query_options)
 
 def check_options(_options):    
@@ -183,16 +195,16 @@ def check_options(_options):
         raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory'] % 'out-dir')
     
     out_dir = _options.out_dir
+    if not out_dir.startswith("console"):
+        # check directory existence
+        if not os.path.exists(out_dir):
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.outdir-notexist'] % out_dir)
+        # check whether directory is writable or not
+        if not os.access(out_dir, os.W_OK):
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.outdir-notwritable'] % out_dir)
     
-    # check directory existence
-    if not os.path.exists(out_dir):
-        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.outdir-notexist'] % out_dir)
-    # check whether directory is writable or not
-    if not os.access(out_dir, os.W_OK):
-        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.outdir-notwritable'] % out_dir)
-    
-    if _options.out_name == None :
-        raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory'] % 'out-name')
+        if _options.out_name == None :
+            raise Exception(utils_messages.get_external_messages()['motu-client.exception.option.mandatory'] % 'out-name')
 
     # Check PROXY Options
     _options.proxy = False
@@ -220,6 +232,10 @@ def check_options(_options):
     if _options.date_min != None or _options.date_max != None :
          _options.extraction_temporal = True
     
+    #Check OUTPUT Options
+    _options.extraction_output = False
+    if _options.outputWritten != None :
+        _options.extraction_output = True
     
     # Check GEOGRAPHIC Options
     _options.extraction_geographic = False
@@ -295,13 +311,12 @@ def get_url_config(_options, data = None):
 
 def get_requestUrl(dl_url, server, **options):
     """ Get the request url."""    
-    
     stopWatch = stop_watch.localThreadStopWatch()    
     start_time = datetime.datetime.now()
     stopWatch.start('get_request')
     log.info( "Requesting file to download (this can take a while)..." ) 
-	
-	# Get request id    	
+    
+    # Get request id        
     m = utils_http.open_url(dl_url, **options)
     responseStr = m.read()
     dom = minidom.parseString(responseStr)
@@ -319,14 +334,13 @@ def get_requestUrl(dl_url, server, **options):
     stopWatch.stop('get_request')
     
     return get_req_url
-	
-def wait_till_finished(reqUrlCAS, **options):	
-
+    
+def wait_till_finished(reqUrlCAS, **options):    
     stopWatch = stop_watch.localThreadStopWatch()    
     start_time = datetime.datetime.now()
 
-	
-def dl_2_file(dl_url, fh, block_size = 65535, describe = None, **options):
+    
+def dl_2_file(dl_url, fh, block_size = 65535, isADownloadRequest = None, **options):
     """ Download the file with the main url (of Motu) file.
      
     Motu can return an error message in the response stream without setting an
@@ -338,77 +352,94 @@ def dl_2_file(dl_url, fh, block_size = 65535, describe = None, **options):
     
     stopWatch = stop_watch.localThreadStopWatch()    
     start_time = datetime.datetime.now()
-    log.info( "Downloading file (this can take a while)..." )    
+    log.info("Downloading file (this can take a while)..." )    
 
-	# download file
-    temp = open(fh, 'w+b')             
+    # download file
+    temp = None
+    if not fh.startswith("console"):
+        temp = open(fh, 'w+b')
+        
     try:
-      stopWatch.start('processing')
-      m = utils_http.open_url(dl_url, **options)
-      try:
-        # check the real url (after potential redirection) is not a CAS Url scheme
-        match = re.search(utils_cas.CAS_URL_PATTERN, m.url)
-        if match is not None:
-            service, _, _ = dl_url.partition('?')
-            redirection, _, _ = m.url.partition('?')
-            raise Exception(utils_messages.get_external_messages()['motu-client.exception.authentication.redirected'] % (service, redirection) )
+        stopWatch.start('processing')
+        
+        m = utils_http.open_url(dl_url, **options)
+        try:
+            # check the real url (after potential redirection) is not a CAS Url scheme
+            match = re.search(utils_cas.CAS_URL_PATTERN, m.url)
+            if match is not None:
+                service, _, _ = dl_url.partition('?')
+                redirection, _, _ = m.url.partition('?')
+                raise Exception(utils_messages.get_external_messages()['motu-client.exception.authentication.redirected'] % (service, redirection) )
 
-        # check that content type is not text/plain
-        headers = m.info()
-        if "Content-Type" in headers:
-          if len(headers['Content-Type']) > 0:
-            if not describe:
-              if   headers['Content-Type'].startswith('text') or headers['Content-Type'].find('html') != -1:
-                raise Exception( utils_messages.get_external_messages()['motu-client.exception.motu.error'] % m.read() )
-          
-          log.info( 'File type: %s' % headers['Content-Type'] )
-        # check if a content length (size of the file) has been send
-        if "Content-Length" in headers:        
-            try:
-                # it should be an integer
-                size = int(headers["Content-Length"]) 
-                log.info( 'File size: %s (%i B)' % ( utils_unit.convert_bytes(size), size )  )    
-            except Exception, e:
-                size = -1
-                log.warn( 'File size is not an integer: %s' % headers["Content-Length"] )                      
-        else:
-          size = -1
-          log.warn( 'File size: %s' % 'unknown' )
+            # check that content type is not text/plain
+            headers = m.info()
+            if "Content-Type" in headers:
+              if len(headers['Content-Type']) > 0:
+                if isADownloadRequest:
+                  if headers['Content-Type'].startswith('text') or headers['Content-Type'].find('html') != -1:
+                    raise Exception( utils_messages.get_external_messages()['motu-client.exception.motu.error'] % m.read() )
+              
+            log.info( 'File type: %s' % headers['Content-Type'] )
+            # check if a content length (size of the file) has been send
+            size = -1
+            if "Content-Length" in headers:        
+                try:
+                    # it should be an integer
+                    size = int(headers["Content-Length"]) 
+                    log.info( 'File size: %s (%i B)' % ( utils_unit.convert_bytes(size), size )  )    
+                except Exception, e:
+                    size = -1
+                    log.warn( 'File size is not an integer: %s' % headers["Content-Length"] )                      
+            elif temp is not None:
+                log.warn( 'File size: %s' % 'unknown' )
 
-        processing_time = datetime.datetime.now();        
-        stopWatch.stop('processing')        
-        stopWatch.start('downloading')
+            processing_time = datetime.datetime.now();        
+            stopWatch.stop('processing')        
+            stopWatch.start('downloading')
         
-        # performs the download           
-        log.info( 'Downloading file %s' % os.path.abspath(fh) )
+            # performs the download           
+            log.info( 'Downloading file %s' % os.path.abspath(fh) )
         
-        def progress_function(sizeRead):
-           percent = sizeRead*100./size
-           log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
-           td = datetime.datetime.now()- start_time;           
+            def progress_function(sizeRead):
+                percent = sizeRead*100./size
+                log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
+                td = datetime.datetime.now()- start_time;           
         
-	def none_function(sizeRead):
-           percent = 100
-           log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
-           td = datetime.datetime.now()- start_time;           
-
-	read = utils_stream.copy(m,temp,progress_function if size != -1 else none_function, block_size )
+            def none_function(sizeRead):
+                percent = 100
+                log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent)
+                td = datetime.datetime.now()- start_time;           
+            
+            if temp is not None:
+                read = utils_stream.copy(m,temp,progress_function if size != -1 else none_function, block_size )
+            else:
+                if isADownloadRequest:
+                    #Console mode, only display the NC file URL on stdout
+                    read = len(m.url)
+                    print (m.url)
+                else:
+                    import cStringIO
+                    output = cStringIO.StringIO()
+                    utils_stream.copy(m,output,progress_function if size != -1 else none_function, block_size )
+                    read = len(output.getvalue())
+                    print (output.getvalue())
+                
+            end_time = datetime.datetime.now()
+            stopWatch.stop('downloading')
         
-        end_time = datetime.datetime.now()
-        stopWatch.stop('downloading')
-        
-        log.info( "Processing  time : %s", str(processing_time - init_time) )
-        log.info( "Downloading time : %s", str(end_time - processing_time) )
-        log.info( "Total time       : %s", str(end_time - init_time) )
-        log.info( "Download rate    : %s/s", utils_unit.convert_bytes((read / total_milliseconds(end_time - start_time)) * 10**3) )
-      finally:
-        m.close()
+            log.info( "Processing  time : %s", str(processing_time - init_time) )
+            log.info( "Downloading time : %s", str(end_time - processing_time) )
+            log.info( "Total time       : %s", str(end_time - init_time) )
+            log.info( "Download rate    : %s/s", utils_unit.convert_bytes((read / total_milliseconds(end_time - start_time)) * 10**3) )
+        finally:
+            m.close()
     finally:
-      temp.flush()
-      temp.close()
+        if temp is not None:
+            temp.flush()
+            temp.close()
 
     # raise exception if actual size does not match content-length header
-    if size >= 0 and read < size:
+    if temp is not None and size >= 0 and read < size:
         raise Exception(utils_messages.get_external_messages()['motu-client.exception.download.too-short'] % (read, size) )
 
 def execute_request(_options):
@@ -502,8 +533,8 @@ def execute_request(_options):
             questionMark = ''
         url = url_service+questionMark+url_params
 
-        if _options.describe == True: 
-	    _options.out_name = _options.out_name.replace('.nc','.xml')
+        if _options.describe == True or _options.size == True: 
+            _options.out_name = _options.out_name.replace('.nc','.xml')
 
         # set-up the socket timeout if any
         if _options.socket_timeout != None:
@@ -524,65 +555,68 @@ def execute_request(_options):
 
         # create a file for storing downloaded stream
         fh = os.path.join(_options.out_dir,_options.out_name)
-		
+        if _options.console_mode:
+            fh = "console"
+            
         try:
-			# Synchronous mode
-			if _options.sync == True:
-				dl_2_file(download_url, fh, _options.block_size, _options.describe, **url_config)
-				log.info( "Done" )			
-			# Asynchronous mode
-			else:
-				stopWatch.start('wait_request')
-				requestUrl = get_requestUrl(download_url, url_service, **url_config)			
-				
-				if requestUrl != None:
-					# asynchronous mode
-					status = 0
-					dwurl = ""
-					msg = ""
-				
-					while True:	
-						if _options.auth_mode == AUTHENTICATION_MODE_CAS:
-							stopWatch.start('authentication')
-							# perform authentication before acceding service
-							requestUrlCas = utils_cas.authenticate_CAS_for_URL(requestUrl,
-																			 _options.user,
-																			 _options.pwd,**url_config)
-							stopWatch.stop('authentication')
-						else:
-							# if none, we do nothing more, in basic, we let the url requester doing the job
-							requestUrlCas = requestUrl	
-						
-						m = utils_http.open_url(requestUrlCas, **url_config)				
-						motu_reply=m.read()
-						dom = minidom.parseString(motu_reply)
-	
-						for node in dom.getElementsByTagName('statusModeResponse'):
-							status = node.getAttribute('status')	
-							dwurl = node.getAttribute('remoteUri')
-							msg = node.getAttribute('msg')
-							
-						# Check status
-						if status == "0" or status == "3": # in progress/pending
-							log.info('Product is not yet available (request in process)') 		
-							time.sleep(10)
-						else: # finished (error|success)
-							break
-					
-					
-	
-					if status == "2": 
-					    log.error(msg) 
-					if status == "1": 
-						log.info('The product is ready for download')
-						if dwurl != "":
-							dl_2_file(dwurl, fh, _options.block_size, _options.describe, **url_config)
-							log.info( "Done" )
-						else:
-							log.error("Couldn't retrieve file")
-					
-				stopWatch.stop('wait_request')		
-							
+            # Synchronous mode
+            if _options.sync == True or _options.describe == True or _options.size == True:
+                is_a_download_request=False
+                if _options.describe == False and _options.size == False:
+                    is_a_download_request=True
+                dl_2_file(download_url, fh, _options.block_size, is_a_download_request, **url_config)
+                log.info( "Done" )
+            # Asynchronous mode
+            else:
+                stopWatch.start('wait_request')
+                requestUrl = get_requestUrl(download_url, url_service, **url_config)    
+                
+                if requestUrl != None:    
+                    # asynchronous mode
+                    status = 0
+                    dwurl = ""
+                    msg = ""
+                
+                    while True:    
+                        if _options.auth_mode == AUTHENTICATION_MODE_CAS:
+                            stopWatch.start('authentication')
+                            # perform authentication before acceding service
+                            requestUrlCas = utils_cas.authenticate_CAS_for_URL(requestUrl,
+                                                                             _options.user,
+                                                                             _options.pwd,**url_config)
+                            stopWatch.stop('authentication')
+                        else:
+                            # if none, we do nothing more, in basic, we let the url requester doing the job
+                            requestUrlCas = requestUrl    
+                        
+                        m = utils_http.open_url(requestUrlCas, **url_config)                
+                        motu_reply=m.read()
+                        dom = minidom.parseString(motu_reply)
+    
+                        for node in dom.getElementsByTagName('statusModeResponse'):
+                            status = node.getAttribute('status')    
+                            dwurl = node.getAttribute('remoteUri')
+                            msg = node.getAttribute('msg')
+                            
+                        # Check status
+                        if status == "0" or status == "3": # in progress/pending
+                            log.info('Product is not yet available (request in process)')         
+                            time.sleep(10)
+                        else: # finished (error|success)
+                            break
+    
+                    if status == "2": 
+                        log.error(msg) 
+                    if status == "1": 
+                        log.info('The product is ready for download')
+                        if dwurl != "":
+                            dl_2_file(dwurl, fh, _options.block_size, not (_options.describe or _options.size), **url_config)
+                            log.info( "Done" )
+                        else:
+                            log.error("Couldn't retrieve file")
+                    
+                stopWatch.stop('wait_request')        
+                            
         except:
             try:
                 if (os.path.isfile(fh)):
