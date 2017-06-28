@@ -13,7 +13,7 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
 >Be careful: Markdown format has issue while rendering underscore "\_" character which can lead to bad variable name or path.
 
 
-#Summary
+# Summary
 * [Overview](#Overview)
 * [Build](#Build)
 * [Installation](#Installation)
@@ -26,7 +26,7 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
 * [Licence](#Licence)
 
 
-#<a name="Overview">Overview</a>
+# <a name="Overview">Overview</a>
 Motu client "motu-client-python" is a python script used to connect to Motu HTTP server in order to:  
 
 * __extract__ the data of a dataset, with geospatial, temporal and variable criterias (default option)   
@@ -36,7 +36,7 @@ Motu client "motu-client-python" is a python script used to connect to Motu HTTP
 This program can be integrated into a processing chain in order to automate the downloading of products via the Motu.  
   
   
-#<a name="Build">Build</a>  
+# <a name="Build">Build</a>  
 From the root folder runs the Maven command:  
   
 ```
@@ -53,7 +53,7 @@ This creates two archives in the target folder:
 
 
 
-#<a name="Installation">Installation</a> 
+# <a name="Installation">Installation</a> 
 You must use python version 2.7.X or later.  
 This program is not compatible with Python 3.X versions.  
   
@@ -65,7 +65,7 @@ tar xvzf motu-client-python-$version-$buildTimestamp-bin.tar.gz
 Create a [configuration file](#Configuration) and set the user and password to use to connect to the CAS server.   
 
 
-#<a name="Configuration">Configuration</a>  
+# <a name="Configuration">Configuration</a>  
 All parameters can be defined as command line options or can be written in a configuration file.
 The configuration file is a .ini file. This file is located in the following directory:  
 
@@ -99,7 +99,7 @@ socket_timeout=
 ``` 
 
 
-#<a name="Usage">Usage</a>  
+# <a name="Usage">Usage</a>  
 Starts the motu python client.  
 
 ```  
@@ -157,11 +157,11 @@ __Options:__
 * __--socket-timeout=SOCKET_TIMEOUT__ Set a timeout on blocking socket operations (float expressing seconds)  
 * __--user-agent=USER_AGENT__ Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)  
   
-#<a name="UsageExamples">Usage examples</a>   
+# <a name="UsageExamples">Usage examples</a>   
 In the following examples, variable ${MOTU\_USER} and ${MOTU\_PASSWORD} are user name and user password used to connect to the CAS server for single sign on.  
 ${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.
 
-##<a name="UsageExamplesDownload">Download</a>  
+## <a name="UsageExamplesDownload">Download</a>  
 ### Download and save extracted file on the local machine
 This command writes the extraction result data in file: /data/test.nc  
 
@@ -176,7 +176,7 @@ The HTTP(s) URL is displayed on stdout. This URL is a direct link to the file wh
 ./motu-client.py --quiet --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o console
 ``` 
 
-##<a name="UsageExamplesGetSize">GetSize</a>  
+## <a name="UsageExamplesGetSize">GetSize</a>  
 See [https://github.com/clstoulouse/motu#ClientAPI_GetSize](https://github.com/clstoulouse/motu#ClientAPI_GetSize) for more details about XML result.  
 
 ### Download and save the XML file which contains the size on the local machine
@@ -190,7 +190,7 @@ See [https://github.com/clstoulouse/motu#ClientAPI_GetSize](https://github.com/c
 ``` 
 
 
-##<a name="UsageExamplesDescribeProduct">DescribeProduct</a>  
+## <a name="UsageExamplesDescribeProduct">DescribeProduct</a>  
 See [https://github.com/clstoulouse/motu#describe-product](https://github.com/clstoulouse/motu#describe-product) for more details about XML result.  
 
 ### Download and save the XML file which contains the size on the local machine
@@ -206,7 +206,7 @@ See [https://github.com/clstoulouse/motu#describe-product](https://github.com/cl
 
 
 
-#<a name="Licence">Licence</a> 
+# <a name="Licence">Licence</a> 
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.  
   
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.  
