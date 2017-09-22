@@ -1,0 +1,6 @@
+# Author: CLS, smarty@cls.fr
+include LICENSE
+include pom.xml
+include README.md
+include setup.cfg
+include setup.py

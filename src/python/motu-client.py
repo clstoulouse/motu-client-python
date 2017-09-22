@@ -52,10 +52,10 @@ ERROR_CODE_EXIT=1
 
 # the config file to load from 
 CFG_FILE = '~/motu-client/motu-client-python.ini'
-LOG_CFG_FILE = './etc/log.ini'
+LOG_CFG_FILE = './motuclient/cfg/log.ini'
 
 # project libraries path
-LIBRARIES_PATH = os.path.join(os.path.dirname(__file__), './lib')
+LIBRARIES_PATH = os.path.join(os.path.dirname(__file__), './motuclient')
 
 SECTION = 'Main'
 
