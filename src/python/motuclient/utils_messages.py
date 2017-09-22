@@ -30,7 +30,7 @@ import os
 
 _messages = None
 
-MESSAGES_FILE = '../etc/messages.properties'
+MESSAGES_FILE = 'cfg/messages.properties'
 
 def get_external_messages():
     """Return a table of externalized messages.

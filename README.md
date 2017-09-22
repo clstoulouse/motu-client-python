@@ -1,8 +1,7 @@
-# Motu Client Python Project
-@author Project manager <rdedianous@cls.fr>  
+# Motu Client Python Project 
 @author Product owner <tjolibois@cls.fr>  
 @author Scrum master, software architect <smarty@cls.fr>  
-@author Quality assurance, continuous integration manager <bpirrotta@cls.fr> 
+@author Quality assurance, continuous integration manager <smarty@cls.fr>  
 
 >How to read this file? 
 Use a markdown reader: 
@@ -17,13 +16,19 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
 * [Overview](#Overview)
 * [Build](#Build)
 * [Installation](#Installation)
+    * [Using PIP](#InstallationPIP)
+    * [From tar.gz file](#InstallationTGZ)
 * [Configuration](#Configuration)
 * [Usage and options](#Usage)
+    * [Usage from PIP installation](#UsagePIP)
+    * [Usage from tar.gz installation](#UsageTGZ)
 * [Usage examples](#UsageExamples)
     * [Download](#UsageExamplesDownload)
     * [GetSize](#UsageExamplesGetSize)	
     * [DescribeProduct](#UsageExamplesDescribeProduct)
 * [Licence](#Licence)
+* [Troubleshooting](#Troubleshooting)
+    * [Unable to download the latest version watched on GitHub from PIP](#Troubleshooting)  
 
 
 # <a name="Overview">Overview</a>
@@ -56,8 +61,26 @@ This creates two archives in the target folder:
 # <a name="Installation">Installation</a> 
 You must use python version 2.7.X or later.  
 This program is not compatible with Python 3.X versions.  
+There is two methods to install the client, by using PIP or from a tar.gz file.
   
-Deploy the archive in the directory of your choice.  
+## <a name="InstallationPIP">Using PIP</a>
+Python Package Index is used to ease installation.  
+If your host needs a PROXY set it, for example:  
+```
+export HTTPS_PROXY=http://myCompanyProxy:8080  
+```  
+
+Then install:  
+  
+```
+pip install motu-client  
+```
+  
+Now "Motu-client" is installed, you can [configured it](#Configuration) and [use it](#UsagePIP).
+  
+  
+## <a name="InstallationTGZ">From tar.gz file</a>
+Deploy the archive (file motu-client-python-$version-bin.tar.gz available from [GitHub release](https://github.com/clstoulouse/motu-client-python/releases)) in the directory of your choice.  
 ```  
 tar xvzf motu-client-python-$version-$buildTimestamp-bin.tar.gz
 ```  
@@ -102,12 +125,25 @@ socket_timeout=
 # <a name="Usage">Usage</a>  
 Starts the motu python client.  
 
+## <a name="UsagePIP">Usage from PIP installation</a>  
+```  
+python -m motu-client -h  
+python -m motu-client [options]
+```  
+  
+[Options](#UsageOptions) are listed below.  
+Method to used when it has been installed with [PIP method](#InstallationPIP).  
+
+
+## <a name="UsageTGZ">Usage from tar.gz installation</a>  
 ```  
 ./motu-client.py  -h  
 motu-client.py [options]
 ```  
+Method to used when it has been installed with [tar.gz method](#InstallationTGZ).  
+Usefull if host is offline and has no Internet access.
 
-__Options:__  
+### <a name="UsageOptions">__Options:__</a>  
 
 
 * __-h, --help__            show this help message and exit  
@@ -157,9 +193,12 @@ __Options:__
 * __--socket-timeout=SOCKET_TIMEOUT__ Set a timeout on blocking socket operations (float expressing seconds)  
 * __--user-agent=USER_AGENT__ Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)  
   
+  
 # <a name="UsageExamples">Usage examples</a>   
 In the following examples, variable ${MOTU\_USER} and ${MOTU\_PASSWORD} are user name and user password used to connect to the CAS server for single sign on.  
-${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.
+${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.  
+Commands "./motu-client.py" can be replaced by "python -m motu-client" if it has been installed with [PIP method](#UsagePIP).  
+
 
 ## <a name="UsageExamplesDownload">Download</a>  
 ### Download and save extracted file on the local machine
@@ -212,3 +251,29 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.  
   
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.  
+
+# <a name="Troubleshooting">Troubleshooting</a>  
+# <a name="TroubleshootingPIPCache">Unable to download the latest version watched on GitHub from PIP</a>
+Example:  
+```  
+pip install motu-client  
+Collecting motu-client  
+  Using cached https://test-files.pythonhosted.org/packages/4a/7d/41c3bdd973baf119371493c193248349c9b7107477ebf343f3889cabbf48/motu-client-X.Y.Z.zip  
+Installing collected packages: motu-client  
+  Running setup.py install for motu-client ... done  
+Successfully installed motu-client-X.Y.Z  
+```  
+  
+Clear your PIP cache: On Windows, delete the folder %HOMEPATH%/pip. On archlinux pip cache is located at ~/.cache/pip.
+After re run the command:  
+```  
+pip install motu-client  
+Collecting motu-client  
+  Using https://test-files.pythonhosted.org/packages/4a/7d/41c3bdd973baf119371493c193248349c9b7107477ebf343f3889cabbf48/motu-client-X.Y.Z.zip  
+Installing collected packages: motu-client  
+  Running setup.py install for motu-client ... done  
+Successfully installed motu-client-X.Y.Z  
+``` 
+
+
+

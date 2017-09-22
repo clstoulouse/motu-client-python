@@ -34,6 +34,7 @@ import datetime
 import time
 import socket
 from xml.dom import minidom
+from pkg_resources import get_distribution
 
 # Import project libraries
 import utils_log
@@ -63,7 +64,13 @@ def get_client_version():
     
     The value is automatically set by the maven processing build, so don't 
     touch it unless you know what you are doing."""
-    return '${project.version}-${build-timestamp}'
+    version = 'unknown'
+    try:
+	    version = get_distribution('motu-client').version
+    except:
+	    from motuclient import pom_version
+	    version = pom_version.getPOMVersion()
+    return version
 
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
