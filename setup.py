@@ -1,6 +1,17 @@
 from distutils.core import setup
-from os.path import splitext, basename
-import glob
+from os.path import splitext, basename, dirname, abspath
+import glob, os, sys
+
+# project libraries path
+LIBRARIES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src', 'python')
+print LIBRARIES_PATH
+# Manage imports of project libraries
+if not os.path.exists(LIBRARIES_PATH):
+    sys.stderr.write('\nERROR: can not find project libraries path: %s\n\n' % os.path.abspath(LIBRARIES_PATH))
+    sys.exit(1) 
+sys.path.append(LIBRARIES_PATH)  
+
+
 from motuclient import pom_version
 
 setup(

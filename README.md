@@ -29,7 +29,7 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
 * [Licence](#Licence)
 * [Troubleshooting](#Troubleshooting)
     * [Unable to download the latest version watched on GitHub from PIP](#Troubleshooting)  
-
+    * [From Windows, Parameter error](#TroubleshootingWinArgErr)
 
 # <a name="Overview">Overview</a>
 Motu client "motu-client-python" is a python script used to connect to Motu HTTP server in order to:  
@@ -275,5 +275,16 @@ Installing collected packages: motu-client
 Successfully installed motu-client-X.Y.Z  
 ``` 
 
+# <a name="TroubleshootingWinArgErr">From Windows, Parameter error</a>
+From Windows, the command "motu-client.py --version" returns an error.  
+10:44:24 [ERROR] Execution failed: [Excp 13] User (option 'user') is mandatory when 'cas' authentication is set. Please provide it.
 
+__Analyse:__  
+This issue comes from the fact that Windows command line does not pass parameters to python command.  
+  
+__Solution:__  
+``` 
+Edit the Windows Registry Key "HKEY_CLASSES_ROOT\py_auto_file\shell\open\command" and append at the end of the value %*  
+Exemple: "C:\dvltSoftware\python\Python27\python.exe" "%1" %*  
+``` 
 

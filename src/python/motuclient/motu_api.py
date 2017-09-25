@@ -66,10 +66,10 @@ def get_client_version():
     touch it unless you know what you are doing."""
     version = 'unknown'
     try:
-	    version = get_distribution('motu-client').version
+        version = get_distribution('motu-client').version    
     except:
-	    from motuclient import pom_version
-	    version = pom_version.getPOMVersion()
+        from motuclient import pom_version
+        version = pom_version.getPOMVersion()
     return version
 
 def get_client_artefact():
