@@ -1,10 +1,12 @@
 from xml.etree import ElementTree
 
 def getPOMVersion():
-    version="Unknown"  # replace your path
+    version="Unknown"
     try:
+        # For production tree
         version = __getPOMVersion("pom.xml")
     except:
+        # For development tree
         version = __getPOMVersion("../../pom.xml")
     return version
     
