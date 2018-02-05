@@ -316,7 +316,7 @@ def get_url_config(_options, data = None):
     
     return kargs
 
-def get_requestUrl(dl_url, server, **options):
+def get_requestUrl(dl_url, server, _options, **options):
     """ Get the request url."""    
     stopWatch = stop_watch.localThreadStopWatch()    
     start_time = datetime.datetime.now()
@@ -336,7 +336,7 @@ def get_requestUrl(dl_url, server, **options):
     else:
         requestId = node.getAttribute('requestId')
         # Get request url
-        get_req_url = server + '?action=getreqstatus&requestid=' + requestId
+        get_req_url = server + '?action=getreqstatus&requestid=' + requestId + "&service=" + _options.service_id + "&product=" + _options.product_id
         
     stopWatch.stop('get_request')
     
@@ -573,7 +573,7 @@ def execute_request(_options):
             # Asynchronous mode
             else:
                 stopWatch.start('wait_request')
-                requestUrl = get_requestUrl(download_url, url_service, **url_config)    
+                requestUrl = get_requestUrl(download_url, url_service, _options, **url_config)    
                 
                 if requestUrl != None:    
                     # asynchronous mode
@@ -592,6 +592,7 @@ def execute_request(_options):
                         else:
                             # if none, we do nothing more, in basic, we let the url requester doing the job
                             requestUrlCas = requestUrl    
+                        
                         
                         m = utils_http.open_url(requestUrlCas, **url_config)                
                         motu_reply=m.read()
