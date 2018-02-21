@@ -11,6 +11,5 @@
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-h"/>
 <stringAttribute key="org.python.pydev.debug.ATTR_INTERPRETER" value="Python27"/>
 <stringAttribute key="org.python.pydev.debug.ATTR_PROJECT" value="motu-client-python"/>
-<stringAttribute key="org.python.pydev.debug.vm.arguments" value="--version"/>
 <stringAttribute key="process_factory_id" value="org.python.pydev.debug.processfactory.PyProcessFactory"/>
 </launchConfiguration>

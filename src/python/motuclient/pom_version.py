@@ -1,10 +1,13 @@
 from xml.etree import ElementTree
+import os
 
 def getPOMVersion():
     version="Unknown"
     try:
-        # For production tree
-        version = __getPOMVersion("pom.xml")
+        # For production tree, while run from cur folder
+        abspath = os.path.abspath(__file__)
+        dname = os.path.dirname(abspath)
+        version = __getPOMVersion(os.path.join(dname, "..", "pom.xml") )
     except:
         # For development tree
         version = __getPOMVersion("../../pom.xml")
