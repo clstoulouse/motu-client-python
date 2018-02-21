@@ -70,5 +70,11 @@
 			<fileMode>0664</fileMode>
 			<filtered>false</filtered>
 		</file>
+		<file>
+			<source>patchPOMtoBuild.sh</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0774</fileMode>
+			<filtered>false</filtered>
+		</file>
 	</files>
 </assembly>

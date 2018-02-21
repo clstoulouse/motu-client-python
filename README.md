@@ -45,6 +45,7 @@ This program can be integrated into a processing chain in order to automate the 
 From the root folder runs the Maven command:  
   
 ```
+./patchPOMtoBuild.sh
 mvn clean install -Dmaven.test.skip=true
 [...]
 [INFO] BUILD SUCCESS
