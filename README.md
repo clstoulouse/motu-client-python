@@ -42,10 +42,10 @@ This program can be integrated into a processing chain in order to automate the 
   
   
 # <a name="Build">Build</a>  
-From the root folder runs the Maven command:  
+From the root folder runs the command:  
   
 ```
-./patchPOMtoBuild.sh
+./patchPOMtoBuild.sh  
 mvn clean install -Dmaven.test.skip=true
 [...]
 [INFO] BUILD SUCCESS
@@ -71,7 +71,7 @@ If your host needs a PROXY set it, for example:
 export HTTPS_PROXY=http://myCompanyProxy:8080  
 ```  
 
-Then install:  
+Then run:  
   
 ```
 pip install motu-client  
@@ -198,7 +198,7 @@ Usefull if host is offline and has no Internet access.
 # <a name="UsageExamples">Usage examples</a>   
 In the following examples, variable ${MOTU\_USER} and ${MOTU\_PASSWORD} are user name and user password used to connect to the CAS server for single sign on.  
 ${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.  
-Commands "./motu-client.py" can be replaced by "python -m motu-client" if it has been installed with [PIP method](#UsagePIP).  
+Commands "./motu-client.py" has to be replaced by "python -m motu-client" if it has been installed with [PIP method](#UsagePIP).  
 
 
 ## <a name="UsageExamplesDownload">Download</a>  
@@ -221,7 +221,7 @@ See [https://github.com/clstoulouse/motu#ClientAPI_GetSize](https://github.com/c
 
 ### Download and save the XML file which contains the size on the local machine
 ```  
-./motu-client.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f size.xml
+./motu-client.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f getSizeResult.xml
 ``` 
 
 ### Display the size XML result on stdout
@@ -235,7 +235,7 @@ See [https://github.com/clstoulouse/motu#describe-product](https://github.com/cl
 
 ### Download and save the XML file which contains the size on the local machine
 ```  
-./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f size.xml
+./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f describeProductResult.xml
 ``` 
 
 ### Display the size XML result on stdout

@@ -10,7 +10,10 @@ def getPOMVersion():
         version = __getPOMVersion(os.path.join(dname, "..", "pom.xml") )
     except:
         # For development tree
-        version = __getPOMVersion("../../pom.xml")
+        try:
+            version = __getPOMVersion("../../pom.xml")
+        except:
+            version = __getPOMVersion("../../../pom.xml")
     return version
     
 def __getPOMVersion(POM_FILE):
