@@ -1,8 +1,7 @@
-# Motu Client Python Project
-@author Project manager <rdedianous@cls.fr>  
+# Motu Client Python Project 
 @author Product owner <tjolibois@cls.fr>  
 @author Scrum master, software architect <smarty@cls.fr>  
-@author Quality assurance, continuous integration manager <bpirrotta@cls.fr> 
+@author Quality assurance, continuous integration manager <smarty@cls.fr>  
 
 >How to read this file? 
 Use a markdown reader: 
@@ -17,14 +16,20 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
 * [Overview](#Overview)
 * [Build](#Build)
 * [Installation](#Installation)
+    * [Using PIP](#InstallationPIP)
+    * [From tar.gz file](#InstallationTGZ)
 * [Configuration](#Configuration)
 * [Usage and options](#Usage)
+    * [Usage from PIP installation](#UsagePIP)
+    * [Usage from tar.gz installation](#UsageTGZ)
 * [Usage examples](#UsageExamples)
     * [Download](#UsageExamplesDownload)
     * [GetSize](#UsageExamplesGetSize)	
     * [DescribeProduct](#UsageExamplesDescribeProduct)
 * [Licence](#Licence)
-
+* [Troubleshooting](#Troubleshooting)
+    * [Unable to download the latest version watched on GitHub from PIP](#Troubleshooting)  
+    * [From Windows, Parameter error](#TroubleshootingWinArgErr)
 
 # <a name="Overview">Overview</a>
 Motu client "motu-client-python" is a python script used to connect to Motu HTTP server in order to:  
@@ -37,9 +42,10 @@ This program can be integrated into a processing chain in order to automate the 
   
   
 # <a name="Build">Build</a>  
-From the root folder runs the Maven command:  
+From the root folder runs the command:  
   
 ```
+./patchPOMtoBuild.sh  
 mvn clean install -Dmaven.test.skip=true
 [...]
 [INFO] BUILD SUCCESS
@@ -56,8 +62,26 @@ This creates two archives in the target folder:
 # <a name="Installation">Installation</a> 
 You must use python version 2.7.X or later.  
 This program is not compatible with Python 3.X versions.  
+There is two methods to install the client, by using PIP or from a tar.gz file.
   
-Deploy the archive in the directory of your choice.  
+## <a name="InstallationPIP">Using PIP</a>
+Python Package Index is used to ease installation.  
+If your host needs a PROXY set it, for example:  
+```
+export HTTPS_PROXY=http://myCompanyProxy:8080  
+```  
+
+Then run:  
+  
+```
+pip install motu-client  
+```
+  
+Now "Motu-client" is installed, you can [configured it](#Configuration) and [use it](#UsagePIP).
+  
+  
+## <a name="InstallationTGZ">From tar.gz file</a>
+Deploy the archive (file motu-client-python-$version-bin.tar.gz available from [GitHub release](https://github.com/clstoulouse/motu-client-python/releases)) in the directory of your choice.  
 ```  
 tar xvzf motu-client-python-$version-$buildTimestamp-bin.tar.gz
 ```  
@@ -102,12 +126,25 @@ socket_timeout=
 # <a name="Usage">Usage</a>  
 Starts the motu python client.  
 
+## <a name="UsagePIP">Usage from PIP installation</a>  
+```  
+python -m motu-client -h  
+python -m motu-client [options]
+```  
+  
+[Options](#UsageOptions) are listed below.  
+Method to used when it has been installed with [PIP method](#InstallationPIP).  
+
+
+## <a name="UsageTGZ">Usage from tar.gz installation</a>  
 ```  
 ./motu-client.py  -h  
 motu-client.py [options]
 ```  
+Method to used when it has been installed with [tar.gz method](#InstallationTGZ).  
+Usefull if host is offline and has no Internet access.
 
-__Options:__  
+### <a name="UsageOptions">__Options:__</a>  
 
 
 * __-h, --help__            show this help message and exit  
@@ -133,8 +170,8 @@ __Options:__
 * __-m MOTU, --motu=MOTU__ Motu server url, e.g. "-m http://localhost:8080/motu-web/Motu"  
 * __-s SERVICE_ID, --service-id=SERVICE_ID__ The service identifier (string), e.g. -s Mercator_Ocean_Model_Global-TDS  
 * __-d PRODUCT_ID, --product-id=PRODUCT_ID__ The product (data set) to download (string), e.g. -d dataset-mercator-psy4v3-gl12-bestestimate-uv  
-* __-t DATE_MIN, --date-min=DATE_MIN__ The min date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS]), e.g. -t "2016-06-10"    
-* __-T DATE_MAX, --date-max=DATE_MAX__ The max date with optional hour resolution (string following format YYYY-MM-DD  [HH:MM:SS ]), e.g. -T "2016-06-11"  
+* __-t DATE_MIN, --date-min=DATE_MIN__ The min date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS]), e.g. -t "2016-06-10" or -t "2016-06-10 12:00:00". Be careful to not forget double quotes around the date.     
+* __-T DATE_MAX, --date-max=DATE_MAX__ The max date with optional hour resolution (string following format YYYY-MM-DD  [HH:MM:SS ]), e.g. -T "2016-06-11" or -T "2016-06-10 12:00:00".  Be careful to not forget double quotes around the date.      
 * __-y LATITUDE_MIN, --latitude-min=LATITUDE_MIN__ The min latitude (float in the interval  [-90 ; 90 ]), e.g. -y -80.5  
 * __-Y LATITUDE_MAX, --latitude-max=LATITUDE_MAX__ The max latitude (float in the interval  [-90 ; 90 ]), e.g. -Y 80.5   
 * __-x LONGITUDE_MIN, --longitude-min=LONGITUDE_MIN__ The min longitude (float in the interval [-180 ; 180 ]), e.g. -x -180      
@@ -157,9 +194,12 @@ __Options:__
 * __--socket-timeout=SOCKET_TIMEOUT__ Set a timeout on blocking socket operations (float expressing seconds)  
 * __--user-agent=USER_AGENT__ Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)  
   
+  
 # <a name="UsageExamples">Usage examples</a>   
 In the following examples, variable ${MOTU\_USER} and ${MOTU\_PASSWORD} are user name and user password used to connect to the CAS server for single sign on.  
-${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.
+${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.  
+Commands "./motu-client.py" has to be replaced by "python -m motu-client" if it has been installed with [PIP method](#UsagePIP).  
+
 
 ## <a name="UsageExamplesDownload">Download</a>  
 ### Download and save extracted file on the local machine
@@ -181,7 +221,7 @@ See [https://github.com/clstoulouse/motu#ClientAPI_GetSize](https://github.com/c
 
 ### Download and save the XML file which contains the size on the local machine
 ```  
-./motu-client.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f size.xml
+./motu-client.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f getSizeResult.xml
 ``` 
 
 ### Display the size XML result on stdout
@@ -195,7 +235,7 @@ See [https://github.com/clstoulouse/motu#describe-product](https://github.com/cl
 
 ### Download and save the XML file which contains the size on the local machine
 ```  
-./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f size.xml
+./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f describeProductResult.xml
 ``` 
 
 ### Display the size XML result on stdout
@@ -212,3 +252,40 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.  
   
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.  
+
+# <a name="Troubleshooting">Troubleshooting</a>  
+# <a name="TroubleshootingPIPCache">Unable to download the latest version watched on GitHub from PIP</a>
+Example:  
+```  
+pip install motu-client  
+Collecting motu-client  
+  Using cached https://test-files.pythonhosted.org/packages/4a/7d/41c3bdd973baf119371493c193248349c9b7107477ebf343f3889cabbf48/motu-client-X.Y.Z.zip  
+Installing collected packages: motu-client  
+  Running setup.py install for motu-client ... done  
+Successfully installed motu-client-X.Y.Z  
+```  
+  
+Clear your PIP cache: On Windows, delete the folder %HOMEPATH%/pip. On archlinux pip cache is located at ~/.cache/pip.
+After re run the command:  
+```  
+pip install motu-client  
+Collecting motu-client  
+  Using https://test-files.pythonhosted.org/packages/4a/7d/41c3bdd973baf119371493c193248349c9b7107477ebf343f3889cabbf48/motu-client-X.Y.Z.zip  
+Installing collected packages: motu-client  
+  Running setup.py install for motu-client ... done  
+Successfully installed motu-client-X.Y.Z  
+``` 
+
+# <a name="TroubleshootingWinArgErr">From Windows, Parameter error</a>
+From Windows, the command "motu-client.py --version" returns an error.  
+10:44:24 [ERROR] Execution failed: [Excp 13] User (option 'user') is mandatory when 'cas' authentication is set. Please provide it.
+
+__Analyse:__  
+This issue comes from the fact that Windows command line does not pass parameters to python command.  
+  
+__Solution:__  
+``` 
+Edit the Windows Registry Key "HKEY_CLASSES_ROOT\py_auto_file\shell\open\command" and append at the end of the value %*  
+Exemple: "C:\dvltSoftware\python\Python27\python.exe" "%1" %*  
+``` 
+

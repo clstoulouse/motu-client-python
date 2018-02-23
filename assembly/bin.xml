@@ -29,32 +29,51 @@
             <excludes>
 				<!-- excludeany compiled source -->
 				<exclude>**/*.pyc</exclude>
-                                <exclude>**/*.formatted</exclude>
+                <exclude>**/*.formatted</exclude>
 			</excludes>	
-		</fileSet>
-		<fileSet>
-			<directory>src/doc</directory>
-			<outputDirectory>/doc</outputDirectory>
-			<excludes>
-				<!-- exclude the source of the doc (included only in the source assembly) -->
-				<exclude>*.t2t</exclude>
-			</excludes>	
-			<!-- rwx rwx r-x -->
-			<fileMode>0664</fileMode>
-			<directoryMode>0775</directoryMode>
 		</fileSet>
 	</fileSets>
 	<files>
 		<file>
-			<source>NOTICE</source>
-			<outputDirectory>/</outputDirectory>
-			<fileMode>0664</fileMode>
-			<filtered>true</filtered>
-		</file>
-		<file>
 			<source>LICENSE</source>
 			<outputDirectory>/</outputDirectory>
 			<fileMode>0664</fileMode>
+			<filtered>false</filtered>
+		</file>
+		<file>
+			<source>MANIFEST.in</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0664</fileMode>
+			<filtered>false</filtered>
+		</file>
+		<file>
+			<source>README.md</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0664</fileMode>
+			<filtered>false</filtered>
+		</file>
+		<file>
+			<source>pom.xml</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0664</fileMode>
+			<filtered>false</filtered>
+		</file>
+		<file>
+			<source>setup.cfg</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0664</fileMode>
+			<filtered>false</filtered>
+		</file>
+		<file>
+			<source>setup.py</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0664</fileMode>
+			<filtered>false</filtered>
+		</file>
+		<file>
+			<source>patchPOMtoBuild.sh</source>
+			<outputDirectory>/</outputDirectory>
+			<fileMode>0774</fileMode>
 			<filtered>false</filtered>
 		</file>
 	</files>

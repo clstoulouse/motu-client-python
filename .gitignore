@@ -1,3 +1,5 @@
 /target/
 *.pyc
 *.py-path
+/dist/
+/MANIFEST

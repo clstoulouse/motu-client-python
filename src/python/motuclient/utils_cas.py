@@ -87,8 +87,21 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
 
     utils_log.log_url( log, "login user into CAS:\t", url_cas+'?'+opts )
     url_config['data']=opts
-    connexion = utils_http.open_url(url_cas, **url_config)
-
+    try:
+        connexion = utils_http.open_url(url_cas, **url_config)
+    except Exception as e:
+        if e.code == 400:
+            log.error( """Error: Bad user login or password:
+            
+                 On *nix OS, you must use the single quote, otherwise it may expand specific characters.
+                 [...] -u 'string' or --user 'string' [...]
+                 
+                 On Windows OS, you must use the double quote, because single quotes are treated literally.
+                 [...] -p "string" or --pwd "string" [...]
+                 """);
+        
+        raise e
+        
     fp = utils_html.FounderParser()
     for line in connexion:
         log.log( utils_log.TRACE_LEVEL, 'utils_html.FounderParser() line: %s', line )

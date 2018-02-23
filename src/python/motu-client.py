@@ -52,10 +52,7 @@ ERROR_CODE_EXIT=1
 
 # the config file to load from 
 CFG_FILE = '~/motu-client/motu-client-python.ini'
-LOG_CFG_FILE = './etc/log.ini'
-
-# project libraries path
-LIBRARIES_PATH = os.path.join(os.path.dirname(__file__), './lib')
+LOG_CFG_FILE = './motuclient/cfg/log.ini'
 
 SECTION = 'Main'
 
@@ -65,6 +62,8 @@ log = None
 # shared variables to download
 _variables = []
 
+# project libraries path
+LIBRARIES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'motuclient')
 # Manage imports of project libraries
 if not os.path.exists(LIBRARIES_PATH):
     sys.stderr.write('\nERROR: can not find project libraries path: %s\n\n' % os.path.abspath(LIBRARIES_PATH))
