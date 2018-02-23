@@ -37,7 +37,7 @@ setup(
   data_files=[('motu-client/cfg', [ 'src/python/motuclient/cfg/log.ini',
                         'src/python/motuclient/cfg/messages.properties'])],
   
-  download_url = 'https://github.com/clstoulouse/motu-client-python/releases/download/motu-client-python-1.4.00/motu-client-python-1.4.00-20170410143941999-bin.tar.gz', # https://github.com/clstoulouse/motu-client-python/archive/motu-client-python-1.4.00.tar.gz
+  download_url = 'https://github.com/clstoulouse/motu-client-python/releases/',
   
   classifiers = ['Development Status :: 5 - Production/Stable',
                  'Programming Language :: Python :: 2.7',
