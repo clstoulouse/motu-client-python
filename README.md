@@ -42,9 +42,10 @@ This program can be integrated into a processing chain in order to automate the 
   
   
 # <a name="Build">Build</a>  
-From the root folder runs the Maven command:  
+From the root folder runs the command:  
   
 ```
+./patchPOMtoBuild.sh  
 mvn clean install -Dmaven.test.skip=true
 [...]
 [INFO] BUILD SUCCESS
@@ -70,7 +71,7 @@ If your host needs a PROXY set it, for example:
 export HTTPS_PROXY=http://myCompanyProxy:8080  
 ```  
 
-Then install:  
+Then run:  
   
 ```
 pip install motu-client  
@@ -169,8 +170,8 @@ Usefull if host is offline and has no Internet access.
 * __-m MOTU, --motu=MOTU__ Motu server url, e.g. "-m http://localhost:8080/motu-web/Motu"  
 * __-s SERVICE_ID, --service-id=SERVICE_ID__ The service identifier (string), e.g. -s Mercator_Ocean_Model_Global-TDS  
 * __-d PRODUCT_ID, --product-id=PRODUCT_ID__ The product (data set) to download (string), e.g. -d dataset-mercator-psy4v3-gl12-bestestimate-uv  
-* __-t DATE_MIN, --date-min=DATE_MIN__ The min date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS]), e.g. -t "2016-06-10"    
-* __-T DATE_MAX, --date-max=DATE_MAX__ The max date with optional hour resolution (string following format YYYY-MM-DD  [HH:MM:SS ]), e.g. -T "2016-06-11"  
+* __-t DATE_MIN, --date-min=DATE_MIN__ The min date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS]), e.g. -t "2016-06-10" or -t "2016-06-10 12:00:00". Be careful to not forget double quotes around the date.     
+* __-T DATE_MAX, --date-max=DATE_MAX__ The max date with optional hour resolution (string following format YYYY-MM-DD  [HH:MM:SS ]), e.g. -T "2016-06-11" or -T "2016-06-10 12:00:00".  Be careful to not forget double quotes around the date.      
 * __-y LATITUDE_MIN, --latitude-min=LATITUDE_MIN__ The min latitude (float in the interval  [-90 ; 90 ]), e.g. -y -80.5  
 * __-Y LATITUDE_MAX, --latitude-max=LATITUDE_MAX__ The max latitude (float in the interval  [-90 ; 90 ]), e.g. -Y 80.5   
 * __-x LONGITUDE_MIN, --longitude-min=LONGITUDE_MIN__ The min longitude (float in the interval [-180 ; 180 ]), e.g. -x -180      
@@ -197,7 +198,7 @@ Usefull if host is offline and has no Internet access.
 # <a name="UsageExamples">Usage examples</a>   
 In the following examples, variable ${MOTU\_USER} and ${MOTU\_PASSWORD} are user name and user password used to connect to the CAS server for single sign on.  
 ${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.  
-Commands "./motu-client.py" can be replaced by "python -m motu-client" if it has been installed with [PIP method](#UsagePIP).  
+Commands "./motu-client.py" has to be replaced by "python -m motu-client" if it has been installed with [PIP method](#UsagePIP).  
 
 
 ## <a name="UsageExamplesDownload">Download</a>  
@@ -220,7 +221,7 @@ See [https://github.com/clstoulouse/motu#ClientAPI_GetSize](https://github.com/c
 
 ### Download and save the XML file which contains the size on the local machine
 ```  
-./motu-client.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f size.xml
+./motu-client.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f getSizeResult.xml
 ``` 
 
 ### Display the size XML result on stdout
@@ -234,7 +235,7 @@ See [https://github.com/clstoulouse/motu#describe-product](https://github.com/cl
 
 ### Download and save the XML file which contains the size on the local machine
 ```  
-./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f size.xml
+./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f describeProductResult.xml
 ``` 
 
 ### Display the size XML result on stdout
