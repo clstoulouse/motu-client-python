@@ -16,6 +16,7 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
 * [Overview](#Overview)
 * [Build](#Build)
 * [Installation](#Installation)
+    * [Prerequisites](#InstallationPre)
     * [Using PIP](#InstallationPIP)
     * [From tar.gz file](#InstallationTGZ)
 * [Configuration](#Configuration)
@@ -60,9 +61,12 @@ This creates two archives in the target folder:
 
 
 # <a name="Installation">Installation</a> 
+
+## <a name="InstallationPre">Prerequisites</a>
 You must use python version 2.7.X or later.  
 This program is not compatible with Python 3.X versions.  
-There is two methods to install the client, by using PIP or from a tar.gz file.
+There is two methods to install the client, by using PIP or from a tar.gz file.  
+ [setuptools](#InstallationSetuptools) python package has be installed in order to display the motuclient version successfully.    
   
 ## <a name="InstallationPIP">Using PIP</a>
 Python Package Index is used to ease installation.  
@@ -88,6 +92,20 @@ tar xvzf motu-client-python-$version-$buildTimestamp-bin.tar.gz
 
 Create a [configuration file](#Configuration) and set the user and password to use to connect to the CAS server.   
 
+## <a name="InstallationSetuptools">Install setuptools python package</a>
+"[Setuptools](https://pypi.python.org/pypi/setuptools)" python package has to be installed in order to display the version with option --version, here is how to install it:    
+ 
+If your host needs a PROXY set it, for example:  
+```
+export HTTPS_PROXY=http://myCompanyProxy:8080  
+```  
+
+Then run:  
+
+```  
+sudo apt install python-pip  
+pip install --upgrade setuptools  
+```  
 
 # <a name="Configuration">Configuration</a>  
 All parameters can be defined as command line options or can be written in a configuration file.
@@ -151,7 +169,7 @@ Usefull if host is offline and has no Internet access.
 * __-q, --quiet__           print logs with level WARN in stdout, used to prevent any output in stdout  
 * __--noisy__               print logs with level TRACE in stdout  
 * __--verbose__             print logs with level DEBUG in stdout  
-* __--version__             show program's version number and exit  
+* __--version__             show program's version number and exit, [setuptools](#InstallationSetuptools) python package has be installed to run it successfully    
 
 * __--proxy-server=PROXY_SERVER__ Proxy server (url) used to contact Motu 
 * __--proxy-user=PROXY_USER__ Proxy user name (string)

@@ -7,7 +7,6 @@ def getPOMVersion():
         # For production tree, while run from cur folder
         abspath = os.path.abspath(__file__)
         dname = os.path.dirname(abspath)
-        print "dname=" + dname
         version = __getPOMVersion(os.path.join(dname, "..", "pom.xml") )
     except:
         # For development tree

@@ -43,6 +43,7 @@ import logging.config
 import ConfigParser
 import optparse
 import socket
+from motuclient import utils_configpath
 
 # The necessary required version of Python interpreter
 REQUIRED_VERSION = (2,7)
@@ -52,7 +53,7 @@ ERROR_CODE_EXIT=1
 
 # the config file to load from 
 CFG_FILE = '~/motu-client/motu-client-python.ini'
-LOG_CFG_FILE = './motuclient/cfg/log.ini'
+LOG_CFG_FILE = utils_configpath.getConfigPath() + '/log.ini'
 
 SECTION = 'Main'
 
@@ -274,7 +275,7 @@ if __name__ == '__main__':
     
     # first initialize the logger
     logging.addLevelName(utils_log.TRACE_LEVEL, 'TRACE')
-    logging.config.fileConfig(  os.path.join(os.path.dirname(__file__),LOG_CFG_FILE) )
+    logging.config.fileConfig(LOG_CFG_FILE)
     log = logging.getLogger("motu-client-python")
         
     logging.getLogger().setLevel(logging.INFO)
