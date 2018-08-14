@@ -237,12 +237,12 @@ The HTTP(s) URL is displayed on stdout. This URL is a direct link to the file wh
 ## <a name="UsageExamplesGetSize">GetSize</a>  
 See [https://github.com/clstoulouse/motu#ClientAPI_GetSize](https://github.com/clstoulouse/motu#ClientAPI_GetSize) for more details about XML result.  
 
-### Download and save the XML file which contains the size on the local machine
+### Get the XML file which contains the extraction size on the local machine
 ```  
 ./motu-client.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f getSizeResult.xml
 ``` 
 
-### Display the size XML result on stdout
+### Display the extraction size as XML on stdout
 ```  
 ./motu-client.py --quiet --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o console
 ``` 
@@ -251,14 +251,14 @@ See [https://github.com/clstoulouse/motu#ClientAPI_GetSize](https://github.com/c
 ## <a name="UsageExamplesDescribeProduct">DescribeProduct</a>  
 See [https://github.com/clstoulouse/motu#describe-product](https://github.com/clstoulouse/motu#describe-product) for more details about XML result.  
 
-### Download and save the XML file which contains the size on the local machine
+### Get the XML file which contains the dataset description on the local machine
 ```  
-./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f describeProductResult.xml
+./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -o /data -f describeProductResult.xml
 ``` 
 
-### Display the size XML result on stdout
+### Display the dataset description XML result on stdout
 ```  
-./motu-client.py --quiet -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o console
+./motu-client.py --quiet -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -o console
 ``` 
 
 

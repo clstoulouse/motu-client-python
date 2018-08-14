@@ -41,7 +41,7 @@ def copy(sourceHandler, destHandler, callback = None, blockSize = 65535 ):
     
     returns the total size read
     """
-            
+    
     read = 0        
     while 1:
        block = sourceHandler.read(blockSize)

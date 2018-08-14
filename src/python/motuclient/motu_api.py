@@ -346,7 +346,9 @@ def wait_till_finished(reqUrlCAS, **options):
     stopWatch = stop_watch.localThreadStopWatch()    
     start_time = datetime.datetime.now()
 
-    
+  
+lastProgressPercentValue=0.0
+  
 def dl_2_file(dl_url, fh, block_size = 65535, isADownloadRequest = None, **options):
     """ Download the file with the main url (of Motu) file.
      
@@ -359,6 +361,7 @@ def dl_2_file(dl_url, fh, block_size = 65535, isADownloadRequest = None, **optio
     
     stopWatch = stop_watch.localThreadStopWatch()    
     start_time = datetime.datetime.now()
+    lastProgressPercentValue=0.0
     log.info("Downloading file (this can take a while)..." )    
 
     # download file
@@ -403,16 +406,19 @@ def dl_2_file(dl_url, fh, block_size = 65535, isADownloadRequest = None, **optio
         
             # performs the download           
             log.info( 'Downloading file %s' % os.path.abspath(fh) )
-        
+            
             def progress_function(sizeRead):
+                global lastProgressPercentValue
                 percent = sizeRead*100./size
-                log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
-                td = datetime.datetime.now()- start_time;           
-        
+                if percent - lastProgressPercentValue> 1 or (lastProgressPercentValue != 100 and percent >= 100) :
+                    log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent )
+                    lastProgressPercentValue = percent
+                    
             def none_function(sizeRead):
+                global lastProgressPercentValue
                 percent = 100
-                log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent)
-                td = datetime.datetime.now()- start_time;           
+                log.info( "- %s (%.1f%%)", utils_unit.convert_bytes(size).rjust(8), percent)         
+                lastProgressPercentValue = percent
             
             if temp is not None:
                 read = utils_stream.copy(m,temp,progress_function if size != -1 else none_function, block_size )
@@ -605,7 +611,7 @@ def execute_request(_options):
                             
                         # Check status
                         if status == "0" or status == "3": # in progress/pending
-                            log.info('Product is not yet available (request in process)')         
+                            log.info('Product is not yet available (request in progress)')         
                             time.sleep(10)
                         else: # finished (error|success)
                             break
