@@ -89,7 +89,7 @@ class StopWatch(object):
     def __str__(self):
         """Nicely format the elapsed time
         """
-        keys = self.times.keys() + filter( lambda x:x not in self.times.keys(), self.timers.keys() )
+        keys = list(self.times.keys()) + [x for x in list(self.timers.keys()) if x not in list(self.times.keys())]
         txt = ""
         for key in keys:
           txt = txt + key + " : " + str(self.elapsed(key)) + " s " + ("(running)" if self.isRunning(key) else "(stopped)")+"\n"
