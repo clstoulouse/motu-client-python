@@ -26,19 +26,35 @@
 #  along with this library; if not, write to the Free Software Foundation,
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-import urllib
-import urllib2
-import httplib
-import cookielib
-import utils_log
+import sys
+
+
+if sys.version_info > (3, 0):
+    import urllib.request, urllib.error
+    from urllib.request import HTTPCookieProcessor, Request
+    from urllib.request import HTTPSHandler, HTTPHandler, install_opener, build_opener, \
+        HTTPRedirectHandler, ProxyHandler, HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
+    from urllib.request import HTTPErrorProcessor as HTTPErrorProcessor_
+    from http.client import HTTPConnection, HTTPSConnection
+    from http.cookiejar import CookieJar
+else:
+    from httplib import HTTPConnection, HTTPSConnection
+    from urllib2 import HTTPSHandler, install_opener, build_opener, \
+    HTTPRedirectHandler, HTTPRedirectHandler, ProxyHandler, HTTPBasicAuthHandler, \
+    HTTPPasswordMgrWithDefaultRealm, HTTPCookieProcessor, HTTPSHandler, HTTPHandler, Request
+    from urllib2 import HTTPErrorProcessor as HTTPErrorProcessor_
+    from cookielib import CookieJar
+
+from motuclient import utils_log
 import logging
 import ssl
 import socket
 
-class TLS1Connection(httplib.HTTPSConnection):
+
+class TLS1Connection(HTTPSConnection):
     """Like HTTPSConnection but more specific"""
     def __init__(self, host, **kwargs):
-        httplib.HTTPSConnection.__init__(self, host, **kwargs)
+        HTTPSConnection.__init__(self, host, **kwargs)
  
     def connect(self):
         """Overrides HTTPSConnection.connect to specify TLS version"""
@@ -54,41 +70,31 @@ class TLS1Connection(httplib.HTTPSConnection):
         self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file,
                 ssl_version=ssl.PROTOCOL_TLSv1)
  
-class TLS1Handler(urllib2.HTTPSHandler):
+class TLS1Handler(HTTPSHandler):
     """Like HTTPSHandler but more specific"""
     def __init__(self):
-        urllib2.HTTPSHandler.__init__(self)
+        HTTPSHandler.__init__(self)
  
     def https_open(self, req):
         return self.do_open(TLS1Connection, req)
 
 # Overide default handler
-urllib2.install_opener(urllib2.build_opener(TLS1Handler()))
+install_opener(build_opener(TLS1Handler()))
 
-class HTTPErrorProcessor(urllib2.HTTPErrorProcessor):
+
+class HTTPErrorProcessor(HTTPErrorProcessor_):
     def https_response(self, request, response):
         # Consider error codes that are not 2xx (201 is an acceptable response)
         code, msg, hdrs = response.code, response.msg, response.info()
-        if code >= 300: 
+        if code >= 300:
             response = self.parent.error('http', request, response, code, msg, hdrs)
         return response
-
-class NoRedirection(urllib2.HTTPErrorProcessor):
-
-    # deg __init__(self, )
-    def http_response(self, request, response):
-        if response.code == 302: 
-            return response
-        
-        return response
-
-    https_response = http_response
     
 
-class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
+class SmartRedirectHandler(HTTPRedirectHandler):
 
     def http_error_302(self, req, fp, code, msg, headers):
-        result = urllib2.HTTPRedirectHandler.http_error_302(
+        result = HTTPRedirectHandler.http_error_302(
             self, req, fp, code, msg, headers)              
         result.status = code                                
         return result
@@ -116,59 +122,60 @@ def open_url(url, **kargsParam):
     """   
     data = None
     log = logging.getLogger("utils_http:open_url")
-    kargs = kargsParam.copy();
+    kargs = kargsParam.copy()
     # common handlers
     handlers = [SmartRedirectHandler(),
-                urllib2.HTTPCookieProcessor(cookielib.CookieJar()),
-                urllib2.HTTPHandler(),
+                HTTPCookieProcessor(CookieJar()),
+                HTTPHandler(),
                 TLS1Handler(),
                 utils_log.HTTPDebugProcessor(log),
-                HTTPErrorProcessor()                    
-               ]
+                HTTPErrorProcessor()
+                ]
 
     # add handlers for managing proxy credentials if necessary        
-    if kargs.has_key('proxy'):
+    if 'proxy' in kargs:
         urlProxy = ''
-        if kargs['proxy'].has_key('user'):
+        if 'user' in kargs['proxy']:
             urlProxy = kargs['proxy']['user'] + ':' + kargs['proxy']['password'] + '@'
 
         urlProxy += kargs['proxy']['netloc'] 
 
-        handlers.append( urllib2.ProxyHandler({'http':urlProxy, 'https':urlProxy}) )
-        handlers.append( urllib2.HTTPBasicAuthHandler() )
+        handlers.append( ProxyHandler({'http':urlProxy, 'https':urlProxy}) )
+        handlers.append( HTTPBasicAuthHandler() )
         
         del kargs['proxy']
         
-    if kargs.has_key('authentication'):
+    if 'authentication' in kargs:
         # create the password manager
-        password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm(ssl_version=ssl.PROTOCOL_TLSv1)
+        #password_mgr = HTTPPasswordMgrWithDefaultRealm(ssl_version=ssl.PROTOCOL_TLSv1)
+        password_mgr = HTTPPasswordMgrWithDefaultRealm()
         urlPart = url.partition('?')
         password_mgr.add_password(None, urlPart, kargs['authentication']['user'], kargs['authentication']['password'])
         # add the basic authentication handler
-        handlers.append(urllib2.TLS1Handler(password_mgr))
+        handlers.append(HTTPSHandler(password_mgr))
         del kargs['authentication']
     
-    if kargs.has_key('data'):
+    if 'data' in kargs:
         data = kargs['data']
         del kargs['data']
     
-    _opener = urllib2.build_opener(*handlers)
-    log.log( utils_log.TRACE_LEVEL, 'list of handlers:' )
+    _opener = build_opener(*handlers)
+    log.log(utils_log.TRACE_LEVEL, 'list of handlers:')
     for h in _opener.handlers:
-        log.log( utils_log.TRACE_LEVEL, ' . %s',str(h))
+        log.log(utils_log.TRACE_LEVEL, ' . %s', str(h))
 
     # create the request
     if( data != None ):
-        r = urllib2.Request(url, data, **kargs)
+        r = Request(url, data, **kargs)
     else:
-        r = urllib2.Request(url, **kargs)
+        r = Request(url, **kargs)
 
     # open the url, but let the exception propagates to the caller  
     return _opener.open(r)
 
 def encode(options):    
     opts = []
-    for k, vset in options.dict().iteritems():
+    for k, vset in options.dict().items():
         for v in vset:
            opts.append('%s=%s' % (str(k), str(v).replace('#','%23').replace(' ','%20')))
     return '&'.join(opts)

@@ -207,45 +207,4 @@
             <comments>A business-friendly Open Source license</comments>
         </license>
     </licenses>
-
-    <developers>
-        <developer>
-            <id>mhebert</id>
-            <name>Mathieu Hebert</name>
-            <email>mhebert@cls.fr</email>
-            <organization>Akka Technologies</organization>
-            <organizationUrl>http://www.akka.eu</organizationUrl>
-            <roles>
-                <role>Main Developer</role>
-            </roles>
-            <timezone>+1</timezone>
-            <properties />
-        </developer>
-        <developer>
-            <id>ccamel</id>
-            <name>Christophe Camel</name>
-            <email>ccamel@cls.fr</email>
-            <organization>CLS</organization>
-            <organizationUrl>http://www.cls.fr</organizationUrl>
-            <roles>
-                <role>Architect</role>
-            </roles>
-            <timezone>+1</timezone>
-            <properties />
-        </developer>
-    </developers>
-
-    <contributors>
-        <contributor>
-            <name>Jean-Michel Zigna</name>
-            <email>jmzigna@cls.fr</email>
-            <organization>CLS</organization>
-            <organizationUrl>http://www.cls.fr</organizationUrl>
-            <roles>
-                <role>Project Manager</role>
-            </roles>
-            <timezone>+1</timezone>
-            <properties />
-        </contributor>
-    </contributors>
 </project>
