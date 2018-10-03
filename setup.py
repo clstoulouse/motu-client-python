@@ -3,14 +3,14 @@ import os, sys
 
 # project libraries path
 LIBRARIES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src', 'python')
-print(LIBRARIES_PATH)
+
 # Manage imports of project libraries
 if not os.path.exists(LIBRARIES_PATH):
     sys.stderr.write('\nERROR: can not find project libraries path: %s\n\n' % os.path.abspath(LIBRARIES_PATH))
     sys.exit(1) 
 sys.path.append(LIBRARIES_PATH)
 
-from motuclient.src.python.motuclient import pom_version
+from motuclient import pom_version
 
 setup(
   name = 'motu-client',
