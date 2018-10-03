@@ -26,34 +26,32 @@
 #  along with this library; if not, write to the Free Software Foundation,
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-import urllib
-import urllib2
+
+import sys
+if sys.version_info > (3, 0):
+    import urllib
+    import configparser as ConfigParser
+else:
+    import urllib2 as urllib
+    import ConfigParser
+
 import traceback
 import platform
 import sys
-import httplib
 import os
-import re
-import tempfile
 import datetime
-import shutil
-import zipfile
 import logging
 import logging.config
-import ConfigParser
-import optparse
-import socket
-from motuclient import utils_configpath
 
-# The necessary required version of Python interpreter
-REQUIRED_VERSION = (2,7)
+import optparse
+from motuclient import utils_configpath
 
 # error code to use when exiting after exception catch
 ERROR_CODE_EXIT=1
 
 # the config file to load from 
 CFG_FILE = '~/motu-client/motu-client-python.ini'
-LOG_CFG_FILE = utils_configpath.getConfigPath() + '/log.ini'
+LOG_CFG_FILE = './motuclient/cfg/log.ini'
 
 SECTION = 'Main'
 
@@ -99,7 +97,7 @@ def load_options():
     parser = optparse.OptionParser(version=get_client_artefact() + ' v' + get_client_version())
     
     # create config parser
-    conf_parser = ConfigParser.SafeConfigParser()
+    conf_parser = ConfigParser.ConfigParser()
     conf_parser.read(os.path.expanduser(CFG_FILE))
                      
     # add available options
@@ -253,29 +251,15 @@ def option_callback_variable(option, opt, value, parser):
     _variables.append(value)
     setattr(parser.values, option.dest, _variables)
     
-def check_version():
-    """Utilitary function that checks the required version of the python interpreter
-    is available. Raise an exception if not."""
-    
-    global REQUIRED_VERSION
-    cur_version = sys.version_info
-    if (cur_version[0] > REQUIRED_VERSION[0] or
-        cur_version[0] == REQUIRED_VERSION[0] and
-        cur_version[1] >= REQUIRED_VERSION[1]):   
-       return
-    else:
-       raise Exception( "This tool uses python 2.7 or greater. You version is %s. " % str(cur_version) )
-    
 #===============================================================================
 # The Main function
 #===============================================================================
 if __name__ == '__main__':
-    check_version()
     start_time = datetime.datetime.now()
     
     # first initialize the logger
     logging.addLevelName(utils_log.TRACE_LEVEL, 'TRACE')
-    logging.config.fileConfig(LOG_CFG_FILE)
+    logging.config.fileConfig(  os.path.join(os.path.dirname(__file__),LOG_CFG_FILE) )
     log = logging.getLogger("motu-client-python")
         
     logging.getLogger().setLevel(logging.INFO)
@@ -288,7 +272,7 @@ if __name__ == '__main__':
             logging.getLogger().setLevel(int(_options.log_level))
                    
         motu_api.execute_request(_options)       
-    except Exception, e:
+    except Exception as e:
         log.error( "Execution failed: %s", e )
         if hasattr(e, 'reason'):
           log.info( ' . reason: %s', e.reason )
