@@ -1,5 +1,7 @@
 /target/
-*.pyc
-*.py-path
 /dist/
 /MANIFEST
+/build
+*.pyc
+*.py-path
+*__pycache__*

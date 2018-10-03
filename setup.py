@@ -27,13 +27,11 @@ setup(
   url = 'https://github.com/clstoulouse/motu-client-python',
   license='LGPL',
   
-  package_dir = {'': 'src/python'},
   packages=['', 'motuclient'],
+  package_dir = {'': 'src/python', 'motuclient': 'src/python/motuclient'},
   include_package_data = True,
-  package_data={'motuclient/cfg': ['src/python/motuclient/cfg/log.ini',
-                                    'src/python/motuclient/cfg/messages.properties']},
-  data_files=[('motu-client/cfg', [ 'src/python/motuclient/cfg/log.ini',
-                        'src/python/motuclient/cfg/messages.properties'])],
+  package_data={'motuclient': ['cfg/log.ini',
+                               'cfg/messages.properties']},
   
   download_url = 'https://github.com/clstoulouse/motu-client-python/releases/',
   
