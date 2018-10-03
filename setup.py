@@ -1,23 +1,21 @@
 from distutils.core import setup
-from os.path import splitext, basename, dirname, abspath
-import glob, os, sys
+import os, sys
 
 # project libraries path
 LIBRARIES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src', 'python')
-print LIBRARIES_PATH
+print(LIBRARIES_PATH)
 # Manage imports of project libraries
 if not os.path.exists(LIBRARIES_PATH):
     sys.stderr.write('\nERROR: can not find project libraries path: %s\n\n' % os.path.abspath(LIBRARIES_PATH))
     sys.exit(1) 
-sys.path.append(LIBRARIES_PATH)  
+sys.path.append(LIBRARIES_PATH)
 
-
-from motuclient import pom_version
+from motuclient.src.python.motuclient import pom_version
 
 setup(
   name = 'motu-client',
   version = pom_version.getPOMVersion(),
-  python_requires='>=2.7, <3',
+  python_requires='>=2.7, >=3',
   description = 'Extract and download gridded data through a python command line from Motu web server. Used in CMEMS context http://marine.copernicus.eu/',
   long_description = 'Motu is a high efficient and robust Web Server which fills the gap between heterogeneous data providers to end users. Motu handles, extracts and transforms oceanographic huge volumes of data without performance collapse. This client enables to extract and download data through a python command line.',
   keywords = ['Copernicus', 'CMEMS', 'CLS', 'Motu', 'motu-client-python', 'Dissemination Unit'],

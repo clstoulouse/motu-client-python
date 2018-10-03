@@ -26,14 +26,20 @@
 #  along with this library; if not, write to the Free Software Foundation,
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-import HTMLParser
+import sys
+if sys.version_info > (3, 0):
+    from html.parser import HTMLParser
+else:
+    from HTMLParser import HTMLParser
 
-class FounderParser(HTMLParser.HTMLParser):
+
+
+class FounderParser(HTMLParser):
     """
     Parser witch found the form/action section an return it
     """
     def __init__(self, *args, **kargs):
-        HTMLParser.HTMLParser.__init__(self, *args, **kargs)
+        HTMLParser.__init__(self, *args, **kargs)
         self.action_ = None
 
     def handle_starttag(self, tag, attrs):

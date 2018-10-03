@@ -13,7 +13,6 @@ Requires Python 2.7.
 """
 
 import collections
-import sets
 
 class Map(object):
     """ Map wraps a dictionary. It is essentially an abstract class from which
@@ -36,7 +35,7 @@ class Map(object):
         del self._dict[key]
     
     def insert(self, **values):
-        for k, v in values.iteritems():
+        for k, v in values.items():
            self.__setitem__(k, v)
     
     def remove(self, key, value):
@@ -62,7 +61,7 @@ class ListMultimap(Map):
 class SetMultimap(Map):
     """ SetMultimap is based on sets and prevents multiple instances of same value. """
     def __init__(self):
-        self._dict = collections.defaultdict(sets.Set)
+        self._dict = collections.defaultdict(set)
         
     def __setitem__(self, key, value):
         self._dict[key].add(value)
@@ -83,25 +82,25 @@ class DictMultimap(Map):
 
 def test():
     def test_multimap(m):
-        print "__________________________________"
-        print m["a"]
+        print("__________________________________")
+        print(m["a"])
         m["a"] = 1
         m["a"] = 2
         m["a"] = 2
         m["a"] = 3
         m["a"] = 4
         m.insert( b = 'v1', c = 'v2' )
-        print m
+        print(m)
         m.remove("a", 4)
-        print m
-        print ("a" in m.dict())
-        print m["a"]
+        print(m)
+        print(("a" in m.dict()))
+        print(m["a"])
         m["a"] = 5
         m["b"] = 6
-        print m
+        print(m)
         del m["b"]
-        print m
-        print (3 in m["a"])
+        print(m)
+        print((3 in m["a"]))
         
     test_multimap(ListMultimap())
     test_multimap(SetMultimap())

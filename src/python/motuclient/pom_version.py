@@ -12,9 +12,10 @@ def getPOMVersion():
         # For development tree
         try:
             version = __getPOMVersion(os.path.join(dname, "..", "..", "pom.xml") )
-        except:
+        except FileNotFoundError:
             version = __getPOMVersion(os.path.join(dname, "..", "..", "..", "pom.xml") )
-    return version
+    finally:
+        return version
     
 def __getPOMVersion(POM_FILE):
     namespaces = {'xmlns' : 'http://maven.apache.org/POM/4.0.0'}
