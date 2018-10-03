@@ -12,7 +12,7 @@ def getPOMVersion():
         # For development tree
         try:
             version = __getPOMVersion(os.path.join(dname, "..", "..", "pom.xml") )
-        except FileNotFoundError:
+        except :
             version = __getPOMVersion(os.path.join(dname, "..", "..", "..", "pom.xml") )
     finally:
         return version
