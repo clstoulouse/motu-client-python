@@ -64,7 +64,7 @@ This creates two archives in the target folder:
 
 ## <a name="InstallationPre">Prerequisites</a>
 You must use python version 2.7.X or later.  
-This program is not compatible with Python 3.X versions.  
+This program is fully compatible with Python 3.X versions.  
 There is two methods to install the client, by using PIP or from a tar.gz file.  
  [setuptools](#InstallationSetuptools) python package has be installed in order to display the motuclient version successfully.    
   
