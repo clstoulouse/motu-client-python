@@ -15,7 +15,7 @@ from motuclient import pom_version
 setup(
   name = 'motu-client',
   version = pom_version.getPOMVersion(),
-  python_requires='>=2.7, >=3',
+  python_requires='>=2.7',
   description = 'Extract and download gridded data through a python command line from Motu web server. Used in CMEMS context http://marine.copernicus.eu/',
   long_description = 'Motu is a high efficient and robust Web Server which fills the gap between heterogeneous data providers to end users. Motu handles, extracts and transforms oceanographic huge volumes of data without performance collapse. This client enables to extract and download data through a python command line.',
   keywords = ['Copernicus', 'CMEMS', 'CLS', 'Motu', 'motu-client-python', 'Dissemination Unit'],
