@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Script used to build when project is cloned from on GitHub
 #Test to comment only once
 stringParent=`head -n 2 pom.xml | tail -n 1`
