@@ -12,10 +12,10 @@ if not os.path.exists(LIBRARIES_PATH):
     sys.exit(1)
 sys.path.append(LIBRARIES_PATH)
 
-from motuclient import pom_version
+from motu_utils import pom_version
 
 setup(
-    name='motu-client',
+    name='motuclient',
     version=pom_version.getPOMVersion(),
     python_requires='>=2.7',
     description='Extract and download gridded data through a python command line from Motu web server. Used in CMEMS context http://marine.copernicus.eu/',
@@ -25,8 +25,8 @@ setup(
         'CMEMS',
         'CLS',
         'Motu',
-        'motu-client-python',
-        'Dissemination Unit',
+        'motuclient-python',
+        'Dissemination Unit'
     ],
 
     author='Sylvain MARTY, CLS',
@@ -36,14 +36,10 @@ setup(
     url='https://github.com/clstoulouse/motu-client-python',
     license='LGPL',
 
-    packages=find_packages,
+    package_dir = {'': 'src/python', 'motu_utils': 'src/python/motu_utils'},
+    packages=['motu_utils'],
+    py_modules = ['motuclient', 'motu-client'],
     include_package_data=True,
-    package_data={
-        'motuclient': [
-            'cfg/log.ini',
-            'cfg/messages.properties',
-        ],
-    },
 
     download_url='https://github.com/clstoulouse/motu-client-python/releases/',
 
@@ -54,12 +50,12 @@ setup(
         'Topic :: Scientific/Engineering :: GIS',
         'Environment :: Console',
         'Natural Language :: English',
-        'Operating System :: OS Independent',
+        'Operating System :: OS Independent'
     ],
 
     entry_points={
         'console_scripts': [
-            'motu-client = motu-client:main'
+            'motuclient = motuclient:main'
         ]
     }
 )

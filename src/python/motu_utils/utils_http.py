@@ -45,7 +45,7 @@ else:
     from urllib2 import HTTPErrorProcessor as HTTPErrorProcessor_
     from cookielib import CookieJar
 
-from motuclient import utils_log
+from motu_utils import utils_log
 import logging
 import ssl
 import socket

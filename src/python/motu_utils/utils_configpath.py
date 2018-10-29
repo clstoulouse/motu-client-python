@@ -1,7 +1,7 @@
 import sys
 import os
 
-MOTU_CLIENT_CONFIG_PATH = os.path.join("motu-client", "cfg")
+MOTU_CLIENT_CONFIG_PATH = os.path.join("motuclient", "cfg")
 LINUX_CONFIG_PATH = os.path.join("/usr", "local", MOTU_CLIENT_CONFIG_PATH)
 WINDOWS_CONFIG_PATH = os.path.join(sys.prefix, MOTU_CLIENT_CONFIG_PATH)
 VIT_ENV_CONFIG_PATH = MOTU_CLIENT_CONFIG_PATH
