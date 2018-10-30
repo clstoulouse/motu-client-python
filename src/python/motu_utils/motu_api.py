@@ -42,6 +42,7 @@ import re
 import datetime
 import time
 import socket
+from urlparse import urlparse
 from xml.dom import minidom
 from pkg_resources import get_distribution
 
@@ -447,7 +448,7 @@ def dl_2_file(dl_url, fh, block_size = 65535, isADownloadRequest = None, **optio
                 
             end_time = datetime.datetime.now()
             stopWatch.stop('downloading')
-        
+            
             log.info( "Processing  time : %s", str(processing_time - init_time) )
             log.info( "Downloading time : %s", str(end_time - processing_time) )
             log.info( "Total time       : %s", str(end_time - init_time) )
