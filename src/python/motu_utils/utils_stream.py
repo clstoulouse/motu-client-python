@@ -25,7 +25,7 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with this library; if not, write to the Free Software Foundation,
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
-import io
+import io, sys
 
 def copy(sourceHandler, destHandler, callback = None, blockSize = 65535 ):
     """Copy the available content through the given handler to another one. Process
@@ -50,7 +50,10 @@ def copy(sourceHandler, destHandler, callback = None, blockSize = 65535 ):
         try:
           if type(destHandler) == io.StringIO:
             strBlock=str(block)
-            destHandler.write( unicode(block, 'utf-8') )
+            if sys.version_info > (3, 0):
+              destHandler.write( str(block, 'utf-8') )
+            else:
+              destHandler.write( unicode(block, 'utf-8') )
           else:
             destHandler.write(block)
         except Exception as inst:
