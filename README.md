@@ -33,7 +33,7 @@ and also plugin for [notepadd++](https://github.com/Edditoria/markdown_npp_zenbu
     * [From Windows, Parameter error](#TroubleshootingWinArgErr)
 
 # <a name="Overview">Overview</a>
-Motu client "motu-client-python" is a python script used to connect to Motu HTTP server in order to:  
+Motu client "motuclient-python" is a python script used to connect to Motu HTTP server in order to:  
 
 * __extract__ the data of a dataset, with geospatial, temporal and variable criterias (default option)   
 * __get the size__ of an extraction with geospatial, temporal and variable criterias  
@@ -55,8 +55,8 @@ mvn clean install -Dmaven.test.skip=true
 
 This creates two archives in the target folder:
 
-* motu-client-python-$version-$buildTimestamp-src.tar.gz: Archive containing all the source code
-* motu-client-python-$version-$buildTimestamp-bin.tar.gz: Archive ready to be installed
+* motuclient-python-$version-$buildTimestamp-src.tar.gz: Archive containing all the source code
+* motuclient-python-$version-$buildTimestamp-bin.tar.gz: Archive ready to be installed
 
 
 
@@ -78,16 +78,16 @@ export HTTPS_PROXY=http://myCompanyProxy:8080
 Then run:  
   
 ```
-pip install motu-client  
+pip install motuclient  
 ```
   
-Now "Motu-client" is installed, you can [configured it](#Configuration) and [use it](#UsagePIP).
+Now "motuclient" is installed, you can [configured it](#Configuration) and [use it](#UsagePIP).
   
   
 ## <a name="InstallationTGZ">From tar.gz file</a>
-Deploy the archive (file motu-client-python-$version-bin.tar.gz available from [GitHub release](https://github.com/clstoulouse/motu-client-python/releases)) in the directory of your choice.  
+Deploy the archive (file motuclient-python-$version-bin.tar.gz available from [GitHub release](https://github.com/clstoulouse/motu-client-python/releases)) in the directory of your choice.  
 ```  
-tar xvzf motu-client-python-$version-$buildTimestamp-bin.tar.gz
+tar xvzf motuclient-python-$version-$buildTimestamp-bin.tar.gz
 ```  
 
 Create a [configuration file](#Configuration) and set the user and password to use to connect to the CAS server.   
@@ -111,8 +111,8 @@ pip install --upgrade setuptools
 All parameters can be defined as command line options or can be written in a configuration file.
 The configuration file is a .ini file. This file is located in the following directory:  
 
-* on __Unix__ platforms: $HOME/motu-client/motu-client-python.ini
-* on __Windows__ platforms: %USERPROFILE%\motu-client\motu-client-python.ini
+* on __Unix__ platforms: $HOME/motuclient/motuclient-python.ini
+* on __Windows__ platforms: %USERPROFILE%\motuclient\motuclient-python.ini
   
 The expected structure of file is:  
 ``` 
@@ -146,8 +146,8 @@ Starts the motu python client.
 
 ## <a name="UsagePIP">Usage from PIP installation</a>  
 ```  
-python -m motu-client -h  
-python -m motu-client [options]
+python -m motuclient -h  
+python -m motuclient [options]
 ```  
   
 [Options](#UsageOptions) are listed below.  
@@ -156,8 +156,8 @@ Method to used when it has been installed with [PIP method](#InstallationPIP).
 
 ## <a name="UsageTGZ">Usage from tar.gz installation</a>  
 ```  
-./motu-client.py  -h  
-motu-client.py [options]
+./motuclient.py  -h  
+motuclient.py [options]
 ```  
 Method to used when it has been installed with [tar.gz method](#InstallationTGZ).  
 Usefull if host is offline and has no Internet access.
@@ -216,7 +216,7 @@ Usefull if host is offline and has no Internet access.
 # <a name="UsageExamples">Usage examples</a>   
 In the following examples, variable ${MOTU\_USER} and ${MOTU\_PASSWORD} are user name and user password used to connect to the CAS server for single sign on.  
 ${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.  
-Commands "./motu-client.py" has to be replaced by "python -m motu-client" if it has been installed with [PIP method](#UsagePIP).  
+Commands "./motuclient.py" has to be replaced by "python -m motuclient" if it has been installed with [PIP method](#UsagePIP).  
 
 
 ## <a name="UsageExamplesDownload">Download</a>  
@@ -224,14 +224,14 @@ Commands "./motu-client.py" has to be replaced by "python -m motu-client" if it 
 This command writes the extraction result data in file: /data/test.nc  
 
 ```  
-./motu-client.py --verbose --auth-mode=none -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f test.nc
+./motuclient.py --verbose --auth-mode=none -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f test.nc
 ``` 
 
 ### Display on stdout the HTTP(s) URL of the NC file available on the Motu server
 The HTTP(s) URL is displayed on stdout. This URL is a direct link to the file which is available to be downloaded.  
 
 ```  
-./motu-client.py --quiet --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o console
+./motuclient.py --quiet --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o console
 ``` 
 
 ## <a name="UsageExamplesGetSize">GetSize</a>  
@@ -239,12 +239,12 @@ See [https://github.com/clstoulouse/motu#ClientAPI_GetSize](https://github.com/c
 
 ### Get the XML file which contains the extraction size on the local machine
 ```  
-./motu-client.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f getSizeResult.xml
+./motuclient.py --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o /data -f getSizeResult.xml
 ``` 
 
 ### Display the extraction size as XML on stdout
 ```  
-./motu-client.py --quiet --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o console
+./motuclient.py --quiet --size --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t "2016-06-10" -T "2016-06-11" -v salinity -o console
 ``` 
 
 
@@ -253,12 +253,12 @@ See [https://github.com/clstoulouse/motu#describe-product](https://github.com/cl
 
 ### Get the XML file which contains the dataset description on the local machine
 ```  
-./motu-client.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -o /data -f describeProductResult.xml
+./motuclient.py -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -o /data -f describeProductResult.xml
 ``` 
 
 ### Display the dataset description XML result on stdout
 ```  
-./motu-client.py --quiet -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -o console
+./motuclient.py --quiet -D --auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m ${MOTU_SERVER_URL} -s HR_MOD_NCSS-TDS -d HR_MOD -o console
 ``` 
 
 
@@ -275,27 +275,27 @@ You should have received a copy of the GNU Lesser General Public License along w
 # <a name="TroubleshootingPIPCache">Unable to download the latest version watched on GitHub from PIP</a>
 Example:  
 ```  
-pip install motu-client  
-Collecting motu-client  
-  Using cached https://test-files.pythonhosted.org/packages/4a/7d/41c3bdd973baf119371493c193248349c9b7107477ebf343f3889cabbf48/motu-client-X.Y.Z.zip  
-Installing collected packages: motu-client  
-  Running setup.py install for motu-client ... done  
-Successfully installed motu-client-X.Y.Z  
+pip install motuclient  
+Collecting motuclient  
+  Using cached https://test-files.pythonhosted.org/packages/4a/7d/41c3bdd973baf119371493c193248349c9b7107477ebf343f3889cabbf48/motuclient-X.Y.Z.zip  
+Installing collected packages: motuclient  
+  Running setup.py install for motuclient ... done  
+Successfully installed motuclient-X.Y.Z  
 ```  
   
 Clear your PIP cache: On Windows, delete the folder %HOMEPATH%/pip. On archlinux pip cache is located at ~/.cache/pip.
 After re run the command:  
 ```  
-pip install motu-client  
-Collecting motu-client  
-  Using https://test-files.pythonhosted.org/packages/4a/7d/41c3bdd973baf119371493c193248349c9b7107477ebf343f3889cabbf48/motu-client-X.Y.Z.zip  
-Installing collected packages: motu-client  
-  Running setup.py install for motu-client ... done  
-Successfully installed motu-client-X.Y.Z  
+pip install motuclient  
+Collecting motuclient  
+  Using https://test-files.pythonhosted.org/packages/4a/7d/41c3bdd973baf119371493c193248349c9b7107477ebf343f3889cabbf48/motuclient-X.Y.Z.zip  
+Installing collected packages: motuclient  
+  Running setup.py install for motuclient ... done  
+Successfully installed motuclient-X.Y.Z  
 ``` 
 
 # <a name="TroubleshootingWinArgErr">From Windows, Parameter error</a>
-From Windows, the command "motu-client.py --version" returns an error.  
+From Windows, the command "motuclient.py --version" returns an error.  
 10:44:24 [ERROR] Execution failed: [Excp 13] User (option 'user') is mandatory when 'cas' authentication is set. Please provide it.
 
 __Analyse:__  

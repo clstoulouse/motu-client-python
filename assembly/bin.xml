@@ -12,7 +12,7 @@
 		all assemblies have the same directory, thus allowing to deploy
 		easily. Version is not considered here.
 	-->
-	<baseDirectory>motu-client-python</baseDirectory>
+	<baseDirectory>motuclient-python</baseDirectory>
 	<fileSets>
 		<fileSet>
 			<directory>src/python</directory>

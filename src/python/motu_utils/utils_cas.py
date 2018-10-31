@@ -38,8 +38,8 @@ else:
     from urllib import quote_plus, quote
     from urlparse import urlparse, parse_qs
 
-from motuclient import utils_http, utils_log, utils_html, utils_messages
-from motuclient import utils_collection
+from motu_utils import utils_http, utils_log, utils_html, utils_messages
+from motu_utils import utils_collection
 
 
 # pattern used to search for a CAS url within a response
@@ -72,7 +72,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     # connexion response code must be a redirection, else, there's an error (user can't be already connected since no cookie or ticket was sent)
     if connexion.url == url:
         raise Exception(
-            utils_messages.get_external_messages()['motu-client.exception.authentication.not-redirected'] % server)
+            utils_messages.get_external_messages()['motuclient.exception.authentication.not-redirected'] % server)
     
     # find the cas url from the redirected url
     redirected_url = connexion.url
@@ -84,7 +84,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     
     if m is None:
         raise Exception(
-            utils_messages.get_external_messages()['motu-client.exception.authentication.unfound-url'] % redirected_url)
+            utils_messages.get_external_messages()['motuclient.exception.authentication.unfound-url'] % redirected_url)
     
     url_cas = m.group(1) + '/v1/tickets'
 
@@ -125,7 +125,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     url_ticket = url_cas + '/' + tgt
 
     if url_ticket is None:
-        raise Exception(utils_messages.get_external_messages()['motu-client.exception.authentication.tgt'])
+        raise Exception(utils_messages.get_external_messages()['motuclient.exception.authentication.tgt'])
     
     utils_log.log_url(log, "found url ticket:\t", url_ticket)
 

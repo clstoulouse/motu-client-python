@@ -6,8 +6,8 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
     <groupId>cls.atoll.motu.client</groupId>
-    <artifactId>motu-client-python</artifactId>
-    <version>1.8.0-snapshot-SNAPSHOT</version>
+    <artifactId>motuclient-python</artifactId>
+    <version>1.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Motu Client Python</name>
@@ -19,36 +19,11 @@
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   	</properties>
     
-    <dependencies>
-        <dependency>
-            <groupId>ant-contrib</groupId>
-            <artifactId>ant-contrib</artifactId>
-            <version>1.0b3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>ant</groupId>
-                    <artifactId>ant</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>ant</groupId>
-            <artifactId>ant-nodeps</artifactId>
-            <version>1.6.5</version>
-        </dependency>
-    </dependencies>
     <build>
         <scriptSourceDirectory>${basedir}/src</scriptSourceDirectory>
         <testSourceDirectory>${basedir}/bin</testSourceDirectory>
         <outputDirectory>${basedir}/bin</outputDirectory>
         <testOutputDirectory>${basedir}/bin</testOutputDirectory>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ftp</artifactId>
-                <version>1.0-beta-6</version>
-            </extension>
-        </extensions>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -70,22 +45,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.0</version>
-                <configuration>
-                    <goals>deploy</goals>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <createChecksum>true</createChecksum>
-                </configuration>
-            </plugin>
-			
 			<!-- Used to build a "build-timestamp" property, this property could be overridden by ANT calls from /motu-distribution/build.xml -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -110,87 +69,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			
-			
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.4</version>
-                <configuration>
-                    <!--
-                                                 Task for generating documentation of the script. 
-                                                 Process is based on text2tags (see http://txt2tags.org/) that must be downloaded into {basedir}/target
-                                               
-                                                 Generation can be started by invoking the following command line when necessary :
-                                                 
-                                                 mvn antrun:run
-                                              -->                                      
-                    <tasks>
-                        <property name="compile_classpath" refid="maven.plugin.classpath" />
-                        <taskdef name="propertyregex" classname="net.sf.antcontrib.property.RegexTask" classpathref="maven.runtime.classpath" />
-
-                        <echo message="Generating documentation" />
-                        <echo message="Preparing source" />                        
-                        <propertyregex property="motu_client_python_version" input="${project.version}" regexp="(.*)-SNAPSHOT" select="\1" global="true" />
-                        <echo message="Version is ${motu_client_python_version}" />
-                        <delete file="${basedir}/target/readme-motu-client.t2t" quiet="true" />
-                        <copy file="${basedir}/src/doc/readme-motu-client.t2t" tofile="${basedir}/target/readme-motu-client.t2t">
-                            <filterchain>                           
-                                <replacetokens>
-                                    <token key="motu-client-python-version" value="${motu_client_python_version}" />
-                                </replacetokens>
-                            </filterchain>
-                        </copy>
-                        <echo message="- Format : man" />
-                        <exec executable="python">
-                            <arg value="${basedir}/txt2tags.py" />
-                            <arg value="-t" />
-                            <arg value="man" />
-                            <arg value="-o" />
-                            <arg value="${basedir}/src/doc/readme-motu-client.man" />
-                            <arg value="${basedir}/target/readme-motu-client.t2t" />
-                        </exec>
-                        <echo message="- Format : txt" />
-                        <exec executable="python">
-                            <arg value="${basedir}/txt2tags.py" />
-                            <arg value="-t" />
-                            <arg value="art" />
-                            <arg value="-o" />
-                            <arg value="${basedir}/src/doc/readme-motu-client.txt" />
-                            <arg value="${basedir}/target/readme-motu-client.t2t" />
-                        </exec>
-                        <echo message="- Format : html" />
-                        <exec executable="python">
-                            <arg value="${basedir}/txt2tags.py" />
-                            <arg value="-t" />
-                            <arg value="html" />
-                            <arg value="-o" />
-                            <arg value="${basedir}/src/doc/readme-motu-client.html" />
-                            <arg value="${basedir}/target/readme-motu-client.t2t" />
-                        </exec>
-                        <echo message="- Format : pdf" />
-                        <exec executable="python" dir="${basedir}/target">
-                            <arg value="${basedir}/txt2tags.py" />
-                            <arg value="-t" />
-                            <arg value="tex" />
-                            <arg value="-o" />
-                            <arg value="${basedir}/target/readme-motu-client.tex" />
-                            <arg value="${basedir}/target/readme-motu-client.t2t" />
-                        </exec>
-                        <!--
-                        <exec executable="pdflatex.exe" dir="${basedir}/target">
-                            <arg value="-output-directory" />
-                            <arg value="${basedir}/src/doc" />
-                            <arg value="-aux-directory" />
-                            <arg value="${basedir}/target" />
-                            <arg value="-interaction" />
-                            <arg value="batchmode" />
-                            <arg value="-quiet" />
-                            <arg value="${basedir}/target/readme-motu-client.tex" />
-                        </exec>
-                        -->
-                    </tasks>
-                </configuration>
-              </plugin>
         </plugins>
     </build>
 

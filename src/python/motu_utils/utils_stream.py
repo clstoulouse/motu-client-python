@@ -25,6 +25,7 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with this library; if not, write to the Free Software Foundation,
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+import io
 
 def copy(sourceHandler, destHandler, callback = None, blockSize = 65535 ):
     """Copy the available content through the given handler to another one. Process
@@ -37,7 +38,6 @@ def copy(sourceHandler, destHandler, callback = None, blockSize = 65535 ):
     
     returns the total size read
     """
-    
     read = 0        
     while 1:
         block = sourceHandler.read(blockSize)
@@ -45,9 +45,19 @@ def copy(sourceHandler, destHandler, callback = None, blockSize = 65535 ):
         if(isinstance(block, bytes)):
            exit_condition = b''
         if block == exit_condition:
-                break
+           break
         read += len(block)
-        destHandler.write(block)
+        try:
+          if type(destHandler) == io.StringIO:
+            strBlock=str(block)
+            destHandler.write( unicode(block, 'utf-8') )
+          else:
+            destHandler.write(block)
+        except Exception as inst:
+          print(type(inst))    # the exception instance
+          print(inst.args)     # arguments stored in .args
+          print(inst) 
+          
         callback(read)
 
     return read
