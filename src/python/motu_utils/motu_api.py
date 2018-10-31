@@ -35,6 +35,7 @@ if sys.version_info > (3, 0):
     from urllib.parse import unquote, quote_plus, urlparse
 else:
     from urllib import quote_plus, quote
+    from urlparse import urlparse
 
 
 import os
@@ -42,7 +43,6 @@ import re
 import datetime
 import time
 import socket
-from urlparse import urlparse
 from xml.dom import minidom
 from pkg_resources import get_distribution
 
