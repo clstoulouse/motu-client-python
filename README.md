@@ -145,9 +145,15 @@ socket_timeout=
 Starts the motu python client.  
 
 ## <a name="UsagePIP">Usage from PIP installation</a>  
+Since version 1.8.0:  
 ```  
-python -m motuclient -h  
-python -m motuclient [options]
+motuclient -h  
+motuclient [options]
+```  
+Before version 1.8.0:  
+```  
+python -m motu-client -h  
+python -m motu-client [options]
 ```  
   
 [Options](#UsageOptions) are listed below.  
