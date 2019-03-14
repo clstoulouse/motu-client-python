@@ -32,25 +32,43 @@ _messages = None
 
 MESSAGES_FILE = utils_configpath.getConfigPath() + '/messages.properties'
 
+
+def _process_content(content):
+    propDict = dict()
+    for propLine in content:
+        propDef = propLine.strip()
+        if len(propDef) == 0:
+            continue
+        if propDef[0] in ('!', '#'):
+            continue
+        punctuation = [propDef.find(c) for c in ':= '] + [len(propDef)]
+        found = min([pos for pos in punctuation if pos != -1])
+        name = propDef[:found].rstrip()
+        value = propDef[found:].lstrip(":= ").rstrip()
+        propDict[name] = value
+
+    _messages = propDict
+    return _messages
+
+
+def _process_file_py3(path):
+    with open(path) as propFile:
+        return _process_content(propFile.readlines())
+
+
+def _process_file_py2(path):
+    propFile = file(path, "rU")
+    processed_content = _process_content(propFile)
+    propFile.close()
+    return processed_content
+
+
 def get_external_messages():
     """Return a table of externalized messages.
-        
+
     The table is lazzy instancied (loaded once when called the first time)."""
     global _messages
     if _messages is None:
-        propFile= file( os.path.join(os.path.dirname(__file__),MESSAGES_FILE), "rU" )
-        propDict= dict()
-        for propLine in propFile:
-            propDef= propLine.strip()
-            if len(propDef) == 0:
-                continue
-            if propDef[0] in ( '!', '#' ):
-                continue
-            punctuation= [ propDef.find(c) for c in ':= ' ] + [ len(propDef) ]
-            found= min( [ pos for pos in punctuation if pos != -1 ] )
-            name= propDef[:found].rstrip()
-            value= propDef[found:].lstrip(":= ").rstrip()
-            propDict[name]= value
-        propFile.close()
-        _messages = propDict
-    return _messages
+        if sys.version_info > (3, 0):
+            return _process_file_py3(MESSAGES_FILE)
+        return _process_file_py2(MESSAGES_FILE)
