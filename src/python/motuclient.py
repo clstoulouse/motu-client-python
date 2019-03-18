@@ -238,8 +238,11 @@ def load_options():
     for option in parser.option_list:
         if (option.dest != None) and conf_parser.has_option(SECTION, option.dest):
             if option.dest == "variable":
-                default_variables.append(conf_parser.get(SECTION, option.dest))
-                default_values[option.dest] = default_variables
+                variablesInCfgFile = conf_parser.get(SECTION, option.dest)
+                if (not variablesInCfgFile is None) and variablesInCfgFile.strip():
+                    allVariablesArray = variablesInCfgFile.split(",")
+                    default_variables = default_variables + allVariablesArray
+                    default_values[option.dest] = default_variables
             else:
                 default_values[option.dest] = conf_parser.get(SECTION, option.dest)
 

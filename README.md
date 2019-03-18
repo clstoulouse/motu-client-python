@@ -117,27 +117,41 @@ The configuration file is a .ini file. This file is located in the following dir
 The expected structure of file is:  
 ``` 
 [Main]  
+# Motu credentials  
 user=john  
 pwd=secret  
-log_level=10  
-proxy_server=proxy.domain.net:8080  
-proxy_user=john  
-proxy_pwd=secret  
-motu=http://motu-ip-server:port/motu-web/Motu
-product_id=dataset-psy2v3-pgs-med-myocean-bestestimate  
-date_min=2010-11-08 12:00:00  
-date_max=2010-11-10  
-latitude_min=-75.0  
-latitude_max=30.0  
-longitude_min=20.0  
-longitude_max=120.0  
-depth_min=  
-depth_max=  
-variable=  
+
+motu=http://motu-ip-server:port/motu-web/Motu  
+service_id=GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS   
+product_id=global-analysis-forecast-phy-001-024-hourly-t-u-v-ssh  
+date_min=2019-03-27  
+date_max=2019-03-27  
+latitude_min=-30  
+latitude_max=40.0  
+longitude_min=-10  
+longitude_max=179.9166717529297    
+depth_min=0.493    
+depth_max=0.4942  
+# Empty or non set means all variables  
+# 1 or more variables separated by a coma and identified by their standard name  
+variable=sea_water_potential_temperature,sea_surface_height_above_geoid 
+# Accept relative or absolute path. The dot character "." is the current folder  
 out_dir=./out_dir  
 out_name=test.nc  
-block_size=65535  
-socket_timeout=  
+
+# Logging
+# https://docs.python.org/3/library/logging.html#logging-levels  
+# log_level=X {CRITICAL:50, ERROR:40, WARNING:30, INFO:20, DEBUG:10, TRACE:0}   
+log_level=0   
+
+# block_size block used to download file (integer expressing bytes) default=65535
+# block_size=65535  
+socket_timeout=120000  
+
+# Http proxy to connect to Motu server
+# proxy_server=proxy.domain.net:8080  
+# proxy_user=john  
+# proxy_pwd=secret  
 ``` 
 
 
@@ -214,7 +228,7 @@ Usefull if host is offline and has no Internet access.
 * __-D, --describe-product__ Get all updated information on a dataset. Output is in XML format, [API details](https://github.com/clstoulouse/motu#describe-product)  
 * __--size__ Get the size of an extraction. Output is in XML format, [API details](https://github.com/clstoulouse/motu#get-size)
 
-* __--block-size=BLOCK_SIZE__ The block used to download file (integer expressing bytes)  
+* __--block-size=BLOCK_SIZE__ The block used to download file (integer expressing bytes), default=65535 bytes  
 * __--socket-timeout=SOCKET_TIMEOUT__ Set a timeout on blocking socket operations (float expressing seconds)  
 * __--user-agent=USER_AGENT__ Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)  
   
