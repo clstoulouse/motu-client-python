@@ -97,10 +97,6 @@ def load_options():
     # create option parser
     parser = optparse.OptionParser(version=get_client_artefact() + ' v' + get_client_version())
 
-    # create config parser
-    conf_parser = ConfigParser.ConfigParser()
-    conf_parser.read(os.path.expanduser(CFG_FILE))
-
     # add available options
     parser.add_option( '--quiet', '-q',
                        help = "prevent any output in stdout",
@@ -231,6 +227,23 @@ def load_options():
                        action='store_true',
                        dest='console_mode')
 
+    parser.add_option( '--config-file',
+                       help = "Path of the optional configuration file [default: %s]" % CFG_FILE,
+                       action='append',
+                       dest="config_file",
+                       type="string")
+
+    # create config parser
+    conf_parser = ConfigParser.ConfigParser()
+
+    # read configuration file name from cli arguments or use default
+    # cant set default in parser.add_option due to optparse/argparse bug:
+    # https://bugs.python.org/issue16399
+    config_file = parser.parse_args()[0].config_file
+    if config_file is None:
+        config_file = [CFG_FILE]
+    config_file=[os.path.expanduser(x) for x in config_file]
+    conf_parser.read(config_file)
 
     # set default values by picking from the configuration file
     default_values = {}

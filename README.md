@@ -154,6 +154,11 @@ socket_timeout=120000
 # proxy_pwd=secret  
 ``` 
 
+A configuration file in another location can be specified by the `--config-file` option. It is even possible to split the configuration into two or more files. This is useful, for example, to keep server configuration in one file and dataset configuration in another:
+```  
+./motuclient.py --config-file ~/server.ini --config-file ~/mercator.ini
+``` 
+If by chance there is a parameter listed in both configuration files, the value in the last file (e.g. `mercator.ini`) is the one actually used.
 
 # <a name="Usage">Usage</a>  
 Starts the motu python client.  
