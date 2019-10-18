@@ -51,7 +51,7 @@ import ssl
 import socket
 
 
-class TLS1Connection(HTTPSConnection):
+class TLS1v2Connection(HTTPSConnection):
     """Like HTTPSConnection but more specific"""
     def __init__(self, host, **kwargs):
         HTTPSConnection.__init__(self, host, **kwargs)
@@ -68,18 +68,18 @@ class TLS1Connection(HTTPSConnection):
  
         # This is the only difference; default wrap_socket uses SSLv23
         self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file,
-                ssl_version=ssl.PROTOCOL_TLSv1)
+                ssl_version=ssl.PROTOCOL_TLSv1_2)
  
-class TLS1Handler(HTTPSHandler):
+class TLS1v2Handler(HTTPSHandler):
     """Like HTTPSHandler but more specific"""
     def __init__(self):
         HTTPSHandler.__init__(self)
  
     def https_open(self, req):
-        return self.do_open(TLS1Connection, req)
+        return self.do_open(TLS1v2Connection, req)
 
 # Overide default handler
-install_opener(build_opener(TLS1Handler()))
+install_opener(build_opener(TLS1v2Handler()))
 
 
 class HTTPErrorProcessor(HTTPErrorProcessor_):
@@ -127,7 +127,7 @@ def open_url(url, **kargsParam):
     handlers = [SmartRedirectHandler(),
                 HTTPCookieProcessor(CookieJar()),
                 HTTPHandler(),
-                TLS1Handler(),
+                TLS1v2Handler(),
                 utils_log.HTTPDebugProcessor(log),
                 HTTPErrorProcessor()
                 ]
