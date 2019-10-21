@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.python.pydev.debug.regularLaunchConfigurationType">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/motuclient-python/src/python/motuclient.py"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="${workspace_loc:motuclient-python/src/python/motuclient.py}"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_OTHER_WORKING_DIRECTORY" value=""/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="--auth-mode=cas -u ${MOTU_USER} -p ${MOTU_PASSWORD}  -m  https://motu-datastore-qo.cls.fr/motu-web/Motu -s Mercator_Ocean_Model_Global-TDS -d dataset-mercator-psy4v3-gl12-bestestimate-uv -z 0.49 -Z 0.50 -x -70 -X 25 -y -75 -Y 10 -t &quot;2019-10-15&quot; -T &quot;2019-10-16&quot; -v uo -o console${MOTU_HOME}/motuclient-python -f test.nc"/>
+<stringAttribute key="org.python.pydev.debug.ATTR_INTERPRETER" value="__default"/>
+<stringAttribute key="org.python.pydev.debug.ATTR_PROJECT" value="motuclient-python"/>
+<stringAttribute key="process_factory_id" value="org.python.pydev.debug.processfactory.PyProcessFactory"/>
+</launchConfiguration>
