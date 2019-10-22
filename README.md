@@ -78,7 +78,7 @@ export HTTPS_PROXY=http://myCompanyProxy:8080
 Then run:  
   
 ```
-pip install motuclient  
+pip install motuclient --upgrade  
 ```
   
 Now "motuclient" is installed, you can [configured it](#Configuration) and [use it](#UsagePIP).
