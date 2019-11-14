@@ -220,7 +220,7 @@ def load_options():
                        help = "Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)")
 
     parser.add_option( '--outputWritten',
-                       help = "Optional parameter used to set the format of the file returned by the download request: netcdf or netcdf4. If not set, netcdf is used.")
+                       help = "Optional parameter used to set the format of the file returned by the download request, only netcdf is supported. If not set, netcdf is used.")
 
     parser.add_option( '--console-mode',
                        help = "Optional parameter used to display result on stdout, either URL path to download extraction file, or the XML content of getSize or describeProduct requests.",

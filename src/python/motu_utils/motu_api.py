@@ -138,10 +138,11 @@ def build_params(_options):
                               z_hi = _options.depth_max
                             )
         
+    """ MOTU-172
     if _options.extraction_output:
         query_options.insert(output=_options.outputWritten)
-    else:
-        query_options.insert(output="netcdf")
+    else:"""
+    query_options.insert(output="netcdf")
     
     if _options.extraction_temporal:
         # date are strings, and they are send to Motu "as is". If not, we convert them into string
@@ -246,11 +247,12 @@ def check_options(_options):
     if _options.date_min != None or _options.date_max != None :
          _options.extraction_temporal = True
     
+    """ MOTU-172
     #Check OUTPUT Options
     _options.extraction_output = False
     if _options.outputWritten != None :
         _options.extraction_output = True
-    
+    """
     # Check GEOGRAPHIC Options
     _options.extraction_geographic = False
     if _options.latitude_min != None or _options.latitude_max != None or _options.longitude_min != None or _options.longitude_max != None :
