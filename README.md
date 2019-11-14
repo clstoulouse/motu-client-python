@@ -236,6 +236,7 @@ Usefull if host is offline and has no Internet access.
 * __--block-size=BLOCK_SIZE__ The block used to download file (integer expressing bytes), default=65535 bytes  
 * __--socket-timeout=SOCKET_TIMEOUT__ Set a timeout on blocking socket operations (float expressing seconds)  
 * __--user-agent=USER_AGENT__ Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)  
+* __--outputWritten=OUTPUT_FORMAT__ Set the output format (file type) of the returned file for download requests. By default this value is 'netcdf' and no other value is supported.  
   
   
 # <a name="UsageExamples">Usage examples</a>   
