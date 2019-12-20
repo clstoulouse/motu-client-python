@@ -622,7 +622,6 @@ def execute_request(_options):
                             log.error(motu_reply)
                             dom = None
                             pass
-                            
     
                         if dom:
                             for node in dom.getElementsByTagName('statusModeResponse'):
@@ -662,3 +661,4 @@ def execute_request(_options):
             raise
     finally:
         stopWatch.stop()
+
