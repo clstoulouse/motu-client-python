@@ -615,12 +615,22 @@ def execute_request(_options):
                         
                         m = utils_http.open_url(requestUrlCas, **url_config)                
                         motu_reply=m.read()
-                        dom = minidom.parseString(motu_reply)
+                        dom = None
+                        try:
+                            dom = minidom.parseString(motu_reply)
+                        except:
+                            log.error(motu_reply)
+                            dom = None
+                            pass
+                            
     
-                        for node in dom.getElementsByTagName('statusModeResponse'):
-                            status = node.getAttribute('status')    
-                            dwurl = node.getAttribute('remoteUri')
-                            msg = node.getAttribute('msg')
+                        if dom:
+                            for node in dom.getElementsByTagName('statusModeResponse'):
+                                status = node.getAttribute('status')    
+                                dwurl = node.getAttribute('remoteUri')
+                                msg = node.getAttribute('msg')
+                        else:
+                            status = 4
                             
                         # Check status
                         if status == "0" or status == "3": # in progress/pending
@@ -631,6 +641,8 @@ def execute_request(_options):
     
                     if status == "2": 
                         log.error(msg) 
+                    if status == "4": 
+                        log.error("CMEMS API interaction appears to have failed - reported as issue CMEMS:11022")
                     if status == "1": 
                         log.info('The product is ready for download')
                         if dwurl != "":
