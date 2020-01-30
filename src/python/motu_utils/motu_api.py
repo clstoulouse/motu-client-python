@@ -598,11 +598,11 @@ def execute_request(_options):
                 
                 if requestUrl != None:    
                     # asynchronous mode
-                    status = 0
+                    status = "0"
                     dwurl = ""
                     msg = ""
                 
-                    while True:    
+                    while True:
                         if _options.auth_mode == AUTHENTICATION_MODE_CAS:
                             stopWatch.start('authentication')
                             # perform authentication before acceding service
@@ -612,27 +612,37 @@ def execute_request(_options):
                             stopWatch.stop('authentication')
                         else:
                             # if none, we do nothing more, in basic, we let the url requester doing the job
-                            requestUrlCas = requestUrl    
+                            requestUrlCas = requestUrl
                         
+                        m = utils_http.open_url(requestUrlCas, **url_config)
+                        motu_reply = m.read()
+                        dom = None
                         
-                        m = utils_http.open_url(requestUrlCas, **url_config)                
-                        motu_reply=m.read()
-                        dom = minidom.parseString(motu_reply)
-    
-                        for node in dom.getElementsByTagName('statusModeResponse'):
-                            status = node.getAttribute('status')    
-                            dwurl = node.getAttribute('remoteUri')
-                            msg = node.getAttribute('msg')
-                            
+                        try:
+                            dom = minidom.parseString(motu_reply)
+                        except:
+                            log.error(motu_reply)
+                            dom = None
+                        
+                        if dom:    
+                            for node in dom.getElementsByTagName('statusModeResponse'):
+                                status = node.getAttribute('status')
+                                dwurl = node.getAttribute('remoteUri')
+                                msg = node.getAttribute('msg')
+                        else:
+                            status = "4"
+
                         # Check status
                         if status == "0" or status == "3": # in progress/pending
-                            log.info('Product is not yet available (request in progress)')         
+                            log.info('Product is not yet available (request in progress)')
                             time.sleep(10)
                         else: # finished (error|success)
                             break
-    
+
                     if status == "2": 
                         log.error(msg) 
+                    if status == "4":
+                        log.error("Motu server API interaction appears to have failed, server response is invalid")
                     if status == "1": 
                         log.info('The product is ready for download')
                         if dwurl != "":
