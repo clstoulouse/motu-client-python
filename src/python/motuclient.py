@@ -188,12 +188,12 @@ def load_options():
     parser.add_option( '--sync-mode', '-S',
                        help = "Sets the download mode to synchronous (not recommended)",
                        action='store_true',
-					   dest='sync')
+                       dest='sync')
 
     parser.add_option( '--describe-product', '-D',
                        help = "Get all updated information on a dataset. Output is in XML format",
                        action='store_true',
-					   dest='describe')
+                       dest='describe')
 
     parser.add_option( '--size',
                        help = "Get the size of an extraction. Output is in XML format",
@@ -299,7 +299,10 @@ def main():
         if hasattr(e, 'code'):
           log.info( ' . code  %s: ', e.code )
         if hasattr(e, 'read'):
-          log.log( utils_log.TRACE_LEVEL, ' . detail:\n%s', e.read() )
+          try:
+            log.log( utils_log.TRACE_LEVEL, ' . detail:\n%s', e.read() )
+          except:
+            pass
 
         log.debug( '-'*60 )
         log.debug( "Stack trace exception is detailed herafter:" )
