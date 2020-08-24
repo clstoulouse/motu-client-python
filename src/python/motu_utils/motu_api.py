@@ -257,36 +257,32 @@ def check_options(_options):
     _options.extraction_geographic = False
     if _options.latitude_min != None or _options.latitude_max != None or _options.longitude_min != None or _options.longitude_max != None :
         _options.extraction_geographic = True
-        if( _options.latitude_min == None ):
-            raise Exception(
-                utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % 'latitude_min')
+        
+        check_latitude(_options.latitude_min, 'latitude_min')
+        check_latitude(_options.latitude_max, 'latitude_max')
+        
+        check_longitude(_options.longitude_min, 'longitude_min')
+        check_longitude(_options.longitude_max, 'longitude_max')
 
-        if( _options.latitude_max == None ):
-            raise Exception(
-                utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % 'latitude_max')
+def check_coordinate(coord, msg):
+    if( coord == None ):
+        raise Exception(
+            utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % msg)
+    try:
+        return float(coord)
+    except ValueError:
+        raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.invalid'] % (coord, msg, 'floating point number'))
         
-        if( _options.longitude_min == None ):
-            raise Exception(
-                utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % 'longitude_min')
-        
-        if( _options.longitude_max == None ):
-            raise Exception(
-                utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % 'longitude_max')
-        
-        tempvalue = float(_options.latitude_min)
-        if tempvalue < -90 or tempvalue > 90 :
-            raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % ('latitude_min', str(tempvalue)))
-        tempvalue = float(_options.latitude_max)
-        if tempvalue < -90 or tempvalue > 90 :
-            raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % ('latitude_max', str(tempvalue)))
-        tempvalue = float(_options.longitude_min)
-        tempvalue = normalize_longitude(tempvalue)
-        if tempvalue < -180 or tempvalue > 180 :
-            raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % ('logitude_min', str(tempvalue)))
-        tempvalue = float(_options.longitude_max)
-        tempvalue = normalize_longitude(tempvalue)
-        if tempvalue < -180 or tempvalue > 180 :
-            raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % ('longitude_max', str(tempvalue)))
+def check_latitude(lat, msg):
+    tempvalue = check_coordinate(lat, msg)
+    if tempvalue < -90 or tempvalue > 90 :
+        raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % (msg, str(tempvalue)))
+
+def check_longitude(lon, msg):
+    tempvalue = check_coordinate(lon, msg)
+    tempvalue = normalize_longitude(tempvalue)
+    if tempvalue < -180 or tempvalue > 180:
+        raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % (msg, str(tempvalue)))
 
 def normalize_longitude(lon):
     if lon > 180:
@@ -455,6 +451,37 @@ def dl_2_file(dl_url, fh, block_size = 65535, isADownloadRequest = None, **optio
             log.info( "Downloading time : %s", str(end_time - processing_time) )
             log.info( "Total time       : %s", str(end_time - init_time) )
             log.info( "Download rate    : %s/s", utils_unit.convert_bytes((read / total_milliseconds(end_time - start_time)) * 10 ** 3))
+        except Exception as e:
+            log.error( "Download failed: %s", e )
+            if hasattr(e, 'reason'):
+              log.info( ' . reason: %s', e.reason )
+            if hasattr(e, 'code'):
+              log.info( ' . code  %s: ', e.code )
+            if hasattr(e, 'read'):
+              try:
+                log.log( utils_log.TRACE_LEVEL, ' . detail:\n%s', e.read() )
+              except:
+                pass
+    
+            log.debug( '-'*60 )
+            log.debug( "Stack trace exception is detailed herafter:" )
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            x = traceback.format_exception(exc_type, exc_value, exc_tb)
+            for stack in x:
+                log.debug( ' . %s', stack.replace('\n', '') )
+            log.debug( '-'*60 )
+            log.log( utils_log.TRACE_LEVEL, 'System info is provided hereafter:' )
+            system, node, release, version, machine, processor = platform.uname()
+            log.log( utils_log.TRACE_LEVEL, ' . system   : %s', system )
+            log.log( utils_log.TRACE_LEVEL, ' . node     : %s', node )
+            log.log( utils_log.TRACE_LEVEL, ' . release  : %s', release )
+            log.log( utils_log.TRACE_LEVEL, ' . version  : %s', version )
+            log.log( utils_log.TRACE_LEVEL, ' . machine  : %s', machine )
+            log.log( utils_log.TRACE_LEVEL, ' . processor: %s', processor )
+            log.log( utils_log.TRACE_LEVEL, ' . python   : %s', sys.version )
+            log.log( utils_log.TRACE_LEVEL, ' . client   : %s', get_client_version() )
+            log.log( utils_log.TRACE_LEVEL, '-'*60 )
+        
         finally:
             m.close()
     finally:
