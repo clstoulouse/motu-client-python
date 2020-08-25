@@ -177,6 +177,7 @@ def load_options():
     parser.add_argument( '--variable', '-v',
                        help = "The variable (list of strings)",
                        dest="variable",
+                       action='append',
                        nargs='+',
                        type=str)
 
@@ -234,6 +235,9 @@ def load_options():
     conf_parser = ConfigParser.ConfigParser()
 
     _options = parser.parse_args()
+    # flatten the variable lists of lists
+    if not _options.variable is None:
+        _options.variable = [var for varlists in _options.variable for var in varlists]
     
     # read configuration file name from cli arguments or use default
     # cant set default in parser.add_option due to optparse/argparse bug:
