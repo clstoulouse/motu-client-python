@@ -138,10 +138,11 @@ def build_params(_options):
                               z_hi = _options.depth_max
                             )
         
+    """ MOTU-172
     if _options.extraction_output:
         query_options.insert(output=_options.outputWritten)
-    else:
-        query_options.insert(output="netcdf")
+    else:"""
+    query_options.insert(output="netcdf")
     
     if _options.extraction_temporal:
         # date are strings, and they are send to Motu "as is". If not, we convert them into string
@@ -246,61 +247,43 @@ def check_options(_options):
     if _options.date_min != None or _options.date_max != None :
          _options.extraction_temporal = True
     
+    """ MOTU-172
     #Check OUTPUT Options
     _options.extraction_output = False
     if _options.outputWritten != None :
         _options.extraction_output = True
-    
+    """
     # Check GEOGRAPHIC Options
     _options.extraction_geographic = False
     if _options.latitude_min != None or _options.latitude_max != None or _options.longitude_min != None or _options.longitude_max != None :
         _options.extraction_geographic = True
-        if( _options.latitude_min == None ):
-            raise Exception(
-                utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % 'latitude_min')
+        
+        check_latitude(_options.latitude_min, 'latitude_min')
+        check_latitude(_options.latitude_max, 'latitude_max')
+        
+        check_coordinate(_options.longitude_min, 'longitude_min')
+        check_coordinate(_options.longitude_max, 'longitude_max')
 
-        if( _options.latitude_max == None ):
-            raise Exception(
-                utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % 'latitude_max')
-        
-        if( _options.longitude_min == None ):
-            raise Exception(
-                utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % 'longitude_min')
-        
-        if( _options.longitude_max == None ):
-            raise Exception(
-                utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % 'longitude_max')
-        
-        tempvalue = float(_options.latitude_min)
-        if tempvalue < -90 or tempvalue > 90 :
-            raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % ('latitude_min', str(tempvalue)))
-        tempvalue = float(_options.latitude_max)
-        if tempvalue < -90 or tempvalue > 90 :
-            raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % ('latitude_max', str(tempvalue)))
-        tempvalue = float(_options.longitude_min)
-        tempvalue = normalize_longitude(tempvalue)
-        if tempvalue < -180 or tempvalue > 180 :
-            raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % ('logitude_min', str(tempvalue)))
-        tempvalue = float(_options.longitude_max)
-        tempvalue = normalize_longitude(tempvalue)
-        if tempvalue < -180 or tempvalue > 180 :
-            raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % ('longitude_max', str(tempvalue)))
+def check_coordinate(coord, msg):
+    if( coord == None ):
+        raise Exception(
+            utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % msg)
+    try:
+        return float(coord)
+    except ValueError:
+        raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.invalid'] % (coord, msg, 'floating point number'))
 
-def normalize_longitude(lon):
-    if lon > 180:
-        while lon > 180:
-            lon -= 360
-    elif lon < -180:
-        while lon < -180:
-            lon += 360
-    return lon
-            
+def check_latitude(lat, msg):
+    tempvalue = check_coordinate(lat, msg)
+    if tempvalue < -90 or tempvalue > 90 :
+        raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % (msg, str(tempvalue)))
+
 def total_seconds(td):
     return total_milliseconds(td) / 10**3 
 
 def total_milliseconds(td):
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**3 
-    
+
 def get_url_config(_options, data = None):
     # prepare arguments    
     kargs = {}
@@ -453,6 +436,37 @@ def dl_2_file(dl_url, fh, block_size = 65535, isADownloadRequest = None, **optio
             log.info( "Downloading time : %s", str(end_time - processing_time) )
             log.info( "Total time       : %s", str(end_time - init_time) )
             log.info( "Download rate    : %s/s", utils_unit.convert_bytes((read / total_milliseconds(end_time - start_time)) * 10 ** 3))
+        except Exception as e:
+            log.error( "Download failed: %s", e )
+            if hasattr(e, 'reason'):
+              log.info( ' . reason: %s', e.reason )
+            if hasattr(e, 'code'):
+              log.info( ' . code  %s: ', e.code )
+            if hasattr(e, 'read'):
+              try:
+                log.log( utils_log.TRACE_LEVEL, ' . detail:\n%s', e.read() )
+              except:
+                pass
+    
+            log.debug( '-'*60 )
+            log.debug( "Stack trace exception is detailed herafter:" )
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            x = traceback.format_exception(exc_type, exc_value, exc_tb)
+            for stack in x:
+                log.debug( ' . %s', stack.replace('\n', '') )
+            log.debug( '-'*60 )
+            log.log( utils_log.TRACE_LEVEL, 'System info is provided hereafter:' )
+            system, node, release, version, machine, processor = platform.uname()
+            log.log( utils_log.TRACE_LEVEL, ' . system   : %s', system )
+            log.log( utils_log.TRACE_LEVEL, ' . node     : %s', node )
+            log.log( utils_log.TRACE_LEVEL, ' . release  : %s', release )
+            log.log( utils_log.TRACE_LEVEL, ' . version  : %s', version )
+            log.log( utils_log.TRACE_LEVEL, ' . machine  : %s', machine )
+            log.log( utils_log.TRACE_LEVEL, ' . processor: %s', processor )
+            log.log( utils_log.TRACE_LEVEL, ' . python   : %s', sys.version )
+            log.log( utils_log.TRACE_LEVEL, ' . client   : %s', get_client_version() )
+            log.log( utils_log.TRACE_LEVEL, '-'*60 )
+        
         finally:
             m.close()
     finally:
@@ -596,11 +610,11 @@ def execute_request(_options):
                 
                 if requestUrl != None:    
                     # asynchronous mode
-                    status = 0
+                    status = "0"
                     dwurl = ""
                     msg = ""
                 
-                    while True:    
+                    while True:
                         if _options.auth_mode == AUTHENTICATION_MODE_CAS:
                             stopWatch.start('authentication')
                             # perform authentication before acceding service
@@ -610,27 +624,37 @@ def execute_request(_options):
                             stopWatch.stop('authentication')
                         else:
                             # if none, we do nothing more, in basic, we let the url requester doing the job
-                            requestUrlCas = requestUrl    
+                            requestUrlCas = requestUrl
                         
+                        m = utils_http.open_url(requestUrlCas, **url_config)
+                        motu_reply = m.read()
+                        dom = None
                         
-                        m = utils_http.open_url(requestUrlCas, **url_config)                
-                        motu_reply=m.read()
-                        dom = minidom.parseString(motu_reply)
-    
-                        for node in dom.getElementsByTagName('statusModeResponse'):
-                            status = node.getAttribute('status')    
-                            dwurl = node.getAttribute('remoteUri')
-                            msg = node.getAttribute('msg')
-                            
+                        try:
+                            dom = minidom.parseString(motu_reply)
+                        except:
+                            log.error(motu_reply)
+                            dom = None
+                        
+                        if dom:    
+                            for node in dom.getElementsByTagName('statusModeResponse'):
+                                status = node.getAttribute('status')
+                                dwurl = node.getAttribute('remoteUri')
+                                msg = node.getAttribute('msg')
+                        else:
+                            status = "4"
+
                         # Check status
                         if status == "0" or status == "3": # in progress/pending
-                            log.info('Product is not yet available (request in progress)')         
+                            log.info('Product is not yet available (request in progress)')
                             time.sleep(10)
                         else: # finished (error|success)
                             break
-    
+
                     if status == "2": 
                         log.error(msg) 
+                    if status == "4":
+                        log.error("Motu server API interaction appears to have failed, server response is invalid")
                     if status == "1": 
                         log.info('The product is ready for download')
                         if dwurl != "":

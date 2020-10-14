@@ -44,7 +44,7 @@ import datetime
 import logging
 import logging.config
 
-import optparse
+import argparse
 from motu_utils import utils_configpath
 
 # error code to use when exiting after exception catch
@@ -95,151 +95,154 @@ def load_options():
     _options = None
 
     # create option parser
-    parser = optparse.OptionParser(version=get_client_artefact() + ' v' + get_client_version())
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--version', action='version', version=get_client_artefact() + ' v' + get_client_version())
     # add available options
-    parser.add_option( '--quiet', '-q',
+    parser.add_argument( '--quiet', '-q',
                        help = "prevent any output in stdout",
                        action = 'store_const',
                        const = logging.WARN,
                        dest='log_level')
 
-    parser.add_option( '--verbose',
+    parser.add_argument( '--verbose',
                        help = "print information in stdout",
                        action='store_const',
                        const = logging.DEBUG,
                        dest='log_level')
 
-    parser.add_option( '--noisy',
+    parser.add_argument( '--noisy',
                        help = "print more information (traces) in stdout",
                        action='store_const',
                        const = utils_log.TRACE_LEVEL,
                        dest='log_level')
 
-    parser.add_option( '--user', '-u',
+    parser.add_argument( '--user', '-u',
                        help = "the user name (string)")
 
-    parser.add_option( '--pwd', '-p',
+    parser.add_argument( '--pwd', '-p',
                        help = "the user password (string)")
 
-    parser.add_option( '--auth-mode',
+    parser.add_argument( '--auth-mode',
                        default = motu_api.AUTHENTICATION_MODE_CAS,
                        help = "the authentication mode: '" + motu_api.AUTHENTICATION_MODE_NONE  +
                               "' (for no authentication), '"+ motu_api.AUTHENTICATION_MODE_BASIC +
                               "' (for basic authentication), or '"+motu_api.AUTHENTICATION_MODE_CAS +
                               "' (for Central Authentication Service) [default: %default]")
 
-    parser.add_option( '--proxy-server',
+    parser.add_argument( '--proxy-server',
                        help = "the proxy server (url)")
 
-    parser.add_option( '--proxy-user',
+    parser.add_argument( '--proxy-user',
                        help = "the proxy user (string)")
 
-    parser.add_option( '--proxy-pwd',
+    parser.add_argument( '--proxy-pwd',
                        help = "the proxy password (string)")
 
-    parser.add_option( '--motu', '-m',
+    parser.add_argument( '--motu', '-m',
                        help = "the motu server to use (url)")
 
-    parser.add_option( '--service-id', '-s',
+    parser.add_argument( '--service-id', '-s',
                        help = "The service identifier (string)")
 
-    parser.add_option( '--product-id', '-d',
+    parser.add_argument( '--product-id', '-d',
                        help = "The product (data set) to download (string)")
 
-    parser.add_option( '--date-min', '-t',
+    parser.add_argument( '--date-min', '-t',
                        help = "The min date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])")
 
-    parser.add_option( '--date-max', '-T',
+    parser.add_argument( '--date-max', '-T',
                        help = "The max date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])",
                        default = datetime.date.today().isoformat())
 
-    parser.add_option( '--latitude-min', '-y',
-                       type = 'float',
+    parser.add_argument( '--latitude-min', '-y',
                        help = "The min latitude (float in the interval [-90 ; 90])")
 
-    parser.add_option( '--latitude-max', '-Y',
-                       type = 'float',
+    parser.add_argument( '--latitude-max', '-Y',
                        help = "The max latitude (float in the interval [-90 ; 90])")
 
-    parser.add_option( '--longitude-min', '-x',
-                       type = 'float',
-                       help = "The min longitude (float in the interval [-180 ; 180])")
+    parser.add_argument( '--longitude-min', '-x',
+                       help = "The min longitude (float)")
 
-    parser.add_option( '--longitude-max', '-X',
-                       type = 'float',
-                       help = "The max longitude (float in the interval [-180 ; 180])")
+    parser.add_argument( '--longitude-max', '-X',
+                       help = "The max longitude (float)")
 
-    parser.add_option( '--depth-min', '-z',
-                       type = 'string',
+    parser.add_argument( '--depth-min', '-z',
+                       type = str,
                        help = "The min depth (float in the interval [0 ; 2e31] or string 'Surface')")
 
-    parser.add_option( '--depth-max', '-Z',
-                       type = 'string',
+    parser.add_argument( '--depth-max', '-Z',
+                       type = str,
                        help = "The max depth (float in the interval [0 ; 2e31] or string 'Surface')")
 
-    parser.add_option( '--variable', '-v',
+    parser.add_argument( '--variable', '-v',
                        help = "The variable (list of strings)",
-                       callback=option_callback_variable,
                        dest="variable",
-                       type="string",
-                       action="callback")
+                       action='append',
+                       nargs='+',
+                       type=str)
 
-    parser.add_option( '--sync-mode', '-S',
+    parser.add_argument( '--sync-mode', '-S',
                        help = "Sets the download mode to synchronous (not recommended)",
                        action='store_true',
-					   dest='sync')
+                       dest='sync')
 
-    parser.add_option( '--describe-product', '-D',
+    parser.add_argument( '--describe-product', '-D',
                        help = "Get all updated information on a dataset. Output is in XML format",
                        action='store_true',
-					   dest='describe')
+                       dest='describe')
 
-    parser.add_option( '--size',
+    parser.add_argument( '--size',
                        help = "Get the size of an extraction. Output is in XML format",
                        action='store_true',
                        dest='size')
 
-    parser.add_option( '--out-dir', '-o',
+    parser.add_argument( '--out-dir', '-o',
                        help = "The output dir where result (download file) is written (string). If it starts with 'console', behaviour is the same as with --console-mode. ",
                        default=".")
 
-    parser.add_option( '--out-name', '-f',
+    parser.add_argument( '--out-name', '-f',
                        help = "The output file name (string)",
                        default="data.nc")
 
-    parser.add_option( '--block-size',
-                       type = 'int',
+    parser.add_argument( '--block-size',
+                       type = int,
                        help = "The block used to download file (integer expressing bytes)",
                        default="65536")
 
-    parser.add_option( '--socket-timeout',
-                       type = 'float',
+    parser.add_argument( '--socket-timeout',
+                       type = float,
                        help = "Set a timeout on blocking socket operations (float expressing seconds)")
-    parser.add_option( '--user-agent',
+    parser.add_argument( '--user-agent',
                        help = "Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)")
 
-    parser.add_option( '--outputWritten',
-                       help = "Optional parameter used to set the format of the file returned by the download request: netcdf or netcdf4. If not set, netcdf is used.")
+    parser.add_argument( '--outputWritten',
+                       help = "Optional parameter used to set the format of the file returned by the download request, only netcdf is supported. If not set, netcdf is used.")
 
-    parser.add_option( '--console-mode',
+    parser.add_argument( '--console-mode',
                        help = "Optional parameter used to display result on stdout, either URL path to download extraction file, or the XML content of getSize or describeProduct requests.",
                        action='store_true',
                        dest='console_mode')
 
-    parser.add_option( '--config-file',
+    parser.add_argument('base', nargs='*')
+
+    parser.add_argument( '--config-file',
                        help = "Path of the optional configuration file [default: %s]" % CFG_FILE,
                        action='append',
                        dest="config_file",
-                       type="string")
+                       type=str)
 
     # create config parser
     conf_parser = ConfigParser.ConfigParser()
 
+    _options = parser.parse_args()
+    # flatten the variable lists of lists
+    if not _options.variable is None:
+        _options.variable = [var for varlists in _options.variable for var in varlists]
+    
     # read configuration file name from cli arguments or use default
     # cant set default in parser.add_option due to optparse/argparse bug:
     # https://bugs.python.org/issue16399
-    config_file = parser.parse_args()[0].config_file
+    config_file = _options.config_file
     if config_file is None:
         config_file = [CFG_FILE]
     config_file=[os.path.expanduser(x) for x in config_file]
@@ -248,26 +251,24 @@ def load_options():
     # set default values by picking from the configuration file
     default_values = {}
     default_variables = []
-    for option in parser.option_list:
-        if (option.dest != None) and conf_parser.has_option(SECTION, option.dest):
-            if option.dest == "variable":
-                variablesInCfgFile = conf_parser.get(SECTION, option.dest)
-                if (not variablesInCfgFile is None) and variablesInCfgFile.strip():
-                    allVariablesArray = variablesInCfgFile.split(",")
-                    default_variables = default_variables + allVariablesArray
-                    default_values[option.dest] = default_variables
-            else:
-                default_values[option.dest] = conf_parser.get(SECTION, option.dest)
-
-    parser.set_defaults( **default_values )
-
-    return parser.parse_args()
-
-def option_callback_variable(option, opt, value, parser):
-    global _variables
-    _variables.append(value)
-    setattr(parser.values, option.dest, _variables)
-
+    
+    if (conf_parser.has_section(SECTION)):
+        parser_options = conf_parser.options(SECTION)
+        for option in conf_parser.options(SECTION):
+            if hasattr(_options, option):
+                if option == "variable":
+                    variablesInCfgFile = conf_parser.get(SECTION, option)
+                    if (not variablesInCfgFile is None) and variablesInCfgFile.strip():
+                        allVariablesArray = variablesInCfgFile.split(",")
+                        default_variables = default_variables + allVariablesArray
+                        default_values[option] = default_variables
+                else:
+                    default_values[option] = conf_parser.get(SECTION, option)
+    
+        parser.set_defaults( **default_values )
+        return parser.parse_args()
+    else:
+        return _options
 
 def initLogger():
     logging.addLevelName(utils_log.TRACE_LEVEL, 'TRACE')
@@ -286,7 +287,7 @@ def main():
 
     try:
         # we prepare options we want
-        (_options, args) = load_options()
+        _options = load_options()
 
         if _options.log_level != None:
             logging.getLogger().setLevel(int(_options.log_level))
@@ -299,10 +300,13 @@ def main():
         if hasattr(e, 'code'):
           log.info( ' . code  %s: ', e.code )
         if hasattr(e, 'read'):
-          log.log( utils_log.TRACE_LEVEL, ' . detail:\n%s', e.read() )
+          try:
+            log.log( utils_log.TRACE_LEVEL, ' . detail:\n%s', e.read() )
+          except:
+            pass
 
         log.debug( '-'*60 )
-        log.debug( "Stack trace exception is detailed herafter:" )
+        log.debug( "Stack trace exception is detailed hereafter:" )
         exc_type, exc_value, exc_tb = sys.exc_info()
         x = traceback.format_exception(exc_type, exc_value, exc_tb)
         for stack in x:
