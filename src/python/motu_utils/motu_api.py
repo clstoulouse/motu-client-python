@@ -261,8 +261,8 @@ def check_options(_options):
         check_latitude(_options.latitude_min, 'latitude_min')
         check_latitude(_options.latitude_max, 'latitude_max')
         
-        check_longitude(_options.longitude_min, 'longitude_min')
-        check_longitude(_options.longitude_max, 'longitude_max')
+        check_coordinate(_options.longitude_min, 'longitude_min')
+        check_coordinate(_options.longitude_max, 'longitude_max')
 
 def check_coordinate(coord, msg):
     if( coord == None ):
@@ -272,33 +272,18 @@ def check_coordinate(coord, msg):
         return float(coord)
     except ValueError:
         raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.invalid'] % (coord, msg, 'floating point number'))
-        
+
 def check_latitude(lat, msg):
     tempvalue = check_coordinate(lat, msg)
     if tempvalue < -90 or tempvalue > 90 :
         raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % (msg, str(tempvalue)))
 
-def check_longitude(lon, msg):
-    tempvalue = check_coordinate(lon, msg)
-    tempvalue = normalize_longitude(tempvalue)
-    if tempvalue < -180 or tempvalue > 180:
-        raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.out-of-range'] % (msg, str(tempvalue)))
-
-def normalize_longitude(lon):
-    if lon > 180:
-        while lon > 180:
-            lon -= 360
-    elif lon < -180:
-        while lon < -180:
-            lon += 360
-    return lon
-            
 def total_seconds(td):
     return total_milliseconds(td) / 10**3 
 
 def total_milliseconds(td):
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**3 
-    
+
 def get_url_config(_options, data = None):
     # prepare arguments    
     kargs = {}

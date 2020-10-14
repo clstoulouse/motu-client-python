@@ -161,10 +161,10 @@ def load_options():
                        help = "The max latitude (float in the interval [-90 ; 90])")
 
     parser.add_argument( '--longitude-min', '-x',
-                       help = "The min longitude (float in the interval [-180 ; 180])")
+                       help = "The min longitude (float)")
 
     parser.add_argument( '--longitude-max', '-X',
-                       help = "The max longitude (float in the interval [-180 ; 180])")
+                       help = "The max longitude (float)")
 
     parser.add_argument( '--depth-min', '-z',
                        type = str,
