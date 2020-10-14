@@ -88,14 +88,14 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     
     url_cas = m.group(1) + '/v1/tickets'
 
-    opts = utils_http.encode(utils_collection.ListMultimap(username = quote(user), password = quote(pwd)))
+    opts = utils_http.encode(utils_collection.ListMultimap(username = user, password = pwd))
 
     utils_log.log_url(log, "login user into CAS:\t", url_cas + '?' + opts)
     url_config['data']=opts.encode()
     try:
         connexion = utils_http.open_url(url_cas, **url_config)
     except Exception as e:
-        if e.code == 400:
+        if hasattr(e, 'code') and e.code == 400:
             log.error( """Error: Bad user login or password:
             
                  On *nix OS, you must use the single quote, otherwise it may expand specific characters.
