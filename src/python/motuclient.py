@@ -127,7 +127,7 @@ def load_options():
                        help = "the authentication mode: '" + motu_api.AUTHENTICATION_MODE_NONE  +
                               "' (for no authentication), '"+ motu_api.AUTHENTICATION_MODE_BASIC +
                               "' (for basic authentication), or '"+motu_api.AUTHENTICATION_MODE_CAS +
-                              "' (for Central Authentication Service) [default: %default]")
+                              "' (for Central Authentication Service) [default: " + motu_api.AUTHENTICATION_MODE_CAS + "]")
 
     parser.add_argument( '--proxy-server',
                        help = "the proxy server (url)")
@@ -222,8 +222,6 @@ def load_options():
                        help = "Optional parameter used to display result on stdout, either URL path to download extraction file, or the XML content of getSize or describeProduct requests.",
                        action='store_true',
                        dest='console_mode')
-
-    parser.add_argument('base', nargs='*')
 
     parser.add_argument( '--config-file',
                        help = "Path of the optional configuration file [default: %s]" % CFG_FILE,
