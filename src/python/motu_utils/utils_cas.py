@@ -115,21 +115,17 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
             connexion = utils_http.open_url(url_cas, **url_config)
             connected = True
         except Exception as e:
-            if tries<nbDelays:
-                log.warn("Warning: Authentication failed, retrying in " + str(delays[tries]) + " seconds ...")
-                time.sleep(delays[tries])
-                tries = tries + 1
-            else:
-                if hasattr(e, 'code') and e.code == 400:
-                    log.error( """Error: Bad user login or password:
-                    
-                         On *nix OS, you must use the single quote, otherwise it may expand specific characters.
-                         [...] -u 'string' or --user 'string' [...]
-                         
-                         On Windows OS, you must use the double quote, because single quotes are treated literally.
+            if hasattr(e, 'code') and e.code == 400:
+                log.error( """Error: Bad user login or password:                         On *nix OS, you must use the single quote, otherwise it may expand specific characters.
+                         [...] -u 'string' or --user 'string' [...]                         On Windows OS, you must use the double quote, because single quotes are treated literally.
                          [...] -p "string" or --pwd "string" [...]
                          """)
                 raise e
+            else:
+                if tries<nbDelays:
+                    log.warn("Warning: Authentication failed, retrying in " + str(delays[tries]) + " seconds ...")
+                    time.sleep(delays[tries])
+                    tries = tries + 1
         
     fp = utils_html.FounderParser()
     for line in connexion:
