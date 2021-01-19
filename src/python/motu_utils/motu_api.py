@@ -43,6 +43,7 @@ import re
 import datetime
 import time
 import socket
+import traceback
 from xml.dom import minidom
 from pkg_resources import get_distribution
 
