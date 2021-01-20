@@ -44,6 +44,7 @@ import datetime
 import time
 import socket
 import traceback
+import platform
 from xml.dom import minidom
 from pkg_resources import get_distribution
 
