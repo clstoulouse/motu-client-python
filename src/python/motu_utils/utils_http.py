@@ -173,9 +173,17 @@ def open_url(url, **kargsParam):
     # open the url, but let the exception propagates to the caller  
     return _opener.open(r)
 
+
+def encodeValue(v):
+  return str(v).replace('#','%23').replace(' ','%20')
+
 def encode(options):    
     opts = []
     for k, vset in options.dict().items():
         for v in vset:
-           opts.append('%s=%s' % (str(k), str(v).replace('#','%23').replace(' ','%20')))
+            if type(v) in (tuple, list):
+                for v2 in v:
+                   opts.append('%s=%s' % (str(k), encodeValue(v2)))
+            else:
+                opts.append('%s=%s' % (str(k), encodeValue(v)))
     return '&'.join(opts)

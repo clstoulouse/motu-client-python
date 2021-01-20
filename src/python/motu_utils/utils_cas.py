@@ -67,9 +67,8 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     server, sep, options = url.partition( '?' )
     
     log.info( 'Authenticating user %s for service %s' % (user,server) )      
-    
     delays = [10, 30, 100, 300]
-    nbDelays = 4
+    nbDelays = len(delays)
     tries = 0
     redirected = False
     while not redirected and tries<=nbDelays:
@@ -81,18 +80,17 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
                 redirected_url = connexion.url
                 p = parse_qs(urlparse(connexion.url).query, keep_blank_values=False)
                 redirectServiceUrl = p['service'][0]
-                
-                
                 m = re.search(CAS_URL_PATTERN, redirected_url)
-                
                 if not m is None:
                     redirected = True
         except Exception as e:
-            pass
-        if not redirected and tries<nbDelays:
-            log.warn("Warning: CAS connection failed, retrying in " + str(delays[tries]) + " seconds ...")
-            time.sleep(delays[tries])
-            tries = tries + 1
+            if not redirected and tries<nbDelays:
+                log.warn("Warning: CAS connection failed, retrying in " + str(delays[tries]) + " seconds ...")
+                time.sleep(delays[tries])
+                tries = tries + 1
+            else:
+                raise e
+        
     if not redirected:
         if redirected_url is None:
             raise Exception(
@@ -115,22 +113,20 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
             connexion = utils_http.open_url(url_cas, **url_config)
             connected = True
         except Exception as e:
-            if tries<nbDelays:
-                log.warn("Warning: Authentication failed, retrying in " + str(delays[tries]) + " seconds ...")
-                time.sleep(delays[tries])
-                tries = tries + 1
-            else:
-                if hasattr(e, 'code') and e.code == 400:
-                    log.error( """Error: Bad user login or password:
-                    
-                         On *nix OS, you must use the single quote, otherwise it may expand specific characters.
-                         [...] -u 'string' or --user 'string' [...]
-                         
-                         On Windows OS, you must use the double quote, because single quotes are treated literally.
+            if hasattr(e, 'code') and e.code == 400:
+                log.error( """Error: Bad user login or password:                         On *nix OS, you must use the single quote, otherwise it may expand specific characters.
+                         [...] -u 'string' or --user 'string' [...]                         On Windows OS, you must use the double quote, because single quotes are treated literally.
                          [...] -p "string" or --pwd "string" [...]
                          """)
                 raise e
-        
+            else:
+                if tries<nbDelays:
+                    log.warn("Warning: Authentication failed, retrying in " + str(delays[tries]) + " seconds ...")
+                    time.sleep(delays[tries])
+                    tries = tries + 1
+                else:
+                  raise e
+    
     fp = utils_html.FounderParser()
     for line in connexion:
         log.log(utils_log.TRACE_LEVEL, 'utils_html.FounderParser() line: %s', line)
