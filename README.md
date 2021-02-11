@@ -163,7 +163,12 @@ A configuration file in another location can be specified by the `--config-file`
 If by chance there is a parameter listed in both configuration files, the value in the last file (e.g. `mercator.ini`) is the one actually used.
 
 Note that the password must be encoded in UTF-8.  
-If it contain UTF-8 special characters, you only have to double the "percent" character. If password is CMS2017@%! then enter pwd = CMS2017@%%! 
+If it contains UTF-8 special characters, you only have to double the "percent" character. If password is CMS2017@%! then enter   
+
+```  
+pwd = CMS2017@%%! 
+```  
+
 Example of server.ini, with user password is loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>  
 
 ```  
