@@ -162,13 +162,14 @@ A configuration file in another location can be specified by the `--config-file`
 ``` 
 If by chance there is a parameter listed in both configuration files, the value in the last file (e.g. `mercator.ini`) is the one actually used.
 
-Note that the password must be encoded in UTF-8. If it contain UTF-8 special characters, they must not be escaped or double as done while using from a Windows batch or a linux shell.
-Example of server.ini:  
+Note that the password must be encoded in UTF-8.  
+If it contain UTF-8 special characters, you only have to double the "percent" character. If password is CMS2017@%! then enter pwd = CMS2017@%%! 
+Example of server.ini, with user password is loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>  
 
 ```  
 [Main]
 user = loginForTesting2@groupcls.com
-pwd = loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,<>
+pwd = loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%%<>
 auth-mode = cas
 motu = http://motuURL:80/motu-web/Motu
 out_dir = J:/dev/CMEMS-CIS-MOTU/git/motu-validkit/output/04-python-client/MOTU-208
@@ -223,7 +224,7 @@ Usefull if host is offline and has no Internet access.
   * __Windows__ users, be careful if your password contain once of the following characters:
     * __percent__: From a Windows batch command, if your password contains a percent character, double the percent character: If password is CMS2017@%! then enter -u username-p CMS2017@%%! 
 	* __space__: From a Windows batch command, if your password contains a space character, set password between double quotes: If password is CMS2017 @%! then enter -u username-p "CMS2017 @%%!"
-	* __double quotes__: From a Windows batch command, if your password contains a double quotes character, double the double quotes character: If password is CMS2017"@%! then enter -u username-p "CMS2017""@%!"
+	* __double quotes__: From a Windows batch command, if your password contains a double quotes character, double the double quotes character: If password is CMS2017"@%! then enter -u username-p "CMS2017""@%%!"
   * __Linux__ users, be careful if your password contain once of the following characters:
     * __space__: From a Linux shell command, if your password contains a space character, set password between simple quotes: If password is CMS2017 @%! then enter -u username-p 'CMS2017 @%!'
 * __-m MOTU, --motu=MOTU__ Motu server url, e.g. "-m http://localhost:8080/motu-web/Motu"  
@@ -256,12 +257,14 @@ Usefull if host is offline and has no Internet access.
   
   
 # <a name="UsageExamples">Usage examples</a>   
+
 In the following examples, variable ${MOTU\_USER} and ${MOTU\_PASSWORD} are user name and user password used to connect to the CAS server for single sign on.  
-${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server. For example http://localhost:8080/motu-web/Motu.  
+${MOTU\_SERVER\_URL} is the URL on the MOTU HTTP(s) server, for example http://localhost:8080/motu-web/Motu.  
 Commands "./motuclient.py" has to be replaced by "python -m motuclient" if it has been installed with [PIP method](#UsagePIP).  
 
 
 ## <a name="UsageExamplesDownload">Download</a>  
+
 ### Download and save extracted file on the local machine
 This command writes the extraction result data in file: /data/test.nc  
 
