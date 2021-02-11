@@ -232,7 +232,7 @@ def load_options():
     # create config parser
     conf_parser = ConfigParser.ConfigParser()
 
-    _options = parser.parse_args()
+    _options = parser.parse_args( parseArgsStringToArray() )
     # flatten the variable lists of lists
     if not _options.variable is None:
         _options.variable = [var for varlists in _options.variable for var in varlists]
@@ -262,12 +262,84 @@ def load_options():
                         default_values[option] = default_variables
                 else:
                     default_values[option] = conf_parser.get(SECTION, option)
-    
         parser.set_defaults( **default_values )
-        return parser.parse_args()
+        return parser.parse_args( parseArgsStringToArray() )
     else:
         return _options
 
+def parseArgsStringToArray(argsString=None):
+  # Used to collapse correctly all the arguments even when a space is detected
+  # e.g. args="-a 'a1' -b 'b2' -c 'c3' -d 'd-d1 -d2 -d3' -e 'e4'"
+  # returns array
+  # ["-a a1", "-b b2", "-c c3", "-d d-d1 -d2 -d3", "-e e4"]
+  if argsString is None:
+    argsString = ""
+    i=0
+    lastOnlyStartingBySimpleQuote=False
+    for v in sys.argv:
+      if i != 0:
+        strV=str(v)
+        
+        if not strV.startswith("-"):
+          if lastOnlyStartingBySimpleQuote:
+            lastOnlyStartingBySimpleQuote=False
+            if not (strV.endswith("'") or strV.endswith("\\'")):
+              strV=strV + "'"
+              
+          else:
+            if (strV.startswith("'") or strV.startswith("\\'")):
+              if( not (strV.endswith("'") or strV.endswith("\\'")) ):
+                lastOnlyStartingBySimpleQuote=True
+            else:
+              strV="'" + strV
+              if( not (strV.endswith("'") or strV.endswith("\\'")) ):
+                strV=strV + "'"
+            
+        if i != 1 :
+          argsString = argsString + " " + strV
+        else:
+          argsString = strV
+      
+      i+=1
+  
+  allProgramAuthArSpaces = argsString.split(" ")
+  allProgramAuthAr = []
+  allProgramAuthArIndex=0
+  # Backup value, e.g when case is -d 'd-d1 -d2', d-d1 is vback, then -d2 is added
+  vbak=None
+  for v in allProgramAuthArSpaces:
+    if vbak is not None:
+      v = vbak + " " + v
+   
+    if v.startswith("'") or v.startswith("\\'") or v.startswith("\"") or v.startswith("\\\""):
+      if v.endswith("'") or v.endswith("\\'") or v.endswith("\"") or v.endswith("\\\""):
+        vbak=None
+        if allProgramAuthArIndex == 0:
+          allProgramAuthAr.append(v)
+        else:
+          oldV=allProgramAuthAr.pop(allProgramAuthArIndex-1)
+          allProgramAuthAr.insert(allProgramAuthArIndex-1, oldV + "=" + v)
+      else:
+        vbak=v
+        continue
+    else:
+      allProgramAuthAr.append(v)
+      allProgramAuthArIndex += 1
+      vbak=None
+  allProgramAuthArRes=[]
+  for v in allProgramAuthAr:
+    newV=v
+    if v.endswith("'"):
+      newV=v[:-1]
+      if v.startswith("'"):
+        newV=v[1:]
+      else:
+        newV=newV.replace("='", "=", 1)
+      
+    allProgramAuthArRes.append(newV)
+
+  return allProgramAuthArRes
+  
 def initLogger():
     logging.addLevelName(utils_log.TRACE_LEVEL, 'TRACE')
     logging.config.fileConfig(  os.path.join(os.path.dirname(__file__),LOG_CFG_FILE) )
@@ -286,7 +358,7 @@ def main():
     try:
         # we prepare options we want
         _options = load_options()
-
+        
         if _options.log_level != None:
             logging.getLogger().setLevel(int(_options.log_level))
 
