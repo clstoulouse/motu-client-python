@@ -84,11 +84,19 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
                 if not m is None:
                     redirected = True
         except Exception as e:
-            if not redirected and tries<nbDelays:
+            if hasattr(e, 'code') and e.code == 400:
+                log.error( """Error: Bad user login or password:
+       [...] -u 'string' or --user 'string' [...]    On *nix OS, you must use the single quote, otherwise it may expand specific characters.
+       [...] -p "string" or --pwd  "string" [...]    On Windows OS, you must use the double quote, because single quotes are treated literally.
+       If you use special characters, please refers to https://github.com/clstoulouse/motu-client-python#options
+           """)
+                raise e
+            else:
+              if not redirected and tries<nbDelays:
                 log.warn("Warning: CAS connection failed, retrying in " + str(delays[tries]) + " seconds ...")
                 time.sleep(delays[tries])
                 tries = tries + 1
-            else:
+              else:
                 raise e
         
     if not redirected:
@@ -100,7 +108,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
                 utils_messages.get_external_messages()['motuclient.exception.authentication.unfound-url'] % redirected_url)
     
     url_cas = m.group(1) + '/v1/tickets'
-
+    print("pwd=" + pwd)
     opts = utils_http.encode(utils_collection.ListMultimap(username = quote(user), password = quote(pwd) ))
 
     utils_log.log_url(log, "login user into CAS:\t", url_cas + '?' + opts)
@@ -114,10 +122,11 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
             connected = True
         except Exception as e:
             if hasattr(e, 'code') and e.code == 400:
-                log.error( """Error: Bad user login or password:                         On *nix OS, you must use the single quote, otherwise it may expand specific characters.
-                         [...] -u 'string' or --user 'string' [...]                         On Windows OS, you must use the double quote, because single quotes are treated literally.
-                         [...] -p "string" or --pwd "string" [...]
-                         """)
+                log.error( """Error: Bad user login or password:                         
+       [...] -u 'string' or --user 'string' [...]    On *nix OS, you must use the single quote, otherwise it may expand specific characters.
+       [...] -p "string" or --pwd  "string" [...]    On Windows OS, you must use the double quote, because single quotes are treated literally.
+       If you use special characters, please refers to https://github.com/clstoulouse/motu-client-python#options
+	   """)
                 raise e
             else:
                 if tries<nbDelays:
