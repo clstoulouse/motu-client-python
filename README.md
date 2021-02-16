@@ -163,18 +163,29 @@ A configuration file in another location can be specified by the `--config-file`
 If by chance there is a parameter listed in both configuration files, the value in the last file (e.g. `mercator.ini`) is the one actually used.
 
 Note that the password must be encoded in UTF-8.  
-If it contains UTF-8 special characters, you only have to double the "percent" character. If password is CMS2017@%! then enter   
+If it contains UTF-8 special characters, on Windows host only, you only have to double the "percent" character. If password is CMS2017@%! then enter   
 
 ```  
 pwd = CMS2017@%%! 
 ```  
 
-Example of server.ini, with user password is loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>  
+Example of server.ini on Windows host only, with user password is loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>  
 
 ```  
 [Main]
 user = loginForTesting2@groupcls.com
 pwd = loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%%<>
+auth-mode = cas
+motu = http://motuURL:80/motu-web/Motu
+out_dir = J:/dev/CMEMS-CIS-MOTU/git/motu-validkit/output/04-python-client/MOTU-208
+```  
+
+Example of server.ini on Linux host only, with user password is loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>  
+
+```  
+[Main]
+user = loginForTesting2@groupcls.com
+pwd = loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>
 auth-mode = cas
 motu = http://motuURL:80/motu-web/Motu
 out_dir = J:/dev/CMEMS-CIS-MOTU/git/motu-validkit/output/04-python-client/MOTU-208
