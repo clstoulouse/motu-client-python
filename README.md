@@ -244,12 +244,14 @@ Usefull if host is offline and has no Internet access.
 ```
 	-u username-p CMS2017@%%! 
 ```  
-  
+     
+	 
 	* __space__: From a Windows batch command, if your password contains a space character, set password between double quotes: If password is CMS2017 @%! then enter  
 	
 ```
 	-u username-p "CMS2017 @%%!"
 ```  
+  
   
 	* __double quotes__: From a Windows batch command, if your password contains a double quotes character, double the double quotes character: If password is CMS2017"@%! then enter  
 	
