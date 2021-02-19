@@ -169,8 +169,13 @@ If it contains UTF-8 special characters, on Windows host only, you only have to 
 pwd = CMS2017@%%! 
 ```  
 
-Example of server.ini on Windows host only, with user password is loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>  
+Example of server.ini on Windows host only, with user password is   
+__Password__:  
+```  
+loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>  
+```  
 
+__server.ini__:  
 ```  
 [Main]
 user = loginForTesting2@groupcls.com
@@ -180,9 +185,14 @@ motu = http://motuURL:80/motu-web/Motu
 out_dir = J:/dev/CMEMS-CIS-MOTU/git/motu-validkit/output/04-python-client/MOTU-208
 ```  
 
-Example of server.ini on Linux host only, with user password is loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>  
-
+Example of server.ini on Linux host only, with user password is   
+__Password__:
 ```  
+loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>  
+```  
+
+__server.ini__:
+```   
 [Main]
 user = loginForTesting2@groupcls.com
 pwd = loginForTesting2 &~#"'{([-|`_\^@)]=}¨^£$ µ*§!/:.;?,%<>
@@ -277,6 +287,12 @@ Usefull if host is offline and has no Internet access.
 ```
 	-u username-p "CMS2017\"@%"
 ```  
+
+    * __grave accent__: From a Linux bash shell command, if your password contains a grave accent character, escape the grave accent character by prefixing it with backslash: If password is CMS2017`@% then enter  
+	
+```
+	-u username-p "CMS2017\`@%"
+``` 
   
 * __-m MOTU, --motu=MOTU__ Motu server url, e.g. "-m http://localhost:8080/motu-web/Motu"  
 * __-s SERVICE_ID, --service-id=SERVICE_ID__ The service identifier (string), e.g. -s Mercator_Ocean_Model_Global-TDS  
