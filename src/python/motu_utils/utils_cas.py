@@ -84,11 +84,15 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
                 if not m is None:
                     redirected = True
         except Exception as e:
-            if not redirected and tries<nbDelays:
+            if hasattr(e, 'code') and e.code == 400:
+                log_error_password(log)
+                raise e
+            else:
+              if not redirected and tries<nbDelays:
                 log.warn("Warning: CAS connection failed, retrying in " + str(delays[tries]) + " seconds ...")
                 time.sleep(delays[tries])
                 tries = tries + 1
-            else:
+              else:
                 raise e
         
     if not redirected:
@@ -100,8 +104,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
                 utils_messages.get_external_messages()['motuclient.exception.authentication.unfound-url'] % redirected_url)
     
     url_cas = m.group(1) + '/v1/tickets'
-
-    opts = utils_http.encode(utils_collection.ListMultimap(username = user, password = pwd))
+    opts = utils_http.encode(utils_collection.ListMultimap(username = quote(user), password = quote(pwd) ))
 
     utils_log.log_url(log, "login user into CAS:\t", url_cas + '?' + opts)
     url_config['data']=opts.encode()
@@ -114,10 +117,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
             connected = True
         except Exception as e:
             if hasattr(e, 'code') and e.code == 400:
-                log.error( """Error: Bad user login or password:                         On *nix OS, you must use the single quote, otherwise it may expand specific characters.
-                         [...] -u 'string' or --user 'string' [...]                         On Windows OS, you must use the double quote, because single quotes are treated literally.
-                         [...] -p "string" or --pwd "string" [...]
-                         """)
+                log_error_password(log)
                 raise e
             else:
                 if tries<nbDelays:
@@ -182,3 +182,8 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     return service_url
 
     
+def log_error_password(log):
+  log.error( """Error: Bad user login or password:
+       [...] -u login -p "password" (or --pwd  "password") [...]    You must use the double quotes for the password.
+       If your password containts UTF8 special characters, please refers to https://github.com/clstoulouse/motu-client-python#options
+           """)
