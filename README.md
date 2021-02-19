@@ -252,10 +252,10 @@ Usefull if host is offline and has no Internet access.
     * __percent__: From a Windows batch command, if your password contains a percent character, double the percent character: If password is CMS2017@%! then enter   
     
 ```
-	-u username-p CMS2017@%%! 
+    -u username-p CMS2017@%%! 
 ```  
      
-	 
+     
     * __space__: From a Windows batch command, if your password contains a space character, set password between double quotes: If password is CMS2017 @%! then enter  
     
 ```
