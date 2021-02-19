@@ -250,49 +250,48 @@ Usefull if host is offline and has no Internet access.
 
   * __Windows__ users, be careful if your password contain once of the following characters:
     * __percent__: From a Windows batch command, if your password contains a percent character, double the percent character: If password is CMS2017@%! then enter   
-	
-```
-	-u username-p CMS2017@%%! 
-```  
-     
-	 
-	* __space__: From a Windows batch command, if your password contains a space character, set password between double quotes: If password is CMS2017 @%! then enter  
-	
-```
-	-u username-p "CMS2017 @%%!"
-```  
+    
+    ```
+    -u username-p CMS2017@%%! 
+    ```  
+
+    * __space__: From a Windows batch command, if your password contains a space character, set password between double quotes: If password is CMS2017 @%! then enter  
+    
+    ```
+    -u username-p "CMS2017 @%%!"
+    ```  
   
   
-	* __double quotes__: From a Windows batch command, if your password contains a double quotes character, double the double quotes character: If password is CMS2017"@%! then enter  
-	
-```
-	-u username-p "CMS2017""@%%!"
-```  
+    * __double quotes__: From a Windows batch command, if your password contains a double quotes character, double the double quotes character: If password is CMS2017"@%! then enter  
+    
+    ```
+    -u username-p "CMS2017""@%%!"
+    ```  
   
   * __Linux__ users, be careful if your password contain once of the following characters:
     * __space__: From a Linux bash shell command, if your password contains a space character, set password between double quotes: If password is CMS2017 @% then enter  
-	
-```
-	-u username-p "CMS2017 @%"
-```  
+    
+    ```
+    -u username-p "CMS2017 @%"
+    ```  
   
     * __exclamation point__: From a Linux bash shell command, if your password contains an exclamation point character, cut the password in two double quotes strings, and append the exclamation point between simple quote: If password is CMS!2017@% then enter  
-	
-```
-	-u username-p "CMS"'!'"2017@%" 
-```  
+    
+    ```
+    -u username-p "CMS"'!'"2017@%" 
+    ```  
   
     * __double quotes__: From a Linux bash shell command, if your password contains a double quotes character, escape the double quotes character by prefixing it with backslash: If password is CMS2017"@% then enter  
-	
-```
-	-u username-p "CMS2017\"@%"
-```  
+    
+    ```
+    -u username-p "CMS2017\"@%"
+    ```  
 
     * __grave accent__: From a Linux bash shell command, if your password contains a grave accent character, escape the grave accent character by prefixing it with backslash: If password is CMS2017`@% then enter  
-	
-```
-	-u username-p "CMS2017\`@%"
-``` 
+    
+    ```
+    -u username-p "CMS2017\`@%"
+    ``` 
   
 * __-m MOTU, --motu=MOTU__ Motu server url, e.g. "-m http://localhost:8080/motu-web/Motu"  
 * __-s SERVICE_ID, --service-id=SERVICE_ID__ The service identifier (string), e.g. -s Mercator_Ocean_Model_Global-TDS  
