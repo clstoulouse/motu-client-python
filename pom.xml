@@ -7,7 +7,7 @@
 	<modelVersion>4.0.0</modelVersion>
     <groupId>cls.atoll.motu.client</groupId>
     <artifactId>motuclient-python</artifactId>
-    <version>1.8.8-SNAPSHOT</version>
+    <version>1.9.00-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Motu Client Python</name>
