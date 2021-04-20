@@ -57,7 +57,7 @@ AUTHENTICATION_MODE_BASIC = 'basic'
 AUTHENTICATION_MODE_CAS = 'cas'
 
 # constant for date time string format
-DATETIME_FORMAT = "%Y-%m-%d% %H:%M:%S"
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 # shared logger
