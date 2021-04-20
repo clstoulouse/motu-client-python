@@ -130,10 +130,10 @@ def load_options():
                               dest='log_level')
 
     parserCredentials.add_argument('--user', '-u',
-                                   help="the user name (string)")
+                                   help="the user name (string). Can be stored alternatively in netrc file.")
 
     parserCredentials.add_argument('--pwd', '-p',
-                                   help="the user password (string)")
+                                   help="the user password (string). Can be stored alternatively in netrc file.")
 
     parserCredentials.add_argument('--auth-mode',
                                    choices=[motu_api.AUTHENTICATION_MODE_NONE, motu_api.AUTHENTICATION_MODE_BASIC, motu_api.AUTHENTICATION_MODE_CAS],
