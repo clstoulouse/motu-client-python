@@ -27,9 +27,6 @@
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 import logging
-from motu_utils import utils_collection
-from motu_utils import utils_http, utils_stream, utils_cas, utils_log, utils_messages, utils_unit, \
-    stop_watch, pom_version
 from pkg_resources import get_distribution
 from xml.dom import minidom
 import platform
@@ -41,7 +38,6 @@ import re
 import os
 import sys
 
-
 if sys.version_info > (3, 0):
     from urllib.parse import quote_plus, urlparse
 else:
@@ -50,6 +46,9 @@ else:
 
 
 # Import project libraries
+from motu_utils import utils_collection
+from motu_utils import utils_http, utils_stream, utils_cas, utils_log, utils_messages, utils_unit, \
+    stop_watch, pom_version
 
 # constant for authentication modes
 AUTHENTICATION_MODE_NONE = 'none'
