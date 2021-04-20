@@ -104,26 +104,24 @@ def build_params(_options):
                              service=_options.service_id,
                              product=_options.product_id
                              )
+    elif _options.sync:
+        log.info('Synchronous mode set')
+        query_options.insert(action='productdownload',
+                             scriptVersion=quote_plus(
+                                 get_client_version()),
+                             mode='console',
+                             service=_options.service_id,
+                             product=_options.product_id
+                             )
     else:
-        # synchronous/asynchronous mode
-        if _options.sync:
-            log.info('Synchronous mode set')
-            query_options.insert(action='productdownload',
-                                 scriptVersion=quote_plus(
-                                     get_client_version()),
-                                 mode='console',
-                                 service=_options.service_id,
-                                 product=_options.product_id
-                                 )
-        else:
-            log.info('Asynchronous mode set')
-            query_options.insert(action='productdownload',
-                                 scriptVersion=quote_plus(
-                                     get_client_version()),
-                                 mode='status',
-                                 service=_options.service_id,
-                                 product=_options.product_id
-                                 )
+        log.info('Asynchronous mode set')
+        query_options.insert(action='productdownload',
+                             scriptVersion=quote_plus(
+                                 get_client_version()),
+                             mode='status',
+                             service=_options.service_id,
+                             product=_options.product_id
+                             )
 
     # geographical parameters
     if _options.extraction_geographic:
@@ -133,7 +131,7 @@ def build_params(_options):
                              y_hi=_options.latitude_max
                              )
 
-    if _options.extraction_vertical:
+    if _options.depth_min is not None or _options.depth_max is not None:
         query_options.insert(z_lo=_options.depth_min,
                              z_hi=_options.depth_max
                              )
@@ -144,19 +142,18 @@ def build_params(_options):
     else:"""
     query_options.insert(output="netcdf")
 
-    if _options.extraction_temporal:
-        # date are strings, and they are send to Motu "as is". If not, we convert them into string
-        if _options.date_min is not None or _options.date_min is not None:
-            date_min = _options.date_min
-            if not isinstance(date_min, str):
-                date_min = date_min.strftime(DATETIME_FORMAT)
-            query_options.insert(t_lo=date_min)
+    # date are strings, and they are send to Motu "as is". If not, we convert them into string
+    if _options.date_min is not None:
+        date_min = _options.date_min
+        if isinstance(date_min, datetime.datetime):
+            date_min = date_min.strftime(DATETIME_FORMAT)
+        query_options.insert(t_lo=date_min)
 
-        if _options.date_max is not None or _options.date_max is not None:
-            date_max = _options.date_max
-            if not isinstance(date_max, str):
-                date_max = date_max.strftime(DATETIME_FORMAT)
-            query_options.insert(t_hi=date_max)
+    if _options.date_max is not None:
+        date_max = _options.date_max
+        if isinstance(date_max, datetime.datetime):
+            date_max = date_max.strftime(DATETIME_FORMAT)
+        query_options.insert(t_hi=date_max)
 
     variable = _options.variable
     if variable is not None:
@@ -248,14 +245,10 @@ def check_options(_options):
                             'motuclient.exception.option.linked'] % ('proxy-user', 'proxy-name'))
 
     # Check VERTICAL Options
-    _options.extraction_vertical = False
-    if _options.depth_min is not None or _options.depth_max is not None:
-        _options.extraction_vertical = True
+    # No need
 
     # Check TEMPORAL  Options
-    _options.extraction_temporal = False
-    if _options.date_min is not None or _options.date_max is not None:
-        _options.extraction_temporal = True
+    # No need
 
     """ MOTU-172
     #Check OUTPUT Options
