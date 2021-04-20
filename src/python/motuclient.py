@@ -90,8 +90,6 @@ def get_client_artefact():
 def load_options():
     """load options to handle"""
 
-    _options = None
-
     # create option parser
     parser = argparse.ArgumentParser()
     parser.add_argument('--version', action='version',
