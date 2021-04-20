@@ -28,6 +28,7 @@
 
 
 import argparse
+from dateutil.parser import parse as dparse
 import logging.config
 import logging
 import datetime
@@ -163,11 +164,13 @@ def load_options():
                              help="The product (data set) to download (string)")
 
     parserQuery.add_argument('--date-min', '-t',
+                             type=dparse,
                              help="The min date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])")
 
     parserQuery.add_argument('--date-max', '-T',
+                             type=dparse,
                              help="The max date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])",
-                             default=datetime.date.today().isoformat())
+                             default=datetime.date.today())
 
     parserQuery.add_argument('--latitude-min', '-y',
                              type=float,
@@ -235,6 +238,7 @@ def load_options():
                                help="Set the identification string (user-agent) for HTTP requests. By default this value is 'Python-urllib/x.x' (where x.x is the version of the python interpreter)")
 
     parserOutput.add_argument('--outputWritten',
+                              choices=['netcdf'],
                               help="Optional parameter used to set the format of the file returned by the download request, only netcdf is supported. If not set, netcdf is used.")
 
     parserOutput.add_argument('--console-mode',
