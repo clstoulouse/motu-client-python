@@ -37,6 +37,7 @@ import datetime
 import re
 import os
 import sys
+import netrc
 
 if sys.version_info > (3, 0):
     from urllib.parse import quote_plus, urlparse
@@ -168,35 +169,33 @@ def build_params(_options):
 def check_options(_options):
     """function that checks the given options for coherency."""
 
-    # Check Mandatory Options
-    if (_options.auth_mode != AUTHENTICATION_MODE_NONE and
-        _options.auth_mode != AUTHENTICATION_MODE_BASIC and
-            _options.auth_mode != AUTHENTICATION_MODE_CAS):
-        raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.invalid'] % (
-            _options.auth_mode, 'auth-mode', [AUTHENTICATION_MODE_NONE, AUTHENTICATION_MODE_BASIC, AUTHENTICATION_MODE_CAS]))
-
-    # if authentication mode is set we check both user & password presence
-    if (_options.user is None and
-            _options.auth_mode != AUTHENTICATION_MODE_NONE):
-        raise Exception(utils_messages.get_external_messages()[
-                        'motuclient.exception.option.mandatory.user'] % ('user', _options.auth_mode))
-
-    # check that if a user is set, a password should be set also
-    if (_options.pwd is None and
-            _options.user is not None):
-        raise Exception(utils_messages.get_external_messages()[
-                        'motuclient.exception.option.mandatory.password'] % ('pwd', _options.user))
-
-    # check that if a user is set, an authentication mode should also be set
-    if (_options.user is not None and
-            _options.auth_mode == AUTHENTICATION_MODE_NONE):
-        raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.mandatory.mode'] % (
-            AUTHENTICATION_MODE_NONE, 'auth-mode', _options.user))
+    # Check Mandatory Options on AUTHENTICATION
+    # Proper selection of authentication_mode is alread ensured through argparse in motuclient
 
     # those following parameters are required
     if _options.motu is None:
         raise Exception(utils_messages.get_external_messages()[
                         'motuclient.exception.option.mandatory'] % 'motu')
+
+    if (_options.auth_mode != AUTHENTICATION_MODE_NONE) and (_options.user is None or _options.pwd is None):
+        # if authentication mode is set we check both user & password presence
+        try:
+            n = netrc.netrc()
+            cred = n.authenticators(_options.motu.split('/')[2])
+            _options.user = cred[0]
+            _options.pwd = cred[2]
+        except Exception as ex:
+            log.error(ex)
+            raise Exception(utils_messages.get_external_messages()[
+                'motuclient.exception.option.mandatory.userpwd'] % (_options.auth_mode))
+    elif (_options.auth_mode == AUTHENTICATION_MODE_NONE and _options.user is not None):
+        # check that if a user is set, an authentication mode should also be set
+        raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.mandatory.mode'] % (
+            AUTHENTICATION_MODE_NONE, 'auth-mode', _options.user))
+    elif (_options.pwd is None and _options.user is not None):
+        # check that if a user is set, a password should be set also
+        raise Exception(utils_messages.get_external_messages()[
+                        'motuclient.exception.option.mandatory.password'] % ('pwd', _options.user))
 
     if _options.service_id is None:
         raise Exception(utils_messages.get_external_messages()[
