@@ -58,8 +58,7 @@ log = None
 _variables = []
 
 # project libraries path
-LIBRARIES_PATH = os.path.join(os.path.dirname(
-    os.path.abspath(__file__)), 'motu_utils')
+LIBRARIES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'motu_utils')
 # Manage imports of project libraries
 if not os.path.exists(LIBRARIES_PATH):
     sys.stderr.write('\nERROR: can not find project libraries path: %s\n\n' %
@@ -171,15 +170,19 @@ def load_options():
                              default=datetime.date.today().isoformat())
 
     parserQuery.add_argument('--latitude-min', '-y',
+                             type=float,
                              help="The min latitude (float in the interval [-90 ; 90])")
 
     parserQuery.add_argument('--latitude-max', '-Y',
+                             type=float,
                              help="The max latitude (float in the interval [-90 ; 90])")
 
     parserQuery.add_argument('--longitude-min', '-x',
+                             type=float,
                              help="The min longitude (float)")
 
     parserQuery.add_argument('--longitude-max', '-X',
+                             type=float,
                              help="The max longitude (float)")
 
     parserQuery.add_argument('--depth-min', '-z',
@@ -240,7 +243,8 @@ def load_options():
                               dest='console_mode')
 
     parser.add_argument('--config-file',
-                        help="Path of the optional configuration file [default: %s]" % CFG_FILE,
+                        default=CFG_FILE,
+                        help="Path of the optional configuration file Default = %(default)s]",
                         action='append',
                         dest="config_file",
                         type=str)
@@ -379,7 +383,7 @@ def main():
     initLogger()
 
     try:
-                # we prepare options we want
+        # we prepare options we want
         _options = load_options()
 
         if _options.log_level is not None:
