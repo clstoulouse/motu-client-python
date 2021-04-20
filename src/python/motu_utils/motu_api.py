@@ -43,12 +43,9 @@ import sys
 
 
 if sys.version_info > (3, 0):
-    import urllib.request
-    import urllib.error
-    from urllib.request import BaseHandler
-    from urllib.parse import unquote, quote_plus, urlparse
+    from urllib.parse import quote_plus, urlparse
 else:
-    from urllib import quote_plus, quote
+    from urllib import quote_plus
     from urlparse import urlparse
 
 
@@ -70,7 +67,7 @@ log = None
 def get_client_version():
     """Return the version (as a string) of this client.
 
-    The value is automatically set by the maven processing build, so don't 
+    The value is automatically set by the maven processing build, so don't
     touch it unless you know what you are doing."""
     version = 'unknown'
     try:
@@ -83,17 +80,13 @@ def get_client_version():
 def get_client_artefact():
     """Return the artifact identifier (as a string) of this client.
 
-    The value is automatically set by the maven processing build, so don't 
+    The value is automatically set by the maven processing build, so don't
     touch it unless you know what you are doing."""
     return 'motuclient-python'
 
 
 def build_params(_options):
     """Function that builds the query string for Motu according to the given options"""
-    temporal = ''
-    geographic = ''
-    vertical = ''
-    other_opt = ''
 
     """
     Build the main url to connect to
@@ -153,13 +146,13 @@ def build_params(_options):
 
     if _options.extraction_temporal:
         # date are strings, and they are send to Motu "as is". If not, we convert them into string
-        if _options.date_min is not None or _options.date_min != None:
+        if _options.date_min is not None or _options.date_min is not None:
             date_min = _options.date_min
             if not isinstance(date_min, str):
                 date_min = date_min.strftime(DATETIME_FORMAT)
             query_options.insert(t_lo=date_min)
 
-        if _options.date_max is not None or _options.date_max != None:
+        if _options.date_max is not None or _options.date_max is not None:
             date_max = _options.date_max
             if not isinstance(date_max, str):
                 date_max = date_max.strftime(DATETIME_FORMAT)
@@ -187,37 +180,37 @@ def check_options(_options):
             _options.auth_mode, 'auth-mode', [AUTHENTICATION_MODE_NONE, AUTHENTICATION_MODE_BASIC, AUTHENTICATION_MODE_CAS]))
 
     # if authentication mode is set we check both user & password presence
-    if (_options.user == None and
+    if (_options.user is None and
             _options.auth_mode != AUTHENTICATION_MODE_NONE):
         raise Exception(utils_messages.get_external_messages()[
                         'motuclient.exception.option.mandatory.user'] % ('user', _options.auth_mode))
 
     # check that if a user is set, a password should be set also
-    if (_options.pwd == None and
-            _options.user != None):
+    if (_options.pwd is None and
+            _options.user is not None):
         raise Exception(utils_messages.get_external_messages()[
                         'motuclient.exception.option.mandatory.password'] % ('pwd', _options.user))
 
     # check that if a user is set, an authentication mode should also be set
-    if (_options.user != None and
+    if (_options.user is not None and
             _options.auth_mode == AUTHENTICATION_MODE_NONE):
         raise Exception(utils_messages.get_external_messages()['motuclient.exception.option.mandatory.mode'] % (
             AUTHENTICATION_MODE_NONE, 'auth-mode', _options.user))
 
     # those following parameters are required
-    if _options.motu == None:
+    if _options.motu is None:
         raise Exception(utils_messages.get_external_messages()[
                         'motuclient.exception.option.mandatory'] % 'motu')
 
-    if _options.service_id == None:
+    if _options.service_id is None:
         raise Exception(utils_messages.get_external_messages()[
                         'motuclient.exception.option.mandatory'] % 'service-id')
 
-    if _options.product_id == None:
+    if _options.product_id is None:
         raise Exception(utils_messages.get_external_messages()[
                         'motuclient.exception.option.mandatory'] % 'product-id')
 
-    if _options.out_dir == None:
+    if _options.out_dir is None:
         raise Exception(utils_messages.get_external_messages()[
                         'motuclient.exception.option.mandatory'] % 'out-dir')
 
@@ -232,13 +225,13 @@ def check_options(_options):
             raise Exception(
                 utils_messages.get_external_messages()['motuclient.exception.option.outdir-notwritable'] % out_dir)
 
-        if _options.out_name == None:
+        if _options.out_name is None:
             raise Exception(
                 utils_messages.get_external_messages()['motuclient.exception.option.mandatory'] % 'out-name')
 
     # Check PROXY Options
     _options.proxy = False
-    if (_options.proxy_server != None) and (len(_options.proxy_server) != 0):
+    if (_options.proxy_server is not None) and (len(_options.proxy_server) != 0):
         _options.proxy = True
         # check that proxy server is a valid url
         url = _options.proxy_server
@@ -250,29 +243,29 @@ def check_options(_options):
             raise Exception(utils_messages.get_external_messages()[
                             'motuclient.exception.option.not-url'] % ('proxy-server', url))
         # check that if proxy-user is defined then proxy-pwd shall be also, and reciprocally.
-        if (_options.proxy_user != None) != (_options.proxy_pwd != None):
+        if (_options.proxy_user is not None) != (_options.proxy_pwd is not None):
             raise Exception(utils_messages.get_external_messages()[
                             'motuclient.exception.option.linked'] % ('proxy-user', 'proxy-name'))
 
     # Check VERTICAL Options
     _options.extraction_vertical = False
-    if _options.depth_min != None or _options.depth_max != None:
+    if _options.depth_min is not None or _options.depth_max is not None:
         _options.extraction_vertical = True
 
     # Check TEMPORAL  Options
     _options.extraction_temporal = False
-    if _options.date_min != None or _options.date_max != None:
+    if _options.date_min is not None or _options.date_max is not None:
         _options.extraction_temporal = True
 
     """ MOTU-172
     #Check OUTPUT Options
     _options.extraction_output = False
-    if _options.outputWritten != None :
+    if _options.outputWritten is not None :
         _options.extraction_output = True
     """
     # Check GEOGRAPHIC Options
     _options.extraction_geographic = False
-    if _options.latitude_min != None or _options.latitude_max != None or _options.longitude_min != None or _options.longitude_max != None:
+    if _options.latitude_min is not None or _options.latitude_max is not None or _options.longitude_min is not None or _options.longitude_max is not None:
         _options.extraction_geographic = True
 
         check_latitude(_options.latitude_min, 'latitude_min')
@@ -283,7 +276,7 @@ def check_options(_options):
 
 
 def check_coordinate(coord, msg):
-    if(coord == None):
+    if(coord is None):
         raise Exception(
             utils_messages.get_external_messages()['motuclient.exception.option.geographic-box'] % msg)
     try:
@@ -313,11 +306,11 @@ def get_url_config(_options, data=None):
     kargs = {}
     # proxy
     if _options.proxy:
-        #proxyUrl = _options.proxy_server.partition(':')
+        # proxyUrl = _options.proxy_server.partition(':')
         proxyUrl = urlparse(_options.proxy_server)
         kargs['proxy'] = {"scheme": proxyUrl.scheme,
                           "netloc": proxyUrl.netloc}
-        if _options.proxy_user != None:
+        if _options.proxy_user is not None:
             kargs['proxy']['user'] = _options.proxy_user
             kargs['proxy']['password'] = _options.proxy_pwd
     # authentication
@@ -329,7 +322,7 @@ def get_url_config(_options, data=None):
     kargs['headers'] = {"X-Client-Id": get_client_artefact(),
                         "X-Client-Version": quote_plus(get_client_version())}
     # data
-    if data != None:
+    if data is not None:
         kargs['data'] = data
 
     return kargs
@@ -338,7 +331,6 @@ def get_url_config(_options, data=None):
 def get_requestUrl(dl_url, server, _options, **options):
     """ Get the request url."""
     stopWatch = stop_watch.localThreadStopWatch()
-    start_time = datetime.datetime.now()
     stopWatch.start('get_request')
     log.info("Requesting file to download (this can take a while)...")
 
@@ -571,7 +563,7 @@ def execute_request(_options):
       - socket_timeout: 515
 
     * The user agent to use when performing http requests
-      - user_agent: 'motu-api-client' 
+      - user_agent: 'motu-api-client'
 
     """
     global log
@@ -610,11 +602,11 @@ def execute_request(_options):
             questionMark = ''
         url = url_service+questionMark+url_params
 
-        if _options.describe == True or _options.size == True:
+        if _options.describe is True or _options.size is True:
             _options.out_name = _options.out_name.replace('.nc', '.xml')
 
         # set-up the socket timeout if any
-        if _options.socket_timeout != None:
+        if _options.socket_timeout is not None:
             log.debug("Setting timeout %s" % _options.socket_timeout)
             socket.setdefaulttimeout(_options.socket_timeout)
 
@@ -637,9 +629,9 @@ def execute_request(_options):
 
         try:
             # Synchronous mode
-            if _options.sync == True or _options.describe == True or _options.size == True:
+            if _options.sync is True or _options.describe is True or _options.size is True:
                 is_a_download_request = False
-                if _options.describe == False and _options.size == False:
+                if _options.describe is False and _options.size is False:
                     is_a_download_request = True
                 dl_2_file(download_url, fh, _options.block_size,
                           is_a_download_request, **url_config)
@@ -650,7 +642,7 @@ def execute_request(_options):
                 requestUrl = get_requestUrl(
                     download_url, url_service, _options, **url_config)
 
-                if requestUrl != None:
+                if requestUrl is not None:
                     # asynchronous mode
                     status = "0"
                     dwurl = ""
