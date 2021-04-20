@@ -42,7 +42,6 @@ if sys.version_info > (3, 0):
 else:
     import ConfigParser
 
-
 # error code to use when exiting after exception catch
 ERROR_CODE_EXIT = 1
 
@@ -139,6 +138,7 @@ def load_options():
                                    help="the user password (string)")
 
     parserCredentials.add_argument('--auth-mode',
+                                   choices=[motu_api.AUTHENTICATION_MODE_NONE, motu_api.AUTHENTICATION_MODE_BASIC, motu_api.AUTHENTICATION_MODE_CAS],
                                    default=motu_api.AUTHENTICATION_MODE_CAS,
                                    help="the authentication mode: '" + motu_api.AUTHENTICATION_MODE_NONE +
                                    "' (for no authentication), '" + motu_api.AUTHENTICATION_MODE_BASIC +
