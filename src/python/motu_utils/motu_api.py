@@ -49,7 +49,7 @@ else:
 # Import project libraries
 from motu_utils import utils_collection
 from motu_utils import utils_http, utils_stream, utils_cas, utils_log, utils_messages, utils_unit, \
-    stop_watch, pom_version
+    stop_watch
 
 # constant for authentication modes
 AUTHENTICATION_MODE_NONE = 'none'
@@ -73,7 +73,7 @@ def get_client_version():
     try:
         version = get_distribution('motuclient').version
     except:
-        version = pom_version.getPOMVersion()
+        version = "Undefined"
     return version
 
 
