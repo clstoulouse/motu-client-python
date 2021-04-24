@@ -142,17 +142,13 @@ def build_params(_options):
     else:"""
     query_options.insert(output="netcdf")
 
-    # date are strings, and they are send to Motu "as is". If not, we convert them into string
+    # date are date time. They should be converted to the proper format to Motu
     if _options.date_min is not None:
-        date_min = _options.date_min
-        if isinstance(date_min, datetime.datetime):
-            date_min = date_min.strftime(DATETIME_FORMAT)
+        date_min = _options.date_min.strftime(DATETIME_FORMAT)
         query_options.insert(t_lo=date_min)
 
     if _options.date_max is not None:
-        date_max = _options.date_max
-        if isinstance(date_max, datetime.datetime):
-            date_max = date_max.strftime(DATETIME_FORMAT)
+        date_max = _options.date_max.strftime(DATETIME_FORMAT)
         query_options.insert(t_hi=date_max)
 
     variable = _options.variable
