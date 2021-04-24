@@ -51,9 +51,6 @@ LOG_CFG_FILE = './motu_utils/cfg/log.ini'
 
 SECTION = 'Main'
 
-# shared logger
-log = None
-
 # shared variables to download
 _variables = []
 
