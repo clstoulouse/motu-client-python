@@ -6,19 +6,15 @@ from xml.etree import ElementTree
 
 def getPOMVersion():
     version = "Unknown"
+    abspath = os.path.abspath(__file__)
+    dname = os.path.dirname(abspath)
+
     try:
         # For production tree, while run from cur folder
-        abspath = os.path.abspath(__file__)
-        dname = os.path.dirname(abspath)
         version = __getPOMVersion(os.path.join(dname, "..", "pom.xml"))
     except Exception:
         # For development tree
-        try:
-            version = __getPOMVersion(
-                os.path.join(dname, "..", "..", "pom.xml"))
-        except Exception:
-            version = __getPOMVersion(os.path.join(
-                dname, "..", "..", "..", "pom.xml"))
+        version = __getPOMVersion(os.path.join(dname, "pom.xml"))
     finally:
         return version
 
