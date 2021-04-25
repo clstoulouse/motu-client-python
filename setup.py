@@ -43,14 +43,15 @@ setup(
     ],
 
     author='Sylvain MARTY, CLS',
-    author_email='smarty@cls.fr',
+    author_email='smarty@groupcls.com',
     platforms=['any'],
 
     url='https://github.com/clstoulouse/motu-client-python',
     license='LGPL',
 
-    package_dir={'': 'src/python'},
-    packages=find_packages('src/python'),
+    package_dir={'': 'src', 'motuclient': 'src/motuclient'}, 
+    packages=['motuclient'], # find_packages('src'),
+    # namespace_packages=['motuclient'],
     py_modules=['motuclient', 'motu-client'],
     include_package_data=True,
 
@@ -68,7 +69,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'motuclient = motuclient:main'
+            'motuclient = motuclient.motuclient:main'
         ]
     }
 )
