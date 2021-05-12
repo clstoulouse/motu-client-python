@@ -85,7 +85,7 @@ def get_client_artefact():
     return 'motuclient-python'
 
 
-def build_params(_options):
+def build_params(_options, log=None):
     """Function that builds the query string for Motu according to the given options"""
 
     """
@@ -350,7 +350,7 @@ def wait_till_finished(reqUrlCAS, **options):
 lastProgressPercentValue = 0.0
 
 
-def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
+def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, log=None, **options):
     """ Download the file with the main url (of Motu) file.
 
     Motu can return an error message in the response stream without setting an
@@ -416,15 +416,13 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
                 global lastProgressPercentValue
                 percent = sizeRead*100./size
                 if percent - lastProgressPercentValue > 1 or (lastProgressPercentValue != 100 and percent >= 100):
-                    log.info("- %s (%.1f%%)",
-                             utils_unit.convert_bytes(size).rjust(8), percent)
+                    log.info("Progress - %s (%.1f%%)" % (utils_unit.convert_bytes(size).rjust(8), percent))
                     lastProgressPercentValue = percent
 
             def none_function(sizeRead):
                 global lastProgressPercentValue
                 percent = 100
-                log.info("- %s (%.1f%%)",
-                         utils_unit.convert_bytes(size).rjust(8), percent)
+                log.info("- %s (%.1f%%)" % (utils_unit.convert_bytes(size).rjust(8), percent))
                 lastProgressPercentValue = percent
 
             if temp is not None:
@@ -446,10 +444,10 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
             end_time = datetime.datetime.now()
             stopWatch.stop('downloading')
 
-            log.info("Processing  time : %s", str(processing_time - init_time))
-            log.info("Downloading time : %s", str(end_time - processing_time))
-            log.info("Total time       : %s", str(end_time - init_time))
-            log.info("Download rate    : %s/s", utils_unit.convert_bytes((read /
+            log.info("Processing  time : %s" % str(processing_time - init_time))
+            log.info("Downloading time : %s" % str(end_time - processing_time))
+            log.info("Total time       : %s" % str(end_time - init_time))
+            log.info("Download rate    : %s/s" % utils_unit.convert_bytes((read /
                                                                           total_milliseconds(end_time - start_time)) * 10 ** 3))
             log.info("Save into        : %s" % fh)
         except Exception as e:
@@ -469,21 +467,17 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
             exc_type, exc_value, exc_tb = sys.exc_info()
             x = traceback.format_exception(exc_type, exc_value, exc_tb)
             for stack in x:
-                log.debug(' . %s', stack.replace('\n', ''))
-            log.debug('-'*60)
-            log.log(utils_log.TRACE_LEVEL,
-                    'System info is provided hereafter:')
+                log.debug(' . %s' % stack.replace('\n', ''))
+            log.info('System info is provided hereafter:')
             system, node, release, version, machine, processor = platform.uname()
-            log.log(utils_log.TRACE_LEVEL, ' . system   : %s', system)
-            log.log(utils_log.TRACE_LEVEL, ' . node     : %s', node)
-            log.log(utils_log.TRACE_LEVEL, ' . release  : %s', release)
-            log.log(utils_log.TRACE_LEVEL, ' . version  : %s', version)
-            log.log(utils_log.TRACE_LEVEL, ' . machine  : %s', machine)
-            log.log(utils_log.TRACE_LEVEL, ' . processor: %s', processor)
-            log.log(utils_log.TRACE_LEVEL, ' . python   : %s', sys.version)
-            log.log(utils_log.TRACE_LEVEL,
-                    ' . client   : %s', get_client_version())
-            log.log(utils_log.TRACE_LEVEL, '-'*60)
+            log.info(' . system   : %s' % system)
+            log.info(' . node     : %s' % node)
+            log.info(' . release  : %s' % release)
+            log.info(' . version  : %s' % version)
+            log.info(' . machine  : %s' % machine)
+            log.info(' . processor: %s' % processor)
+            log.info(' . python   : %s' % sys.version)
+            log.info(' . client   : %s' % get_client_version())
 
         finally:
             m.close()
@@ -498,7 +492,7 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
             utils_messages.get_external_messages()['motuclient.exception.download.too-short'] % (read, size))
 
 
-def execute_request(_options):
+def execute_request(_options, timeout=datetime.timedelta(minutes=2), log=None): # logging.getLogger("motu_api")):
     """
     the main function that submit a request to motu. Available options are:
 
@@ -554,33 +548,27 @@ def execute_request(_options):
       - user_agent: 'motu-api-client'
 
     """
-    global log
     global init_time
 
+    log.debug("start")
     init_time = datetime.datetime.now()
     stopWatch = stop_watch.localThreadStopWatch()
     stopWatch.start()
     try:
-        log = logging.getLogger("motu_api")
-
         # at first, we check given options are ok
+        log.debug("check option")
         check_options(_options)
 
         # print some trace info about the options set
-        log.log(utils_log.TRACE_LEVEL, '-' * 60)
-
         for option in dir(_options):
-            if not option.startswith('_'):
-                log.log(utils_log.TRACE_LEVEL, "%s=%s" %
-                        (option, getattr(_options, option)))
-
-        log.log(utils_log.TRACE_LEVEL, '-' * 60)
+            if not option.startswith('_') and not option.startswith('pwd'):
+                log.debug("%s=%s" % (option, getattr(_options, option)))
 
         # start of url to invoke
         url_service = _options.motu
 
         # parameters of the invoked service
-        url_params = build_params(_options)
+        url_params = build_params(_options, log=log)
 
         url_config = get_url_config(_options)
 
@@ -603,7 +591,8 @@ def execute_request(_options):
             # perform authentication before acceding service
             download_url = utils_cas.authenticate_CAS_for_URL(url,
                                                               _options.user,
-                                                              _options.pwd, **url_config)
+                                                              _options.pwd, **url_config,
+                                                              timeout=timeout)
             url_service = download_url.split("?")[0]
             stopWatch.stop('authentication')
         else:
@@ -611,6 +600,7 @@ def execute_request(_options):
             download_url = url
 
         # create a file for storing downloaded stream
+        log.debug("create file")
         fh = os.path.join(_options.out_dir, _options.out_name)
         if _options.console_mode:
             fh = "console"
@@ -618,17 +608,18 @@ def execute_request(_options):
         try:
             # Synchronous mode
             if _options.sync is True or _options.describe is True or _options.size is True:
+                log.info("synchronous connection")
                 is_a_download_request = False
                 if _options.describe is False and _options.size is False:
                     is_a_download_request = True
                 dl_2_file(download_url, fh, _options.block_size,
-                          is_a_download_request, **url_config)
+                          is_a_download_request, log=log, **url_config)
                 log.info("Done")
             # Asynchronous mode
             else:
+                log.info("asynchronous connection")
                 stopWatch.start('wait_request')
-                requestUrl = get_requestUrl(
-                    download_url, url_service, _options, **url_config)
+                requestUrl = get_requestUrl(download_url, url_service, _options, **url_config)
 
                 if requestUrl is not None:
                     # asynchronous mode
@@ -636,6 +627,8 @@ def execute_request(_options):
                     dwurl = ""
                     msg = ""
 
+                    date_start = datetime.datetime.now()
+                    print(date_start)
                     while True:
                         if _options.auth_mode == AUTHENTICATION_MODE_CAS:
                             stopWatch.start('authentication')
@@ -655,7 +648,7 @@ def execute_request(_options):
                         try:
                             dom = minidom.parseString(motu_reply)
                         except:
-                            log.error(motu_reply)
+                            log.error("Motu Error reply %s" % motu_reply)
                             dom = None
 
                         if dom:
@@ -668,10 +661,13 @@ def execute_request(_options):
 
                         # Check status
                         if status == "0" or status == "3":  # in progress/pending
-                            log.info(
-                                'Product is not yet available (request in progress)')
+                            log.info('Product is not yet available (request in progress)')
                             time.sleep(10)
                         else:  # finished (error|success)
+                            break
+
+                        if (datetime.datetime.now() - date_start) > timeout:
+                            log.error("Timeout %s" % timeout)
                             break
 
                     if status == "2":
@@ -683,18 +679,19 @@ def execute_request(_options):
                         log.info('The product is ready for download')
                         if dwurl != "":
                             dl_2_file(dwurl, fh, _options.block_size, not (
-                                _options.describe or _options.size), **url_config)
+                                _options.describe or _options.size), log=log, **url_config)
                             log.info("Done")
                         else:
                             log.error("Couldn't retrieve file")
 
                 stopWatch.stop('wait_request')
 
-        except:
+        except Exception:
+            # Si ça plante en cours de route, on supprime le fichier
             try:
                 if (os.path.isfile(fh)):
                     os.remove(fh)
-            except:
+            except Exception:
                 pass
             raise
     finally:
