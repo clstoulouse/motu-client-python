@@ -30,6 +30,7 @@ import logging
 import re
 import sys
 import time
+from datetime import datetime, timedelta
 from motuclient.motu_utils import utils_http, utils_log, utils_html, utils_messages, utils_collection
 
 
@@ -44,7 +45,7 @@ else:
 CAS_URL_PATTERN = '(.*)/login.*'
 
 
-def authenticate_CAS_for_URL(url, user, pwd, **url_config):
+def authenticate_CAS_for_URL(url, user, pwd, timeout=timedelta(minutes=2), **url_config):
     """Performs a CAS authentication for the given URL service and returns
     the service url with the obtained credential.
 
@@ -69,6 +70,7 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
     nbDelays = len(delays)
     tries = 0
     redirected = False
+    date_start = datetime.now()
     while not redirected and tries <= nbDelays:
         try:
             connexion = utils_http.open_url(url, **url_config)
@@ -86,15 +88,18 @@ def authenticate_CAS_for_URL(url, user, pwd, **url_config):
             if hasattr(e, 'code') and e.code == 400:
                 log_error_password(log)
                 raise e
+            elif not redirected and tries < nbDelays:
+                log.warn("Warning: CAS connection failed, retrying in " +
+                         str(delays[tries]) + " seconds ...")
+                time.sleep(delays[tries])
+                tries = tries + 1
             else:
-                if not redirected and tries < nbDelays:
-                    log.warn("Warning: CAS connection failed, retrying in " +
-                             str(delays[tries]) + " seconds ...")
-                    time.sleep(delays[tries])
-                    tries = tries + 1
-                else:
-                    raise e
+                raise e
 
+        if (datetime.now() - date_start) > timeout:
+            raise Exception("User Timeout")
+            log.error("User timeout %s" % timeout)
+            
     if not redirected:
         if redirected_url is None:
             raise Exception(
