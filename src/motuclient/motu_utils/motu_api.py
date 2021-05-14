@@ -26,7 +26,6 @@
 #  along with this library; if not, write to the Free Software Foundation,
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-import logging
 from pkg_resources import get_distribution
 from xml.dom import minidom
 import platform
@@ -38,6 +37,7 @@ import re
 import os
 import sys
 import netrc
+import logbook
 
 # Import project libraries
 from motuclient.motu_utils import utils_collection
@@ -60,8 +60,8 @@ AUTHENTICATION_MODE_CAS = 'cas'
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
-# shared logger
-log = None
+log = logbook.Logger("motu_api")
+log.level = logbook.INFO
 
 
 def get_client_version():
@@ -85,7 +85,7 @@ def get_client_artefact():
     return 'motuclient-python'
 
 
-def build_params(_options, log=None):
+def build_params(_options):
     """Function that builds the query string for Motu according to the given options"""
 
     """
@@ -350,7 +350,7 @@ def wait_till_finished(reqUrlCAS, **options):
 lastProgressPercentValue = 0.0
 
 
-def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, log=None, **options):
+def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
     """ Download the file with the main url (of Motu) file.
 
     Motu can return an error message in the response stream without setting an
@@ -432,14 +432,14 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, log=None, *
                 if isADownloadRequest:
                     # Console mode, only display the NC file URL on stdout
                     read = len(m.url)
-                    print((m.url))
+                    # print((m.url))
                 else:
                     import io
                     output = io.StringIO()
                     utils_stream.copy(
                         m, output, progress_function if size != -1 else none_function, block_size)
                     read = len(output.getvalue())
-                    print((output.getvalue()))
+                    # print((output.getvalue()))
 
             end_time = datetime.datetime.now()
             stopWatch.stop('downloading')
@@ -492,7 +492,7 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, log=None, *
             utils_messages.get_external_messages()['motuclient.exception.download.too-short'] % (read, size))
 
 
-def execute_request(_options, timeout=datetime.timedelta(minutes=2), log=None): # logging.getLogger("motu_api")):
+def execute_request(_options, timeout=datetime.timedelta(minutes=2)): # logging.getLogger("motu_api")):
     """
     the main function that submit a request to motu. Available options are:
 
@@ -568,7 +568,7 @@ def execute_request(_options, timeout=datetime.timedelta(minutes=2), log=None): 
         url_service = _options.motu
 
         # parameters of the invoked service
-        url_params = build_params(_options, log=log)
+        url_params = build_params(_options)
 
         url_config = get_url_config(_options)
 
@@ -613,7 +613,7 @@ def execute_request(_options, timeout=datetime.timedelta(minutes=2), log=None): 
                 if _options.describe is False and _options.size is False:
                     is_a_download_request = True
                 dl_2_file(download_url, fh, _options.block_size,
-                          is_a_download_request, log=log, **url_config)
+                          is_a_download_request, **url_config)
                 log.info("Done")
             # Asynchronous mode
             else:
@@ -628,7 +628,6 @@ def execute_request(_options, timeout=datetime.timedelta(minutes=2), log=None): 
                     msg = ""
 
                     date_start = datetime.datetime.now()
-                    print(date_start)
                     while True:
                         if _options.auth_mode == AUTHENTICATION_MODE_CAS:
                             stopWatch.start('authentication')
@@ -679,7 +678,7 @@ def execute_request(_options, timeout=datetime.timedelta(minutes=2), log=None): 
                         log.info('The product is ready for download')
                         if dwurl != "":
                             dl_2_file(dwurl, fh, _options.block_size, not (
-                                _options.describe or _options.size), log=log, **url_config)
+                                _options.describe or _options.size), **url_config)
                             log.info("Done")
                         else:
                             log.error("Couldn't retrieve file")

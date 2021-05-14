@@ -29,14 +29,14 @@
 
 import argparse
 from dateutil.parser import parse as dparse
-import logging.config
-import logging
 import datetime
 import os
 import platform
-import traceback
 import sys
 from cgi import log
+
+import logbook
+
 if sys.version_info > (3, 0):
     import configparser as ConfigParser
 else:
@@ -67,6 +67,8 @@ sys.path.append(LIBRARIES_PATH)
 import motu_api
 import utils_log
 
+log = logbook.Logger("motuclient")
+log.level = logbook.INFO
 
 def get_client_version():
     """Return the version (as a string) of this client.
@@ -108,22 +110,12 @@ def load_options():
                                              description='Options on output')
 
     # add available options
-    parserOutput.add_argument('--quiet', '-q',
-                              help="prevent any output in stdout",
-                              action='store_const',
-                              const=logging.WARN,
-                              dest='log_level')
-
     parserOutput.add_argument('--verbose',
-                              help="print information in stdout",
-                              action='store_const',
-                              const=logging.DEBUG,
-                              dest='log_level')
-
-    parserOutput.add_argument('--noisy',
-                              help="print more information (traces) in stdout",
-                              action='store_const',
-                              const=utils_log.TRACE_LEVEL,
+                              help="Level of verbosity. Default is %(default)s",
+                              choices=['debug', 'info', 'warning', 'error'],
+                              default='info',
+                              action='store',
+                              type=str,
                               dest='log_level')
 
     parserCredentials.add_argument('--user', '-u',
@@ -363,14 +355,6 @@ def parseArgsStringToArray(argsString=None):
     return allProgramAuthArRes
 
 
-def initLogger():
-    logging.addLevelName(utils_log.TRACE_LEVEL, 'TRACE')
-    logging.config.fileConfig(os.path.join(
-        os.path.dirname(__file__), LOG_CFG_FILE))
-    global log
-    log = logging.getLogger(__name__)
-
-    logging.getLogger().setLevel(logging.INFO)
 # ===============================================================================
 # The Main function
 # ===============================================================================
@@ -379,52 +363,33 @@ def initLogger():
 def main():
     start_time = datetime.datetime.now()
 
-    initLogger()
+    handler = logbook.StreamHandler(sys.stdout)
+    handler.push_application()
 
     try:
         # we prepare options we want
         _options = load_options()
-
-        if _options.log_level is not None:
-            logging.getLogger().setLevel(int(_options.log_level))
-
+        log.level = logbook.lookup_level(_options.log_level.upper())
+        log.debug("start")
         motu_api.execute_request(_options)
     except Exception as e:
-        log.error("Execution failed: %s", e)
-        if hasattr(e, 'reason'):
-            log.info(' . reason: %s', e.reason)
-        if hasattr(e, 'code'):
-            log.info(' . code  %s: ', e.code)
-        if hasattr(e, 'read'):
-            try:
-                log.log(utils_log.TRACE_LEVEL, ' . detail:\n%s', e.read())
-            except:
-                pass
+        log.exception("Execution failed: %s" % e)
 
-        log.debug('-'*60)
-        log.debug("Stack trace exception is detailed hereafter:")
-        exc_type, exc_value, exc_tb = sys.exc_info()
-        x = traceback.format_exception(exc_type, exc_value, exc_tb)
-        for stack in x:
-            log.debug(' . %s', stack.replace('\n', ''))
-        log.debug('-'*60)
-        log.log(utils_log.TRACE_LEVEL, 'System info is provided hereafter:')
+        log.info('System info is provided hereafter:')
         system, node, release, version, machine, processor = platform.uname()
-        log.log(utils_log.TRACE_LEVEL, ' . system   : %s', system)
-        log.log(utils_log.TRACE_LEVEL, ' . node     : %s', node)
-        log.log(utils_log.TRACE_LEVEL, ' . release  : %s', release)
-        log.log(utils_log.TRACE_LEVEL, ' . version  : %s', version)
-        log.log(utils_log.TRACE_LEVEL, ' . machine  : %s', machine)
-        log.log(utils_log.TRACE_LEVEL, ' . processor: %s', processor)
-        log.log(utils_log.TRACE_LEVEL, ' . python   : %s', sys.version)
-        log.log(utils_log.TRACE_LEVEL, ' . client   : %s', get_client_version())
-        log.log(utils_log.TRACE_LEVEL, '-'*60)
+        log.info(' . system   : %s' % system)
+        log.info(' . node     : %s' % node)
+        log.info(' . release  : %s' % release)
+        log.info(' . version  : %s' % version)
+        log.info(' . machine  : %s' % machine)
+        log.info(' . processor: %s' % processor)
+        log.info(' . python   : %s' % sys.version)
+        log.info(' . client   : %s' % get_client_version())
 
         sys.exit(ERROR_CODE_EXIT)
 
     finally:
-        log.debug("Elapsed time : %s", str(
-            datetime.datetime.now() - start_time))
+        log.info("Elapsed time : %s" % (datetime.datetime.now() - start_time))
 
 
 if __name__ == '__main__':
