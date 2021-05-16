@@ -62,21 +62,13 @@ log = logbook.Logger("motuclient")
 log.level = logbook.INFO
 
 
-def get_client_artefact():
-    """Return the artifact identifier (as a string) of this client.
-
-    The value is automatically set by the maven processing build, so don't
-    touch it unless you know what you are doing."""
-    return motu_api.get_client_artefact()
-
-
 def load_options():
     """load options to handle"""
 
     # create option parser
     parser = argparse.ArgumentParser()
     parser.add_argument('--version', action='version',
-                        version=get_client_artefact() + ' v' + motu_api.get_client_version())
+                        version=motu_api.get_client_artefact() + ' v' + motu_api.get_client_version())
 
     parserCredentials = parser.add_argument_group(title='Credentials',
                                                   description='Options related to master identification')
@@ -230,8 +222,7 @@ def load_options():
     _options = parser.parse_args()
     # flatten the variable lists of lists
     if _options.variable is not None:
-        _options.variable = [
-            var for varlists in _options.variable for var in varlists]
+        _options.variable = [var for varlists in _options.variable for var in varlists]
 
     # read configuration file name from cli arguments or use default
     # cant set default in parser.add_option due to optparse/argparse bug:
@@ -259,7 +250,7 @@ def load_options():
                 else:
                     default_values[option] = conf_parser.get(SECTION, option)
         parser.set_defaults(**default_values)
-        return parser.parse_args(parseArgsStringToArray())
+        return parser.parse_args()
     else:
         return _options
 
