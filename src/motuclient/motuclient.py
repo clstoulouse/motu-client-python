@@ -33,14 +33,17 @@ import datetime
 import os
 import platform
 import sys
-from cgi import log
 
 import logbook
+
+# Import project libraries
+from motuclient.motu_utils import motu_api
 
 if sys.version_info > (3, 0):
     import configparser as ConfigParser
 else:
     import ConfigParser
+
 
 # error code to use when exiting after exception catch
 ERROR_CODE_EXIT = 1
@@ -54,28 +57,9 @@ SECTION = 'Main'
 # shared variables to download
 _variables = []
 
-# project libraries path
-LIBRARIES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'motu_utils')
-# Manage imports of project libraries
-if not os.path.exists(LIBRARIES_PATH):
-    sys.stderr.write('\nERROR: can not find project libraries path: %s\n\n' %
-                     os.path.abspath(LIBRARIES_PATH))
-    sys.exit(1)
-sys.path.append(LIBRARIES_PATH)
-
-# Import project libraries
-import motu_api
-import utils_log
-
+# Configure logger
 log = logbook.Logger("motuclient")
 log.level = logbook.INFO
-
-def get_client_version():
-    """Return the version (as a string) of this client.
-
-    The value is automatically set by the maven processing build, so don't
-    touch it unless you know what you are doing."""
-    return motu_api.get_client_version()
 
 
 def get_client_artefact():
@@ -92,7 +76,7 @@ def load_options():
     # create option parser
     parser = argparse.ArgumentParser()
     parser.add_argument('--version', action='version',
-                        version=get_client_artefact() + ' v' + get_client_version())
+                        version=get_client_artefact() + ' v' + motu_api.get_client_version())
 
     parserCredentials = parser.add_argument_group(title='Credentials',
                                                   description='Options related to master identification')
@@ -243,7 +227,7 @@ def load_options():
     # create config parser
     conf_parser = ConfigParser.ConfigParser()
 
-    _options = parser.parse_args(parseArgsStringToArray())
+    _options = parser.parse_args()
     # flatten the variable lists of lists
     if _options.variable is not None:
         _options.variable = [
@@ -280,81 +264,6 @@ def load_options():
         return _options
 
 
-def parseArgsStringToArray(argsString=None):
-    # Used to collapse correctly all the arguments even when a space is detected
-    # e.g. args="-a 'a1' -b 'b2' -c 'c3' -d 'd-d1 -d2 -d3' -e 'e4'"
-    # returns array
-    # ["-a a1", "-b b2", "-c c3", "-d d-d1 -d2 -d3", "-e e4"]
-    if argsString is None:
-        argsString = ""
-        i = 0
-        lastOnlyStartingBySimpleQuote = False
-        for v in sys.argv:
-            if i != 0:
-                strV = str(v)
-
-                if not strV.startswith("-"):
-                    if lastOnlyStartingBySimpleQuote:
-                        lastOnlyStartingBySimpleQuote = False
-                        if not (strV.endswith("'") or strV.endswith("\\'")):
-                            strV = strV + "'"
-
-                    else:
-                        if (strV.startswith("'") or strV.startswith("\\'")):
-                            if(not (strV.endswith("'") or strV.endswith("\\'"))):
-                                lastOnlyStartingBySimpleQuote = True
-                        else:
-                            strV = "'" + strV
-                            if(not (strV.endswith("'") or strV.endswith("\\'"))):
-                                strV = strV + "'"
-
-                if i != 1:
-                    argsString = argsString + " " + strV
-                else:
-                    argsString = strV
-
-            i += 1
-
-    allProgramAuthArSpaces = argsString.split(" ")
-    allProgramAuthAr = []
-    allProgramAuthArIndex = 0
-    # Backup value, e.g when case is -d 'd-d1 -d2', d-d1 is vback, then -d2 is added
-    vbak = None
-    for v in allProgramAuthArSpaces:
-        if vbak is not None:
-            v = vbak + " " + v
-
-        if v.startswith("'") or v.startswith("\\'") or v.startswith("\"") or v.startswith("\\\""):
-            if v.endswith("'") or v.endswith("\\'") or v.endswith("\"") or v.endswith("\\\""):
-                vbak = None
-                if allProgramAuthArIndex == 0:
-                    allProgramAuthAr.append(v)
-                else:
-                    oldV = allProgramAuthAr.pop(allProgramAuthArIndex-1)
-                    allProgramAuthAr.insert(
-                        allProgramAuthArIndex-1, oldV + "=" + v)
-            else:
-                vbak = v
-                continue
-        else:
-            allProgramAuthAr.append(v)
-            allProgramAuthArIndex += 1
-            vbak = None
-    allProgramAuthArRes = []
-    for v in allProgramAuthAr:
-        newV = v
-        if v.endswith("'"):
-            newV = v[:-1]
-            if v.startswith("'"):
-                newV = v[1:]
-            else:
-                newV = newV.replace("='", "=", 1)
-
-        allProgramAuthArRes.append(newV)
-
-    return allProgramAuthArRes
-
-
 # ===============================================================================
 # The Main function
 # ===============================================================================
@@ -384,7 +293,7 @@ def main():
         log.info(' . machine  : %s' % machine)
         log.info(' . processor: %s' % processor)
         log.info(' . python   : %s' % sys.version)
-        log.info(' . client   : %s' % get_client_version())
+        log.info(' . client   : %s' % motu_api.get_client_version())
 
         sys.exit(ERROR_CODE_EXIT)
 

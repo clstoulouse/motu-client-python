@@ -10,14 +10,6 @@ motuclient.initLogger()
 motuclient.log.warn(deprecatedWarnMsg)
 
 
-def get_client_version():
-    return motuclient.get_client_version()
-
-
-def get_client_artefact():
-    return motuclient.get_client_artefact()
-
-
 def main():
     motuclient.main()
 
