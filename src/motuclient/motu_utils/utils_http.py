@@ -165,9 +165,9 @@ def open_url(url, **kargsParam):
         del kargs['data']
 
     _opener = build_opener(*handlers)
-    log.log(utils_log.TRACE_LEVEL, 'list of handlers:')
+    log.debug('list of handlers:')
     for h in _opener.handlers:
-        log.log(utils_log.TRACE_LEVEL, ' . %s', str(h))
+        log.debug(' . %s' % str(h))
 
     # create the request
     if(data is not None):
