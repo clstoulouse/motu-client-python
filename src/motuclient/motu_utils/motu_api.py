@@ -63,6 +63,9 @@ DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 log = logbook.Logger("motu_api")
 log.level = logbook.INFO
 
+# Used to display download progress
+lastProgressPercentValue = 0.0
+
 
 def get_client_version():
     """Return the version (as a string) of this client.
@@ -280,14 +283,6 @@ def check_latitude(lat, msg):
                         'motuclient.exception.option.out-of-range'] % (msg, str(tempvalue)))
 
 
-def total_seconds(td):
-    return total_milliseconds(td) / 10**3
-
-
-def total_milliseconds(td):
-    return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**3
-
-
 def get_url_config(_options, data=None):
     # prepare arguments
     kargs = {}
@@ -341,13 +336,6 @@ def get_requestUrl(dl_url, server, _options, **options):
 
     return get_req_url
 
-
-def wait_till_finished(reqUrlCAS, **options):
-    stopWatch = stop_watch.localThreadStopWatch()
-    start_time = datetime.datetime.now()
-
-
-lastProgressPercentValue = 0.0
 
 
 def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
@@ -447,20 +435,16 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
             log.info("Processing  time : %s" % str(processing_time - init_time))
             log.info("Downloading time : %s" % str(end_time - processing_time))
             log.info("Total time       : %s" % str(end_time - init_time))
-            log.info("Download rate    : %s/s" % utils_unit.convert_bytes((read /
-                                                                          total_milliseconds(end_time - start_time)) * 10 ** 3))
+            log.info("Download rate    : %s/s" % utils_unit.convert_bytes((read / (end_time - start_time) / datetime.timedelta(seconds=1))))
             log.info("Save into        : %s" % fh)
         except Exception as e:
-            log.error("Download failed: %s", e)
+            log.error("Download failed: %s" % e)
             if hasattr(e, 'reason'):
-                log.info(' . reason: %s', e.reason)
+                log.info(' . reason: %s' % e.reason)
             if hasattr(e, 'code'):
-                log.info(' . code  %s: ', e.code)
+                log.info(' . code  %s: ' % e.code)
             if hasattr(e, 'read'):
-                try:
-                    log.log(utils_log.TRACE_LEVEL, ' . detail:\n%s', e.read())
-                except:
-                    pass
+                log.info(' . detail:\n%s' % e.read())
 
             log.debug('-'*60)
             log.debug("Stack trace exception is detailed herafter:")
