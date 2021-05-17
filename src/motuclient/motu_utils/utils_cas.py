@@ -99,7 +99,7 @@ def authenticate_CAS_for_URL(url, user, pwd, timeout=timedelta(minutes=2), **url
         if (datetime.now() - date_start) > timeout:
             raise Exception("User Timeout")
             log.error("User timeout %s" % timeout)
-            
+
     if not redirected:
         if redirected_url is None:
             raise Exception(
@@ -170,7 +170,7 @@ def authenticate_CAS_for_URL(url, user, pwd, timeout=timedelta(minutes=2), **url
         try:
             ticket = utils_http.open_url(url_ticket, **url_config).readline()
             validated = True
-        except Exception as e:
+        except Exception:
             if tries < nbDelays:
                 log.warn("Warning: Ticket validation failed, retrying in " +
                          str(delays[tries]) + " seconds ...")
