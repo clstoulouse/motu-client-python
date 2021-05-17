@@ -135,19 +135,19 @@ def load_options():
                              help="The max date with optional hour resolution (string following format YYYY-MM-DD [HH:MM:SS])",
                              default=datetime.date.today())
 
-    parserQuery.add_argument('--latitude-min', '-y',
+    parserQuery.add_argument('--latitude-min', '-y', default=-89.91032409667969,
                              type=float,
                              help="The min latitude (float in the interval [-90 ; 90])")
 
-    parserQuery.add_argument('--latitude-max', '-Y',
+    parserQuery.add_argument('--latitude-max', '-Y', default=89.91032409667969,
                              type=float,
                              help="The max latitude (float in the interval [-90 ; 90])")
 
-    parserQuery.add_argument('--longitude-min', '-x',
+    parserQuery.add_argument('--longitude-min', '-x', default=0.,
                              type=float,
                              help="The min longitude (float)")
 
-    parserQuery.add_argument('--longitude-max', '-X',
+    parserQuery.add_argument('--longitude-max', '-X', default=-0.1171875,
                              type=float,
                              help="The max longitude (float)")
 
