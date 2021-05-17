@@ -136,8 +136,7 @@ def authenticate_CAS_for_URL(url, user, pwd, timeout=timedelta(minutes=2), **url
 
     fp = utils_html.FounderParser()
     for line in connexion:
-        log.log(utils_log.TRACE_LEVEL,
-                'utils_html.FounderParser() line: %s', line)
+        log.debug('utils_html.FounderParser() line: %s' % line)
         # py3 compatibility
         if (isinstance(line, bytes)):
             fp.feed(line.decode())
@@ -145,7 +144,7 @@ def authenticate_CAS_for_URL(url, user, pwd, timeout=timedelta(minutes=2), **url
             fp.feed(line)
 
     tgt = fp.action_[fp.action_.rfind('/') + 1:]
-    log.log(utils_log.TRACE_LEVEL, 'TGT: %s', tgt)
+    log.debug('TGT: %s' % tgt)
 
     # WARNING : don't use 'fp.action_' as url : it seems protocol is always http never https
     # use 'url_cas', extract TGT from 'fp.action_' , then construct url_ticket.
