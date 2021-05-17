@@ -30,10 +30,11 @@ import socket
 import ssl
 import logging
 import sys
-from motuclient.motu_utils import utils_log
 
+from motuclient.motu_utils.utils_log import log_url
 
 if sys.version_info > (3, 0):
+    from urllib.request import BaseHandler
     from urllib.request import HTTPCookieProcessor, Request
     from urllib.request import HTTPSHandler, HTTPHandler, install_opener, build_opener, \
         HTTPRedirectHandler, ProxyHandler, HTTPBasicAuthHandler, HTTPPasswordMgrWithDefaultRealm
@@ -42,11 +43,47 @@ if sys.version_info > (3, 0):
     from http.cookiejar import CookieJar
 else:
     from httplib import HTTPSConnection
+    from urllib2 import BaseHandler
     from urllib2 import install_opener, build_opener, \
         HTTPRedirectHandler, ProxyHandler, HTTPBasicAuthHandler, \
         HTTPPasswordMgrWithDefaultRealm, HTTPCookieProcessor, HTTPSHandler, HTTPHandler, Request
     from urllib2 import HTTPErrorProcessor as HTTPErrorProcessor_
     from cookielib import CookieJar
+
+
+# trace level
+TRACE_LEVEL = 1
+
+
+class HTTPDebugProcessor(BaseHandler):
+    """ Track HTTP requests and responses with this custom handler.
+    """
+
+    def __init__(self, log, log_level=TRACE_LEVEL):
+        self.log_level = log_level
+        self.log = log
+
+    def http_request(self, request):
+        host, full_url = request.host, request.get_full_url()
+        url_path = full_url[full_url.find(host) + len(host):]
+        log_url(self.log, "Requesting: ", request.get_full_url(), TRACE_LEVEL)
+        self.log.log(self.log_level, "%s %s" %
+                     (request.get_method(), url_path))
+
+        for header in request.header_items():
+            self.log.log(self.log_level, " . %s: %s" % header[:])
+
+        return request
+
+    def http_response(self, request, response):
+        code, msg, headers = response.code, response.msg, response.info().items()
+        self.log.log(self.log_level, "Response:")
+        self.log.log(self.log_level, " HTTP/1.x %s %s" % (code, msg))
+
+        for key, value in headers:
+            self.log.log(self.log_level, " . %s: %s" % (key, value))
+
+        return response
 
 
 class TLS1v2Connection(HTTPSConnection):
@@ -131,7 +168,7 @@ def open_url(url, **kargsParam):
                 HTTPCookieProcessor(CookieJar()),
                 HTTPHandler(),
                 TLS1v2Handler(),
-                utils_log.HTTPDebugProcessor(log),
+                HTTPDebugProcessor(log),
                 HTTPErrorProcessor()
                 ]
 
