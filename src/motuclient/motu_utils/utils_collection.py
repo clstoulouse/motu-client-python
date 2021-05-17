@@ -1,15 +1,15 @@
-"""  
-The multimap data structure associates multiple values to a key. 
+"""
+The multimap data structure associates multiple values to a key.
 
-In this module the multimap is implemented by a dictionary in which each key is  
-associated to a container, which can be a list, a dictionary, or a set. 
+In this module the multimap is implemented by a dictionary in which each key is
+associated to a container, which can be a list, a dictionary, or a set.
 
-These containers are created, accessed, and extended using the usual array 
-notation, e.g. m["a"] = 1, m["a"] = 2 creates a container for key "a" 
-containing 1 and 2. An item within a container can be removed using the 
+These containers are created, accessed, and extended using the usual array
+notation, e.g. m["a"] = 1, m["a"] = 2 creates a container for key "a"
+containing 1 and 2. An item within a container can be removed using the
 "remove"  method.
 
-Requires Python 2.7.  
+Requires Python 2.7.
 """
 
 import collections
