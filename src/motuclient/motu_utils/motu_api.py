@@ -41,7 +41,7 @@ import logbook
 
 # Import project libraries
 from motuclient.motu_utils import utils_collection
-from motuclient.motu_utils import utils_http, utils_stream, utils_cas, utils_log, utils_messages, utils_unit, \
+from motuclient.motu_utils import utils_http, utils_stream, utils_cas, utils_messages, utils_unit, \
     stop_watch
 
 if sys.version_info > (3, 0):
@@ -337,7 +337,6 @@ def get_requestUrl(dl_url, server, _options, **options):
     return get_req_url
 
 
-
 def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
     """ Download the file with the main url (of Motu) file.
 
@@ -390,6 +389,7 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
                     size = -1
                     log.warn('File size is not an integer: %s' %
                              headers["Content-Length"])
+                    log.exception(e)
             elif temp is not None:
                 log.warn('File size: %s' % 'unknown')
 
@@ -435,7 +435,7 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
             log.info("Processing  time : %s" % str(processing_time - init_time))
             log.info("Downloading time : %s" % str(end_time - processing_time))
             log.info("Total time       : %s" % str(end_time - init_time))
-            log.info("Download rate    : %s/s" % utils_unit.convert_bytes((read / (end_time - start_time) / datetime.timedelta(seconds=1))))
+            log.info("Download rate    : %s/s" % utils_unit.convert_bytes((read / ((end_time - start_time) / datetime.timedelta(seconds=1)))))
             log.info("Save into        : %s" % fh)
         except Exception as e:
             log.error("Download failed: %s" % e)
@@ -460,7 +460,7 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
             log.info(' . version  : %s' % version)
             log.info(' . machine  : %s' % machine)
             log.info(' . processor: %s' % processor)
-            log.info(' . python   : %s' % sys.version)
+            log.info(' . python   : %s' % sys.version.replace("\n", " "))
             log.info(' . client   : %s' % get_client_version())
 
         finally:
@@ -476,7 +476,7 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
             utils_messages.get_external_messages()['motuclient.exception.download.too-short'] % (read, size))
 
 
-def execute_request(_options, timeout=datetime.timedelta(minutes=2)): # logging.getLogger("motu_api")):
+def execute_request(_options, timeout=datetime.timedelta(minutes=2)):
     """
     the main function that submit a request to motu. Available options are:
 
@@ -511,9 +511,9 @@ def execute_request(_options, timeout=datetime.timedelta(minutes=2)): # logging.
       - depth_max: 1000
       - depth_min: 0
 
-    * Temporal extraction parameters, as a datetime instance or a string (format: '%Y-%m-%d %H:%M:%S')
-      - date_max: 2010-04-25 12:05:36
-      - date_min: 2010-04-25
+    * Temporal extraction parameters, as a datetime instance
+      - date_max: datetime.datetime(2010, 4, 25, 12, 5, 36)
+      - date_min: datetime.datetime(2010, 4, 25)
 
     * Variable extraction
       - variable: ['variable1','variable2']
@@ -575,8 +575,7 @@ def execute_request(_options, timeout=datetime.timedelta(minutes=2)): # logging.
             # perform authentication before acceding service
             download_url = utils_cas.authenticate_CAS_for_URL(url,
                                                               _options.user,
-                                                              _options.pwd, **url_config,
-                                                              timeout=timeout)
+                                                              _options.pwd, timeout=timeout, **url_config)
             url_service = download_url.split("?")[0]
             stopWatch.stop('authentication')
         else:
@@ -630,7 +629,7 @@ def execute_request(_options, timeout=datetime.timedelta(minutes=2)): # logging.
 
                         try:
                             dom = minidom.parseString(motu_reply)
-                        except:
+                        except Exception:
                             log.error("Motu Error reply %s" % motu_reply)
                             dom = None
 
