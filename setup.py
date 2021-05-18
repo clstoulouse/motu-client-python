@@ -69,7 +69,8 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'motuclient = motuclient.motuclient:main'
+            'motuclient = motuclient.motuclient:main',
+            'motu-client = motuclient.motuclient:main'
         ]
     }
 )
