@@ -29,13 +29,13 @@
 # SI unit prefixes
 SI_K, SI_M, SI_G, SI_T = 10 ** 3, 10 ** 6, 10 ** 9, 10 ** 12
 
+
 def convert_bytes(n):
     """Converts the given bytes into a string with the most appropriate
     unit power.
-    
     Note that prefixes like M, G, T are power of 10 (ISO/IEC 80000-13:2008) and
-    not power of 2."""        
-    if   n >= SI_T:
+    not power of 2."""
+    if n >= SI_T:
         return '%.1f TB' % (float(n) / SI_T)
     elif n >= SI_G:
         return '%.1f GB' % (float(n) / SI_G)
