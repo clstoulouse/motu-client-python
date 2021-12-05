@@ -15,7 +15,7 @@
 	<baseDirectory>motuclient-python</baseDirectory>
 	<fileSets>
 		<fileSet>
-			<directory>src/python</directory>
+			<directory>src/motu_client</directory>
 			<outputDirectory>/</outputDirectory>
 			<!--
 				filtering allows to inject project properties (like version) as python
