@@ -26,23 +26,22 @@
 #  along with this library; if not, write to the Free Software Foundation,
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
-import sys
-if sys.version_info > (3, 0):
-    from html.parser import HTMLParser
-else:
-    from HTMLParser import HTMLParser
+# SI unit prefixes
+SI_K, SI_M, SI_G, SI_T = 10 ** 3, 10 ** 6, 10 ** 9, 10 ** 12
 
 
-
-class FounderParser(HTMLParser):
-    """
-    Parser witch found the form/action section an return it
-    """
-    def __init__(self, *args, **kargs):
-        HTMLParser.__init__(self, *args, **kargs)
-        self.action_ = None
-
-    def handle_starttag(self, tag, attrs):
-        d = dict(attrs)
-        if tag == 'form' and 'action' in d:
-            self.action_ = d['action']
+def convert_bytes(n):
+    """Converts the given bytes into a string with the most appropriate
+    unit power.
+    Note that prefixes like M, G, T are power of 10 (ISO/IEC 80000-13:2008) and
+    not power of 2."""
+    if n >= SI_T:
+        return '%.1f TB' % (float(n) / SI_T)
+    elif n >= SI_G:
+        return '%.1f GB' % (float(n) / SI_G)
+    elif n >= SI_M:
+        return '%.1f MB' % (float(n) / SI_M)
+    elif n >= SI_K:
+        return '%.1f kB' % (float(n) / SI_K)
+    else:
+        return '%d B' % n

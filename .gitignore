@@ -5,6 +5,6 @@
 *.pyc
 *.py-path
 *__pycache__*
-/src/python/motuclient.egg-info/
+/src/motu_client/motuclient.egg-info/
 /.sonar
 
