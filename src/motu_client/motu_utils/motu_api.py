@@ -441,7 +441,7 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
             log.info("Processing  time : %s" % str(processing_time - init_time))
             log.info("Downloading time : %s" % str(end_time - processing_time))
             log.info("Total time       : %s" % str(end_time - init_time))
-            log.info("Download rate    : %s/s" % utils_unit.convert_bytes(read / int((end_time - start_time).total_seconds())))
+            log.info("Download rate    : %s/s" % utils_unit.convert_bytes(int(read / (end_time - start_time).total_seconds())))
             log.info("Save into        : %s" % fh)
         except Exception as e:
             log.error("Download failed: %s" % e)

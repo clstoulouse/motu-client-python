@@ -219,8 +219,8 @@ def load_options():
                               dest='console_mode')
 
     parser.add_argument('--config-file',
-                        default=CFG_FILE,
-                        help="Path of the optional configuration file [Default = %(default)s]",
+                        default=[CFG_FILE],
+                        help="Path of the optional configuration file [Default = %s]" % CFG_FILE,
                         action='append',
                         dest="config_file",
                         type=str)
