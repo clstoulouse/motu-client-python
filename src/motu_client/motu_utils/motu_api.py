@@ -41,8 +41,8 @@ import logging
 import logging.config
 
 # Import project libraries
-from motu_client.motu_utils import utils_collection
-from motu_client.motu_utils import utils_http, utils_stream, utils_cas, utils_messages, utils_unit, \
+from motu_utils import utils_collection
+from motu_utils import utils_http, utils_stream, utils_cas, utils_messages, utils_unit, \
     stop_watch, utils_log
 
 if sys.version_info > (3, 0):

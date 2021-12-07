@@ -31,8 +31,8 @@ import ssl
 import logging
 import sys
 
-from motu_client.motu_utils.utils_log import log_url
-from motu_client.motu_utils import utils_log
+from motu_utils.utils_log import log_url
+from motu_utils import utils_log
 
 if sys.version_info > (3, 0):
     from urllib.request import BaseHandler

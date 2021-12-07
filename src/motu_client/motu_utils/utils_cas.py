@@ -31,7 +31,7 @@ import re
 import sys
 import time
 from datetime import datetime, timedelta
-from motu_client.motu_utils import utils_http, utils_log, utils_html, utils_messages, utils_collection
+from motu_utils import utils_http, utils_log, utils_html, utils_messages, utils_collection
 
 
 if sys.version_info > (3, 0):

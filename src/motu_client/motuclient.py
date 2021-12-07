@@ -36,8 +36,8 @@ import sys
 import traceback
 
 # Import project libraries
-from motu_client.motu_utils import motu_api
-from motu_client.motu_utils import utils_log
+from motu_utils import motu_api
+from motu_utils import utils_log
 import logging
 import logging.config
 

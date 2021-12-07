@@ -27,7 +27,7 @@
 #  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 import sys
-from motu_client.motu_utils import utils_configpath
+from motu_utils import utils_configpath
 
 
 _messages = None
