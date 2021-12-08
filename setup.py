@@ -49,8 +49,8 @@ setup(
     url='https://github.com/clstoulouse/motu-client-python',
     license='LGPL',
 
-    package_dir = {'': 'src', 'motu_client': 'src/motu_client'}, 
-    packages = ['motu_client', 'motu_client.motu_utils'],
+    package_dir = {'': 'src', 'motu_client': 'src/motu_client', 'motu_utils': 'src/motu_client/motu_utils'}, 
+    packages = ['motu_client', 'motu_utils'],
     py_modules = ['motuclient'],
     include_package_data=True,
 
