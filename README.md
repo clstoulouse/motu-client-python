@@ -63,8 +63,7 @@ This creates two archives in the target folder:
 # <a name="Installation">Installation</a> 
 
 ## <a name="InstallationPre">Prerequisites</a>
-You must use python version 2.7.X or later.  
-This program is fully compatible with Python 3.X versions.  
+Since motuclient release version 3.X.Y, you must use python version 3.7.10 or later.  
 __/!\__ motuclient does not work with the OpenSSL library release 1.1.1.e. Either use an older version such as the 1.1.1.d or jump to the 1.1.1.f release.  
 There are two methods to install the client, by using PIP or from a tar.gz file.  
  [setuptools](#InstallationSetuptools) python package has be installed in order to display the motuclient version successfully.    
@@ -418,3 +417,21 @@ Edit the Windows Registry Key "HKEY_CLASSES_ROOT\py_auto_file\shell\open\command
 Exemple: "C:\dvltSoftware\python\Python27\python.exe" "%1" %*  
 ``` 
 
+# <a name="TroubleshootingPythonVersionErr">Error on all motuclient commands</a>
+For example the command "motuclient.py --version" returns this kind of error:  
+``` 
+Traceback (most recent call last):
+  File "C:\dvlt\python\python2.7.18\Scripts\motuclient-script.py", line 11, in <module>
+    load_entry_point('motuclient==3.0.0.post1', 'console_scripts', 'motuclient')()
+  File "c:\dvlt\python\python2.7.18\lib\site-packages\motuclient\motuclient.py", line 352, in main
+    initLogger()
+  File "c:\dvlt\python\python2.7.18\lib\site-packages\motuclient\motuclient.py", line 336, in initLogger
+    logging.addLevelName(utils_log.TRACE_LEVEL, 'TRACE')
+AttributeError: 'module' object has no attribute 'TRACE_LEVEL'
+``` 
+
+__Analyse:__  
+This issue comes from a too old python installation version.  You must use Python 3.7.10 or higher.  
+  
+__Solution:__  
+Find and install the Python 3 distribution for your operating system.  

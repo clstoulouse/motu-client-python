@@ -58,7 +58,7 @@ setup(
 
     classifiers=[
         'Development Status :: 5 - Production/Stable',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.7',
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Topic :: Scientific/Engineering :: GIS',
         'Environment :: Console',
