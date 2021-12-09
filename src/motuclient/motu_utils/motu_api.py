@@ -548,13 +548,13 @@ def execute_request(_options, timeout=None):
     log = logging.getLogger("motu_api")
     log.trace = lambda arg: utils_log.trace(log, arg)
 
-    log.trace("execute request")
+    log.debug("execute request")
     init_time = datetime.datetime.now()
     stopWatch = stop_watch.localThreadStopWatch()
     stopWatch.start()
     try:
         # at first, we check given options are ok
-        log.trace("check option")
+        log.debug("check option")
         check_options(_options)
 
         # print some trace info about the options set

@@ -49,8 +49,8 @@ setup(
     url='https://github.com/clstoulouse/motu-client-python',
     license='LGPL',
 
-    package_dir = {'': 'src', 'motu_client': 'src/motu_client', 'motu_utils': 'src/motu_client/motu_utils'}, 
-    packages = ['motu_client', 'motu_utils'],
+    package_dir = {'': 'src', 'motuclient': 'src/motuclient', 'motu_utils': 'src/motuclient/motu_utils'}, 
+    packages = ['motuclient', 'motu_utils'],
     py_modules = ['motuclient'],
     include_package_data=True,
 
@@ -58,7 +58,7 @@ setup(
 
     classifiers=[
         'Development Status :: 5 - Production/Stable',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.7',
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Topic :: Scientific/Engineering :: GIS',
         'Environment :: Console',
@@ -68,8 +68,8 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'motuclient = motu_client.motuclient:main',
-            'motu-client = motu_client.motuclient:main'
+            'motuclient = motuclient.motuclient:main',
+            'motu-client = motuclient.motuclient:main'
         ]
     },
 

@@ -37,7 +37,7 @@ import traceback
 
 # Import project libraries
 from motu_utils import motu_api
-from motu_utils import utils_log
+from motu_utils import utils_log, utils_configpath
 import logging
 import logging.config
 
@@ -51,8 +51,8 @@ else:
 ERROR_CODE_EXIT = 1
 
 # the config file to load from
-CFG_FILE = '~/motu_client/motuclient-python.ini'
-LOG_CFG_FILE = './motu_utils/cfg/log.ini'
+CFG_FILE = '~/motuclient/motuclient-python.ini'
+LOG_CFG_FILE = 'log.ini'
 
 SECTION = 'Main'
 
@@ -334,7 +334,7 @@ def parseArgsStringToArray(argsString=None):
   
 def initLogger():
     logging.addLevelName(utils_log.TRACE_LEVEL, 'TRACE')
-    logging.config.fileConfig(os.path.join(os.path.dirname(__file__), LOG_CFG_FILE))
+    logging.config.fileConfig(os.path.join(utils_configpath.getConfigPath(), LOG_CFG_FILE))
     global log
     log = logging.getLogger(__name__)
     log.trace = lambda arg: utils_log.trace(log, arg)

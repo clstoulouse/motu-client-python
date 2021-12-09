@@ -4,5 +4,5 @@ include pom.xml
 include README.md
 include setup.cfg
 include setup.py
-include src/motu_client/motu_utils/cfg/log.ini
-include src/motu_client/motu_utils/cfg/messages.properties
+include src/motuclient/motu_utils/cfg/log.ini
+include src/motuclient/motu_utils/cfg/messages.properties
