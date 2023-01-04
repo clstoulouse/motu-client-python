@@ -360,6 +360,7 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
 
     # download file
     temp = None
+    size = -1
     if not fh.startswith("console"):
         temp = open(fh, 'w+b')
 
@@ -384,7 +385,6 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
 
             log.info('File type: %s' % headers['Content-Type'])
             # check if a content length (size of the file) has been send
-            size = -1
             if "Content-Length" in headers:
                 try:
                     # it should be an integer
@@ -472,6 +472,7 @@ def dl_2_file(dl_url, fh, block_size=65535, isADownloadRequest=None, **options):
             log.trace(' . processor: %s' % processor)
             log.trace(' . python   : %s' % sys.version.replace("\n", " "))
             log.trace(' . client   : %s' % get_client_version())
+            raise e
 
         finally:
             m.close()
